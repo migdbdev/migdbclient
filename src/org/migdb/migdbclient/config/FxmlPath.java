@@ -2,7 +2,7 @@ package org.migdb.migdbclient.config;
 
 public enum FxmlPath {
 	
-	ROOTLAYOUT("/org/migdb/migdbclient/views/RootLayout.fxml");
+	ROOTLAYOUT("/org/migdb/migdbclient/views/root/RootLayout.fxml");
 	
 	private String path;
 	
