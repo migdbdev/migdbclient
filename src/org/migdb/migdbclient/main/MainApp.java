@@ -29,10 +29,6 @@ public class MainApp extends Application {
 		launch(args);
 	}
 
-	public Stage getPrimaryStage() {
-		return primaryStage;
-	}
-
 	/**
 	 * Initialize method for RootLayout
 	 */
