@@ -9,20 +9,24 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
 
 	private Stage primaryStage;
-	private StackPane rootLayout;
+	private BorderPane rootLayout;
 
+	/**
+	 * Startup method
+	 */
 	@Override
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
 		this.primaryStage.setTitle("MigDB");
 		this.primaryStage.getIcons().add(new Image(ImagePath.FAVICON.getPath()));
 		initRootLayout();
+
 	}
 
 	public static void main(String[] args) {
@@ -36,19 +40,19 @@ public class MainApp extends Application {
 
 		try {
 
-			//Load the root layout from the fxml file
+			// Load the root layout from the fxml file
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(MainApp.class.getResource(FxmlPath.ROOTLAYOUT.getPath()));
 			rootLayout = loader.load();
 
-			//Show the scene containing root layout
+			// Show the scene containing root layout
 			Scene scene = new Scene(rootLayout);
 			primaryStage.setScene(scene);
 			primaryStage.show();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
 }
