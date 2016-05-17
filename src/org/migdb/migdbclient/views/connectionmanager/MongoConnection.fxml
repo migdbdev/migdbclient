@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="413.0" prefWidth="623.0" styleClass="background" stylesheets="@../../resources/css/custom.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="rootLayoutAnchorpane" prefHeight="413.0" prefWidth="623.0" styleClass="background" stylesheets="@../../resources/css/custom.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.connectionmanager.MongoConnectionController">
    <children>
       <GridPane layoutX="4.0" layoutY="50.0" prefHeight="30.0" prefWidth="617.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
          <columnConstraints>
@@ -17,7 +17,7 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Label prefHeight="33.0" prefWidth="58.0" text="Label" GridPane.columnIndex="1" />
+            <Label fx:id="backLabel" prefHeight="33.0" prefWidth="58.0" text="back" GridPane.columnIndex="1" />
             <Label prefHeight="39.0" prefWidth="382.0" styleClass="label_Connections" text="Create MongoDB Connection" GridPane.columnIndex="2" />
          </children>
       </GridPane>
