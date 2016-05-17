@@ -6,8 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
-<AnchorPane prefHeight="413.0" prefWidth="623.0" styleClass="background" stylesheets="@../../resources/css/custom.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.connectionmanager.SetupNewDBConnectionController">
+<AnchorPane fx:id="rootLayoutAnchorpane" prefHeight="413.0" prefWidth="623.0" styleClass="background" stylesheets="@../../resources/css/custom.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.connectionmanager.SetupNewDBConnectionController">
    <children>
       <GridPane layoutY="38.0" prefHeight="103.0" prefWidth="623.0" AnchorPane.bottomAnchor="272.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="38.0">
         <columnConstraints>
@@ -53,8 +52,8 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label prefHeight="114.0" prefWidth="191.0" />
-            <Label prefHeight="114.0" prefWidth="191.0" GridPane.columnIndex="1" />
+            <Label fx:id="mysqlLabel" prefHeight="114.0" prefWidth="191.0" text="mysql" />
+            <Label fx:id="mongoLabel" prefHeight="114.0" prefWidth="191.0" text="mongo" GridPane.columnIndex="1" />
          </children>
       </GridPane>
    </children>
