@@ -22,6 +22,8 @@ public class RootLayoutController implements Initializable {
 	private Label datamanagerLabel;
 	@FXML
 	private Label connectionManagerLabel;
+	@FXML
+	private Label modificationEvaluatorLabel;
 
 	/**
 	 * Initialize method Called to initialize a controller after its root
@@ -45,10 +47,18 @@ public class RootLayoutController implements Initializable {
 				showConnectionManager();
 			}
 		});
+
+		// Connection manager navigation label click event
+		modificationEvaluatorLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent mouseevent) {
+				showModificationEvaluator();
+			}
+		});
 	}
 
 	/**
-	 * Method for add connection manager layout to the root container anchor pane
+	 * Method for add connection manager layout to the root container anchor
+	 * pane
 	 */
 	public void showConnectionManager() {
 		try {
@@ -57,6 +67,23 @@ public class RootLayoutController implements Initializable {
 			AnchorPane connectionManager = loader.load();
 			rootContainerAncpane.getChildren().clear();
 			rootContainerAncpane.getChildren().add(connectionManager);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Method for add modification evaluator layout to the root container anchor
+	 * pane
+	 */
+	public void showModificationEvaluator() {
+		try {
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(MainApp.class.getResource(FxmlPath.MODIFICATIONEVALUATOR.getPath()));
+			AnchorPane modificationEvaluator = loader.load();
+			rootContainerAncpane.getChildren().clear();
+			rootContainerAncpane.getChildren().add(modificationEvaluator);
 
 		} catch (Exception e) {
 			e.printStackTrace();

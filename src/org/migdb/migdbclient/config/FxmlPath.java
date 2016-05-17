@@ -4,6 +4,7 @@ public enum FxmlPath {
 	
 	ROOTLAYOUT("/org/migdb/migdbclient/views/root/RootLayout.fxml"),
 	CONNECTIONMANAGER("/org/migdb/migdbclient/views/connectionmanager/ConnectionManager.fxml"),
+	MODIFICATIONEVALUATOR("/org/migdb/migdbclient/views/modificationevaluator/ModificationEvaluator.fxml"),
 	DATAMANAGER("/org/migdb/migdbclient/views/mongodatamanager/MongoDataManager.fxml");
 	
 	private String path;
