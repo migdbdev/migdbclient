@@ -1,0 +1,29 @@
+.background {
+    -fx-background-color: #FFFFFF;
+}
+
+.label_Connections {
+	-fx-font-size: 20pt;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-label-padding : 0 0 0 20px;
+}
+
+.label_AddConnection {
+	-fx-background-repeat: no-repeat;
+	-fx-background-position: center;
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/connection_add.png);
+}
+
+.label_AddConnection:hover {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/connection_add_hover.png);
+}
+
+.label_settingConnection {
+	-fx-background-repeat: no-repeat;
+	-fx-background-position: center;
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/connection_setting.png);
+}
+
+.label_settingConnection:hover {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/connection_setting_hover.png);
+}

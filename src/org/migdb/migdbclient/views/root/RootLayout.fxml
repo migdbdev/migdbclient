@@ -5,9 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <BorderPane prefHeight="200.0" prefWidth="200.0">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.root.RootLayoutController">
          <top>
             <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="87.0" prefWidth="1200.0" BorderPane.alignment="CENTER">
                <children>
@@ -39,12 +37,12 @@
                      <children>
                         <HBox layoutX="1.0" layoutY="1.0" prefHeight="62.0" prefWidth="73.0">
                            <children>
-                              <Label prefHeight="63.0" prefWidth="83.0" text="Label" />
+                              <Label fx:id="connectionManagerLabel" prefHeight="63.0" prefWidth="83.0" text="Label" />
                            </children>
                         </HBox>
                         <HBox layoutX="74.0" layoutY="1.0" prefHeight="62.0" prefWidth="73.0">
                            <children>
-                              <Label prefHeight="69.0" prefWidth="89.0" text="Label" />
+                              <Label fx:id="modificationEvaluatorLabel" prefHeight="69.0" prefWidth="89.0" text="Label" />
                            </children>
                         </HBox>
                         <HBox layoutX="147.0" layoutY="1.0" prefHeight="62.0" prefWidth="73.0">
@@ -59,7 +57,7 @@
                         </HBox>
                         <HBox layoutX="293.0" layoutY="1.0" prefHeight="62.0" prefWidth="73.0">
                            <children>
-                              <Label prefHeight="63.0" prefWidth="76.0" text="Label" />
+                              <Label fx:id="datamanagerLabel" prefHeight="63.0" prefWidth="76.0" text="Label" />
                            </children>
                         </HBox>
                      </children></AnchorPane>
@@ -70,7 +68,5 @@
             <AnchorPane prefHeight="613.0" prefWidth="226.0" style="-fx-background-color: blue;" BorderPane.alignment="CENTER" />
          </left>
          <center>
-            <AnchorPane prefHeight="614.0" prefWidth="973.0" style="-fx-background-color: yellow;" BorderPane.alignment="CENTER" />
+            <AnchorPane fx:id="rootContainerAncpane" prefHeight="614.0" prefWidth="973.0" style="-fx-background-color: yellow;" BorderPane.alignment="CENTER" />
          </center></BorderPane>
-   </children>
-</StackPane>
