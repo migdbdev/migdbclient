@@ -6,9 +6,7 @@ public enum FxmlPath {
 	CONNECTIONMANAGER("/org/migdb/migdbclient/views/connectionmanager/ConnectionManager.fxml"),
 	MODIFICATIONEVALUATOR("/org/migdb/migdbclient/views/modificationevaluator/ModificationEvaluator.fxml"),
 	DATAMANAGER("/org/migdb/migdbclient/views/mongodatamanager/MongoDataManager.fxml"),
-	SETUPNEWDBCONNECTION("/org/migdb/migdbclient/views/connectionmanager/SetupNewDBConnection.fxml"),
-	MYSQLCONNECTION("/org/migdb/migdbclient/views/connectionmanager/MysqlConnection.fxml"),
-	MONGOCONNECTION("/org/migdb/migdbclient/views/connectionmanager/MongoConnection.fxml");
+	NEWDBCONNECTION("/org/migdb/migdbclient/views/connectionmanager/NewDBConnection.fxml");
 	
 	private String path;
 	
