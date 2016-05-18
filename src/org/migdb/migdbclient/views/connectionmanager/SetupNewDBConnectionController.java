@@ -3,13 +3,14 @@ package org.migdb.migdbclient.views.connectionmanager;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import org.migdb.migdbclient.config.FxmlPath;
-import org.migdb.migdbclient.main.MainApp;
+import org.migdb.migdbclient.config.ConnectionManager;
 
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -19,10 +20,18 @@ public class SetupNewDBConnectionController implements Initializable {
 	@FXML
 	private AnchorPane rootLayoutAnchorpane;
 	@FXML
+	private AnchorPane mysqlLayoutAnchorpane;
+	@FXML
+	private AnchorPane mongoLayoutAnchorpane;
+	@FXML
 	private Label mysqlLabel;
 	@FXML
 	private Label mongoLabel;
-	
+	@FXML
+	private Label mysqlBackLabel;
+	@FXML
+	private Label mongoBackLabel;
+
 	FXMLLoader loader = new FXMLLoader();
 
 	/**
@@ -34,6 +43,11 @@ public class SetupNewDBConnectionController implements Initializable {
 	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+
+		// Set visible false when page loaded
+		mysqlLayoutAnchorpane.setVisible(false);
+		mongoLayoutAnchorpane.setVisible(false);
+
 		// MySQL label click event
 		mysqlLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
@@ -47,30 +61,57 @@ public class SetupNewDBConnectionController implements Initializable {
 				mongoPopup();
 			}
 		});
+
+		// Mysql back label click event
+		mysqlBackLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent mouseevent) {
+				back(mouseevent);
+			}
+		});
+
+		// Mongo back label click event
+		mongoBackLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent mouseevent) {
+				back(mouseevent);
+			}
+		});
 	}
 
-	// Method for mysql window pop up
+	/**
+	 * MySQL layout popup method
+	 */
 	public void mysqlPopup() {
 		try {
-			loader.setLocation(MainApp.class.getResource(FxmlPath.MYSQLCONNECTION.getPath()));
-			AnchorPane mysql = loader.load();
-			rootLayoutAnchorpane.getChildren().clear();
-			rootLayoutAnchorpane.getChildren().add(mysql);
+			rootLayoutAnchorpane.setVisible(false);
+			mysqlLayoutAnchorpane.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	// Method for mongo window pop up
+	/**
+	 * Mongo layout popup method
+	 */
 	public void mongoPopup() {
 		try {
-			loader.setLocation(MainApp.class.getResource(FxmlPath.MONGOCONNECTION.getPath()));
-			AnchorPane mongo = loader.load();
-			rootLayoutAnchorpane.getChildren().clear();
-			rootLayoutAnchorpane.getChildren().add(mongo);
+			rootLayoutAnchorpane.setVisible(false);
+			mongoLayoutAnchorpane.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Back to root layout anchor pane from mysql or mongo layout
+	 * @param e
+	 */
+	public void back(Event e) {
+		if ((((Node) e.getSource()).getId()).equals(ConnectionManager.MYSQLBACKLABELID.getConnManager())) {
+			mysqlLayoutAnchorpane.setVisible(false);
+		} else {
+			mongoLayoutAnchorpane.setVisible(false);
+		}
+		rootLayoutAnchorpane.setVisible(true);
 	}
 
 }
