@@ -2,7 +2,7 @@ package org.migdb.migdbclient.config;
 
 public enum DbConnector {
 	
-	SQLITECONNECTIONURL("jdbc:sqlite:test.db");
+	SQLITECONNECTIONURL("jdbc:sqlite:INTERNAL_DB.db");
 	
 	private String connector;
 	
