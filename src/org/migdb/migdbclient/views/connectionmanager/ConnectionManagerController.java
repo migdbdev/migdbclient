@@ -50,7 +50,7 @@ public class ConnectionManagerController implements Initializable {
 		try {
 			Stage newConnectionStage = new Stage();
 			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MainApp.class.getResource(FxmlPath.SETUPNEWDBCONNECTION.getPath()));
+			loader.setLocation(MainApp.class.getResource(FxmlPath.NEWDBCONNECTION.getPath()));
 			rootLayoutAnchorpane = loader.load();
 			newConnectionStage.setTitle("Create a new connection");
 			newConnectionStage.setAlwaysOnTop(true);
