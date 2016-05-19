@@ -140,6 +140,8 @@ public class ModificationEvaluator {
     					line.setEndX(tree.getLayoutX());
     					line.setEndY(tree.getLayoutY());
     				}
+    				
+    				//for(TreeItem col: tbl.getC)
 	            }
     			
     			line.setStrokeWidth(2);
