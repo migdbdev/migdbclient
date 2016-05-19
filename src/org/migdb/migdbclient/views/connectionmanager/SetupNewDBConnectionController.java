@@ -5,6 +5,8 @@ import java.util.ResourceBundle;
 
 import org.controlsfx.control.Notifications;
 import org.migdb.migdbclient.config.ConnectionManager;
+import org.migdb.migdbclient.controllers.dbconnector.MySQLDbConnManager;
+import org.migdb.migdbclient.models.dao.MysqlDAO;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
 
@@ -76,6 +78,14 @@ public class SetupNewDBConnectionController implements Initializable {
 		mysqlLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
 				mysqlPopup();
+				/*MysqlDAO dao = new MysqlDAO();
+				String host ="localhost",database = "bawwadb",username="root",password="123";
+				int port = 3306;
+				System.out.println(dao.getDetails(host, port, database, username, password));*/
+				/*MySQLDbConnManager db = new MySQLDbConnManager();
+				String host ="localhost",database = "bawwadb",username="root",password="123";
+				int port = 3306;
+				System.out.println(db.getConnection(host, port, database, username, password));*/
 			}
 		});
 

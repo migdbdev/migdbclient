@@ -1,19 +1,42 @@
 package org.migdb.migdbclient.controllers.dbconnector;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class MySQLDbConnManager {
-	
-	public Connection getConnection(){
+
+	/**
+	 * MySQL database connection initialize method
+	 * @param host
+	 * @param port
+	 * @param database
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	public Connection getConnection(String host, int port, String database, String username, String password){
 		Connection dbConn = null;
 		try {
-			String connectionURL = "";
-		} catch (Exception e) {
-			// TODO: handle exception
-		}finally {
-			
+			String connectionURL = "jdbc:mysql://"+host+":"+port+"/"+database;
+			Class.forName("com.mysql.jdbc.Driver");
+			dbConn = DriverManager.getConnection(connectionURL, username, password);
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
 		}
 		return dbConn;
+	}
+
+	/**
+	 * MySQL database connection object destroy method
+	 * @param dbConn
+	 */
+	public void closeConnection(Connection dbConn){
+		try {
+			dbConn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -199,6 +199,12 @@
 			<artifactId>controlsfx</artifactId>
 			<version>8.40.10</version>
 		</dependency>
+		<!-- http://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.38</version>
+		</dependency>
 
 	</dependencies>
 </project>
