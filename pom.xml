@@ -216,6 +216,11 @@
 			<artifactId>mongo-java-driver</artifactId>
 			<version>3.2.2</version>
 		</dependency>
-
+		<!-- http://mvnrepository.com/artifact/com.github.cb372/scalacache-lrumap_2.11 -->
+		<dependency>
+			<groupId>com.github.cb372</groupId>
+			<artifactId>scalacache-lrumap_2.11</artifactId>
+			<version>0.8.1</version>
+		</dependency>
 	</dependencies>
 </project>
