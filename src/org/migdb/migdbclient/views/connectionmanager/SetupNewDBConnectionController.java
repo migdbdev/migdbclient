@@ -1,19 +1,26 @@
 package org.migdb.migdbclient.views.connectionmanager;
 
 import java.net.URL;
+import java.sql.Connection;
 import java.util.ResourceBundle;
 
+import org.controlsfx.control.Notifications;
 import org.migdb.migdbclient.config.ConnectionManager;
+import org.migdb.migdbclient.controllers.dbconnector.MySQLDbConnManager;
+import org.migdb.migdbclient.models.dao.SqliteDAO;
+import org.migdb.migdbclient.models.dto.ConnectorDTO;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 
 public class SetupNewDBConnectionController implements Initializable {
 
@@ -24,6 +31,22 @@ public class SetupNewDBConnectionController implements Initializable {
 	@FXML
 	private AnchorPane mongoLayoutAnchorpane;
 	@FXML
+	private TextField connectionNameTextField;
+	@FXML
+	private TextField mysqlHostTextField;
+	@FXML
+	private TextField mysqlPortTextField;
+	@FXML
+	private TextField mysqlUsernameTextField;
+	@FXML
+	private TextField mysqlPasswordTextField;
+	@FXML
+	private TextField mongoHostTexField;
+	@FXML
+	private TextField mongoPortTextField;
+	@FXML
+	private TextField mongoScematextField;
+	@FXML
 	private Label mysqlLabel;
 	@FXML
 	private Label mongoLabel;
@@ -31,8 +54,12 @@ public class SetupNewDBConnectionController implements Initializable {
 	private Label mysqlBackLabel;
 	@FXML
 	private Label mongoBackLabel;
-
-	FXMLLoader loader = new FXMLLoader();
+	@FXML
+	private Button submitButton;
+	@FXML
+	private Button testMySQLConnectionButton;
+	@FXML
+	private Button testMongoConnectionButton;
 
 	/**
 	 * Initialize method Called to initialize a controller after its root
@@ -75,6 +102,18 @@ public class SetupNewDBConnectionController implements Initializable {
 				back(mouseevent);
 			}
 		});
+
+		submitButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent mouseevent) {
+				insertConnection();
+			}
+		});
+
+		testMySQLConnectionButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent mouseevent) {
+				testMySQLConnection();
+			}
+		});
 	}
 
 	/**
@@ -103,6 +142,7 @@ public class SetupNewDBConnectionController implements Initializable {
 
 	/**
 	 * Back to root layout anchor pane from mysql or mongo layout
+	 * 
 	 * @param e
 	 */
 	public void back(Event e) {
@@ -112,6 +152,62 @@ public class SetupNewDBConnectionController implements Initializable {
 			mongoLayoutAnchorpane.setVisible(false);
 		}
 		rootLayoutAnchorpane.setVisible(true);
+	}
+
+	/**
+	 * Connector data transfer model
+	 * 
+	 * @return
+	 */
+	public ConnectorDTO connectionSave() {
+		ConnectorDTO dto = new ConnectorDTO();
+		dto.setConnectionName(connectionNameTextField.getText());
+		dto.setMysqlHostName(mysqlHostTextField.getText());
+		dto.setMongoHostName(mongoHostTexField.getText());
+		dto.setMysqlPort(Integer.parseInt(mysqlPortTextField.getText()));
+		dto.setMongoPort(Integer.parseInt(mongoPortTextField.getText()));
+		dto.setUserName(mysqlUsernameTextField.getText());
+		dto.setPassword(mysqlPasswordTextField.getText());
+		dto.setSchemaName(mongoScematextField.getText());
+		return dto;
+	}
+
+	/**
+	 * Connection information save method
+	 */
+	public void insertConnection() {
+		SqliteDAO dao = new SqliteDAO();
+		boolean result = dao.insertConnection(connectionSave());
+		if (result == true) {
+			Stage stage = (Stage) submitButton.getScene().getWindow();
+			stage.close();
+			Notifications.create().title("Attention").text("Succesfully inserted").darkStyle().showInformation();
+		} else {
+			Notifications.create().title("Attention").text("It seems to be error. Please check again").darkStyle()
+					.showError();
+		}
+	}
+
+	/**
+	 * Test if MySQL connection established or not
+	 */
+	public void testMySQLConnection() {
+		MySQLDbConnManager dao = new MySQLDbConnManager();
+		Connection dbConn = null;
+		String host = mysqlHostTextField.getText(), database = "", username = mysqlUsernameTextField.getText(),
+				password = mysqlPasswordTextField.getText();
+		int port = Integer.parseInt(mysqlPortTextField.getText());
+		dbConn = dao.getConnection(host, port, database, username, password);
+		if (dbConn != null) {
+			Notifications.create().darkStyle().title("MySQL Connection Status")
+					.text("A successful MySQL connection was made with" + "\n"
+							+ " the parameters defined for this connection")
+					.showInformation();
+		} else {
+			Notifications.create().darkStyle().title("MySQL Connection Status")
+					.text("Can't connect to MySQL server with defined parameters").showError();
+		}
+		dao.closeConnection(dbConn);
 	}
 
 }
