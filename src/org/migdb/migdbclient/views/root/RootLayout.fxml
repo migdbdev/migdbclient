@@ -65,7 +65,7 @@
             </AnchorPane>
          </top>
          <left>
-            <AnchorPane prefHeight="613.0" prefWidth="226.0" style="-fx-background-color: blue;" BorderPane.alignment="CENTER" />
+            <AnchorPane fx:id="sideBarAnchorpane" prefHeight="613.0" prefWidth="226.0" style="-fx-background-color: blue;" BorderPane.alignment="CENTER" />
          </left>
          <center>
             <AnchorPane fx:id="rootContainerAncpane" prefHeight="614.0" prefWidth="973.0" style="-fx-background-color: yellow;" BorderPane.alignment="CENTER" />

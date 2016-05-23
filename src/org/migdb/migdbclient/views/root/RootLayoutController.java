@@ -19,6 +19,8 @@ public class RootLayoutController implements Initializable {
 	@FXML
 	private AnchorPane rootContainerAncpane;
 	@FXML
+	private AnchorPane sideBarAnchorpane;
+	@FXML
 	private Label datamanagerLabel;
 	@FXML
 	private Label connectionManagerLabel;
