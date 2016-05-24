@@ -1,19 +1,24 @@
 package org.migdb.migdbclient.views.connectionmanager;
 
 import java.net.URL;
+import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import org.controlsfx.control.Notifications;
 import org.migdb.migdbclient.config.ConnectionManager;
+import org.migdb.migdbclient.controllers.dbconnector.MongoDbConnManager;
 import org.migdb.migdbclient.controllers.dbconnector.MySQLDbConnManager;
 import org.migdb.migdbclient.models.dao.MysqlDAO;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
 
+import com.mongodb.DBCollection;
+import com.mongodb.client.MongoDatabase;
+
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -57,8 +62,10 @@ public class SetupNewDBConnectionController implements Initializable {
 	private Label mongoBackLabel;
 	@FXML
 	private Button submitButton;
-
-	FXMLLoader loader = new FXMLLoader();
+	@FXML
+	private Button testMySQLConnectionButton;
+	@FXML
+	private Button testMongoConnectionButton;
 
 	/**
 	 * Initialize method Called to initialize a controller after its root
@@ -78,14 +85,6 @@ public class SetupNewDBConnectionController implements Initializable {
 		mysqlLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
 				mysqlPopup();
-				/*MysqlDAO dao = new MysqlDAO();
-				String host ="localhost",database = "bawwadb",username="root",password="123";
-				int port = 3306;
-				System.out.println(dao.getDetails(host, port, database, username, password));*/
-				/*MySQLDbConnManager db = new MySQLDbConnManager();
-				String host ="localhost",database = "bawwadb",username="root",password="123";
-				int port = 3306;
-				System.out.println(db.getConnection(host, port, database, username, password));*/
 			}
 		});
 
@@ -109,10 +108,16 @@ public class SetupNewDBConnectionController implements Initializable {
 				back(mouseevent);
 			}
 		});
-		
+
 		submitButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
 				insertConnection();
+			}
+		});
+
+		testMySQLConnectionButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent mouseevent) {
+				testMySQLConnection();
 			}
 		});
 	}
@@ -143,6 +148,7 @@ public class SetupNewDBConnectionController implements Initializable {
 
 	/**
 	 * Back to root layout anchor pane from mysql or mongo layout
+	 * 
 	 * @param e
 	 */
 	public void back(Event e) {
@@ -156,6 +162,7 @@ public class SetupNewDBConnectionController implements Initializable {
 
 	/**
 	 * Connector data transfer model
+	 * 
 	 * @return
 	 */
 	public ConnectorDTO connectionSave() {
@@ -170,20 +177,43 @@ public class SetupNewDBConnectionController implements Initializable {
 		dto.setSchemaName(mongoScematextField.getText());
 		return dto;
 	}
-	
+
 	/**
 	 * Connection information save method
 	 */
 	public void insertConnection() {
 		SqliteDAO dao = new SqliteDAO();
 		boolean result = dao.insertConnection(connectionSave());
-		if(result==true){
+		if (result == true) {
 			Stage stage = (Stage) submitButton.getScene().getWindow();
 			stage.close();
 			Notifications.create().title("Attention").text("Succesfully inserted").darkStyle().showInformation();
 		} else {
-			Notifications.create().title("Attention").text("It seems to be error. Please check again").darkStyle().showError();
+			Notifications.create().title("Attention").text("It seems to be error. Please check again").darkStyle()
+					.showError();
 		}
+	}
+
+	/**
+	 * Test if MySQL connection established or not
+	 */
+	public void testMySQLConnection() {
+		MySQLDbConnManager dao = new MySQLDbConnManager();
+		Connection dbConn = null;
+		String host = mysqlHostTextField.getText(), database = "", username = mysqlUsernameTextField.getText(),
+				password = mysqlPasswordTextField.getText();
+		int port = Integer.parseInt(mysqlPortTextField.getText());
+		dbConn = dao.getConnection(host, port, database, username, password);
+		if (dbConn != null) {
+			Notifications.create().darkStyle().title("MySQL Connection Status")
+					.text("A successful MySQL connection was made with" + "\n"
+							+ " the parameters defined for this connection")
+					.showInformation();
+		} else {
+			Notifications.create().darkStyle().title("MySQL Connection Status")
+					.text("Can't connect to MySQL server with defined parameters").showError();
+		}
+		dao.closeConnection(dbConn);
 	}
 
 }
