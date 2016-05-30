@@ -10,6 +10,7 @@ import org.bson.Document;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.controllers.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
+import org.migdb.migdbclient.resources.CenterLayout;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -98,7 +99,7 @@ public class MongoDataManager implements Initializable {
 	@FXML
 	public void testHandler() {
 		AnchorPane root;
-		root = MySession.INSTANCE.getRootContainer();
+		root = CenterLayout.INSTANCE.getRootContainer();
 		FXMLLoader loader = new FXMLLoader();
 		loader.setLocation(MainApp.class.getResource(FxmlPath.COLLECTIONMANAGER.getPath()));
 		AnchorPane collectionManager;
