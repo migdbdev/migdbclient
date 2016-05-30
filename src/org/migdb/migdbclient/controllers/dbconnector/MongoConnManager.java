@@ -1,4 +1,4 @@
-package org.migdb.migdbclient.controllers;
+package org.migdb.migdbclient.controllers.dbconnector;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
