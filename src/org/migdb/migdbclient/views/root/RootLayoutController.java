@@ -9,6 +9,7 @@ import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
+import org.migdb.migdbclient.resources.LayoutInstance;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
@@ -49,6 +50,7 @@ public class RootLayoutController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 
 		CenterLayout.INSTANCE.setRoot(rootContainerAncpane);
+		LayoutInstance.INSTANCE.setSidebar(sideBarAnchorpane);
 		showConnectionManager();
 
 		ObservableList<String> list;

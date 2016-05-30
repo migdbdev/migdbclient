@@ -19,7 +19,7 @@ public enum MongoConnManager {
 	}
 	
 	public MongoDatabase connectToDatabase(String database) throws Exception {
-		MongoClient client = connect();
+		//MongoClient client = connect();
 		
 		return client.getDatabase(database);
 	}
