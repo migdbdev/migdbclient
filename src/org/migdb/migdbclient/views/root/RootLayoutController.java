@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.migdb.migdbclient.config.FxmlPath;
-import org.migdb.migdbclient.controllers.MongoConnManager;
+import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
 
