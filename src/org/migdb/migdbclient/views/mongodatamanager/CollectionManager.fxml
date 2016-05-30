@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="collectionAncPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="973.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.mongodatamanager.MongoDataManager">
+   <children>
+      <Label layoutX="22.0" layoutY="30.0" prefHeight="17.0" prefWidth="252.0" text="Mongo DB Collections" />
+      <Button fx:id="btnTest" layoutX="22.0" layoutY="445.0" mnemonicParsing="false" onAction="#display" text="Button" />
+      <TableView fx:id="collectionTable" layoutX="22.0" layoutY="47.0" prefHeight="293.0" prefWidth="531.0">
+        <columns>
+          <TableColumn prefWidth="75.0" text="C1" />
+          <TableColumn prefWidth="75.0" text="C2" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>

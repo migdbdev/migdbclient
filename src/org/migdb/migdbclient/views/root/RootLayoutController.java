@@ -1,16 +1,26 @@
 package org.migdb.migdbclient.views.root;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.migdb.migdbclient.config.FxmlPath;
+import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
+import org.migdb.migdbclient.resources.CenterLayout;
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCursor;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
@@ -26,6 +36,8 @@ public class RootLayoutController implements Initializable {
 	private Label connectionManagerLabel;
 	@FXML
 	private Label modificationEvaluatorLabel;
+	@FXML
+	private ListView<String> databaseList;
 
 	/**
 	 * Initialize method Called to initialize a controller after its root
@@ -36,6 +48,17 @@ public class RootLayoutController implements Initializable {
 	 */
 	public void initialize(URL location, ResourceBundle resources) {
 
+		CenterLayout.INSTANCE.setRoot(rootContainerAncpane);
+
+		ObservableList<String> list;
+		try {
+			list = FXCollections.observableArrayList(getDatabaseNames());
+			databaseList.setItems(list);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// Data manager navigation label click event
 		datamanagerLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
@@ -106,6 +129,16 @@ public class RootLayoutController implements Initializable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public List<String> getDatabaseNames() throws Exception {
+		List<String> dbs = new ArrayList<String>();
+		MongoClient client = MongoConnManager.INSTANCE.connect();
+		MongoCursor<String> dbsCursor = client.listDatabaseNames().iterator();
+		while (dbsCursor.hasNext()) {
+			dbs.add(dbsCursor.next());
+		}
+		return dbs;
 	}
 
 }
