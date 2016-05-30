@@ -1,8 +1,8 @@
-package org.migdb.migdbclient.views.mongodatamanager;
+package org.migdb.migdbclient.resources;
 
 import javafx.scene.layout.AnchorPane;
 
-public enum MySession {
+public enum CenterLayout {
 	INSTANCE;
 	
 	private AnchorPane root;
