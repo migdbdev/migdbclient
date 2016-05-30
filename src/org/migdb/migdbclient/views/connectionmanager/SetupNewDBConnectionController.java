@@ -2,19 +2,13 @@ package org.migdb.migdbclient.views.connectionmanager;
 
 import java.net.URL;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import org.controlsfx.control.Notifications;
 import org.migdb.migdbclient.config.ConnectionManager;
-import org.migdb.migdbclient.controllers.dbconnector.MongoDbConnManager;
 import org.migdb.migdbclient.controllers.dbconnector.MySQLDbConnManager;
-import org.migdb.migdbclient.models.dao.MysqlDAO;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
-
-import com.mongodb.DBCollection;
-import com.mongodb.client.MongoDatabase;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
