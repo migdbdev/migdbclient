@@ -5,8 +5,19 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="973.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.mongodatamanager.MongoDataManager">
+<AnchorPane fx:id="rootAncPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="973.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.mongodatamanager.MongoDataManager">
    <children>
-      <Button fx:id="btnTest" layoutX="196.0" layoutY="105.0" mnemonicParsing="false" onAction="#display" text="Button" />
+      <Label layoutX="22.0" layoutY="30.0" prefHeight="17.0" prefWidth="252.0" text="Mongo DB Collections" />
+      <Button fx:id="btnTest" layoutX="22.0" layoutY="445.0" mnemonicParsing="false" onAction="#display" text="Button" />
+      <ListView fx:id="collectionList" layoutX="22.0" layoutY="47.0" prefHeight="241.0" prefWidth="252.0">
+         <contextMenu>
+            <ContextMenu>
+              <items>
+                <MenuItem mnemonicParsing="false" text="View" />
+                  <MenuItem mnemonicParsing="false" onAction="#testHandler" text="Click me" />
+              </items>
+            </ContextMenu>
+         </contextMenu></ListView>
+      <ListView fx:id="databaseList" layoutX="344.0" layoutY="47.0" prefHeight="200.0" prefWidth="200.0" />
    </children>
 </AnchorPane>
