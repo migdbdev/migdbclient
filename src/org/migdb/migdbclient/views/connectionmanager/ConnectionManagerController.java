@@ -8,17 +8,31 @@ import java.util.ResourceBundle;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.migdb.migdbclient.config.FxmlPath;
+import org.migdb.migdbclient.config.ImagePath;
 import org.migdb.migdbclient.main.MainApp;
+import org.migdb.migdbclient.models.dao.MysqlDAO;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
+import org.migdb.migdbclient.resources.CenterLayout;
+import org.migdb.migdbclient.resources.ConnectionParameters;
+import org.migdb.migdbclient.resources.LayoutInstance;
 
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ContextMenuBuilder;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItemBuilder;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
@@ -32,7 +46,7 @@ public class ConnectionManagerController implements Initializable {
 	@FXML
 	private AnchorPane rootLayoutAnchorpane;
 	@FXML
-	AnchorPane connectionAnchorpane;
+	private AnchorPane connectionAnchorpane;
 	@FXML
 	private Label addConnectionLabel;
 
@@ -52,7 +66,7 @@ public class ConnectionManagerController implements Initializable {
 				createNewConnectionPopup();
 			}
 		});
-		
+
 		connectionInfoSet();
 
 	}
@@ -79,8 +93,8 @@ public class ConnectionManagerController implements Initializable {
 		}
 
 	}
-	
-	public void connectionInfoSet(){
+
+	public void connectionInfoSet() {
 		String connName, uName, mysqlHost, mongoHost = null;
 		int mysqlPort, mongoPort = 0;
 		Double x = 10.0;
@@ -143,8 +157,14 @@ public class ConnectionManagerController implements Initializable {
 		// Mouse clicked event
 		vbox.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
-				calla(connName);
+				ConnectionParameters.SESSION.setConnectionName(connName);
+				ConnectionParameters.SESSION.setUserName(uName);
+				ConnectionParameters.SESSION.setMysqlHostName(mysqlHost);
+				ConnectionParameters.SESSION.setMongoHostName(mongoHost);
+				ConnectionParameters.SESSION.setMysqlPort(mysqlPort);
+				ConnectionParameters.SESSION.setMongoPort(mongoPort);
 				rootLayoutAnchorpane.getChildren().clear();
+				setSideBarDatabases();
 			}
 		});
 
@@ -167,12 +187,48 @@ public class ConnectionManagerController implements Initializable {
 		return vbox;
 	}
 
-	public void calla(String conn) {
-		String re = null;
-		re = conn;
-		System.out.println(re);
-	}
-	
+	public void setSideBarDatabases() {
+		MysqlDAO dao = new MysqlDAO();
+		String host = ConnectionParameters.SESSION.getMysqlHostName();
+		int port = ConnectionParameters.SESSION.getMysqlPort();
+		String database = "";
+		String username = ConnectionParameters.SESSION.getUserName();
+		String password = ConnectionParameters.SESSION.getPassword();
+		ArrayList<String> databases = dao.getDatabases(host, port, database, username, password);
+		final Node dbIcon = new ImageView(new Image(getClass().getResourceAsStream(ImagePath.DBICON.getPath())));
+		TreeItem<String> mysqlItem = new TreeItem<String>("MySQL Databases", dbIcon);
+		mysqlItem.setExpanded(true);
+		for (int i = 1; i < databases.size(); i++) {
+			TreeItem<String> item = new TreeItem<String>(databases.get(i));
+			mysqlItem.getChildren().add(item);
+		}
+		TreeView<String> tree = new TreeView<String>(mysqlItem);
+		tree.setStyle("-fx-pref-width: 226;-fx-border-color: #336699");
+		// instantiate the root context menu
+        ContextMenu rootContextMenu
+            = ContextMenuBuilder.create()
+            .items(
+                MenuItemBuilder.create()
+                .text("Menu Item")
+                .onAction(
+                    new EventHandler<ActionEvent>()
+                    {
+                        @Override
+                        public void handle(ActionEvent arg0)
+                        {
+                            System.out.println("Menu Item Clicked!");
+                        }
+                    }
+                )
+                .build()
+            )
+            .build();
 
+        tree.setContextMenu(rootContextMenu);
+		AnchorPane sidebar;
+		sidebar = LayoutInstance.INSTANCE.getSidebar();
+		sidebar.getChildren().clear();
+		sidebar.getChildren().add(tree);
+	}
 
 }

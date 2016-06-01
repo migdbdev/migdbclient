@@ -9,6 +9,7 @@ import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
+import org.migdb.migdbclient.resources.LayoutInstance;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
@@ -49,6 +50,8 @@ public class RootLayoutController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 
 		CenterLayout.INSTANCE.setRoot(rootContainerAncpane);
+		LayoutInstance.INSTANCE.setSidebar(sideBarAnchorpane);
+		showConnectionManager();
 
 		ObservableList<String> list;
 		try {
@@ -87,11 +90,13 @@ public class RootLayoutController implements Initializable {
 	 */
 	public void showConnectionManager() {
 		try {
+			AnchorPane root;
+			root = CenterLayout.INSTANCE.getRootContainer();
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(MainApp.class.getResource(FxmlPath.CONNECTIONMANAGER.getPath()));
 			AnchorPane connectionManager = loader.load();
-			rootContainerAncpane.getChildren().clear();
-			rootContainerAncpane.getChildren().add(connectionManager);
+			root.getChildren().clear();
+			root.getChildren().add(connectionManager);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -104,11 +109,13 @@ public class RootLayoutController implements Initializable {
 	 */
 	public void showModificationEvaluator() {
 		try {
+			AnchorPane root;
+			root = CenterLayout.INSTANCE.getRootContainer();
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(MainApp.class.getResource(FxmlPath.MODIFICATIONEVALUATOR.getPath()));
 			AnchorPane modificationEvaluator = loader.load();
-			rootContainerAncpane.getChildren().clear();
-			rootContainerAncpane.getChildren().add(modificationEvaluator);
+			root.getChildren().clear();
+			root.getChildren().add(modificationEvaluator);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -120,11 +127,13 @@ public class RootLayoutController implements Initializable {
 	 */
 	public void showDataManager() {
 		try {
+			AnchorPane root;
+			root = CenterLayout.INSTANCE.getRootContainer();
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(MainApp.class.getResource(FxmlPath.DATAMANAGER.getPath()));
 			AnchorPane dataManager = loader.load();
-			rootContainerAncpane.getChildren().clear();
-			rootContainerAncpane.getChildren().add(dataManager);
+			root.getChildren().clear();
+			root.getChildren().add(dataManager);
 
 		} catch (Exception e) {
 			e.printStackTrace();
