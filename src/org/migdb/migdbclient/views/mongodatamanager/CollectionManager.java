@@ -12,11 +12,14 @@ import org.json.simple.parser.JSONParser;
 import org.migdb.migdbclient.config.TreeviewSize;
 import org.migdb.migdbclient.models.modificationevaluator.TableReference;
 
+import com.twitter.conversions.string;
+
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.CheckBoxTreeCell;
 import javafx.scene.layout.AnchorPane;
@@ -27,6 +30,7 @@ public class CollectionManager implements Initializable{
 
 
 	@FXML private AnchorPane collectionAncPane;
+	@FXML private TableView<String> table;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
