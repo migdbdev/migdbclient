@@ -11,11 +11,14 @@ import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
+import org.migdb.migdbclient.resources.DatabaseResource;
 
 import com.mongodb.MongoClient;
+import com.mongodb.client.ListCollectionsIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoIterable;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,31 +40,27 @@ public class MongoDataManager implements Initializable {
 	private AnchorPane rootAncPane;
 
 	private MongoDatabase db;
-	
+	private String databaseName;
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
-		try {
-			db = MongoConnManager.INSTANCE.connectToDatabase("test");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			displayCollections();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		try {
-			ObservableList<String> list = FXCollections.observableArrayList(getDatabaseNames());
-			databaseList.setItems(list);
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		/*
+		 * try { db = MongoConnManager.INSTANCE.connectToDatabase("test"); }
+		 * catch (Exception e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); } try { displayCollections(); } catch (Exception
+		 * e) { // TODO Auto-generated catch block e.printStackTrace(); }
+		 * 
+		 * try { ObservableList<String> list =
+		 * FXCollections.observableArrayList(getDatabaseNames());
+		 * databaseList.setItems(list);
+		 * collectionList.setItems(getCollectionNames());
+		 * 
+		 * 
+		 * } catch (Exception e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); } System.out.println(databaseName);
+		 */
 
 		/*
 		 * try { // get list of collections MongoConnManager connManager = new
@@ -77,10 +76,10 @@ public class MongoDataManager implements Initializable {
 
 	}
 
-
 	@FXML
 	public void display() throws Exception {
 		System.out.println("button clicked");
+
 		MongoCollection<Document> collection = db.getCollection("zips");
 
 		List<Document> foundDocument = collection.find().into(new ArrayList<Document>());
@@ -89,11 +88,8 @@ public class MongoDataManager implements Initializable {
 			System.out.println(e.toJson());
 		});
 
-	}
+		// System.out.println(databaseName);
 
-	@FXML
-	public void displayCollections() throws Exception {
-		System.out.println(getDatabaseNames());
 	}
 
 	@FXML
@@ -113,16 +109,51 @@ public class MongoDataManager implements Initializable {
 		}
 
 	}
-
 	
-	public List<String> getDatabaseNames() throws Exception {
-		List<String> dbs = new ArrayList<String>();
-		MongoClient client = MongoConnManager.INSTANCE.connect();
-		MongoCursor<String> dbsCursor = client.listDatabaseNames().iterator();
-		while (dbsCursor.hasNext()) {
-			dbs.add(dbsCursor.next());
+	@FXML
+	public void showCollectionManger(){
+		System.out.println(collectionList.getSelectionModel().getSelectedItem());
+		AnchorPane root;
+		root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.COLLECTIONMANAGER.getPath()));
+		AnchorPane mongoCollectionManagerAncPane;
+		try {
+			mongoCollectionManagerAncPane = loader.load();
+			CollectionManager collectionManager = (CollectionManager)loader.getController();
+			collectionManager.setCollection(collectionList.getSelectionModel().getSelectedItem());
+			root.getChildren().clear();
+			root.getChildren().add(mongoCollectionManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return dbs;
+
+	}
+
+	private ObservableList<String> getCollectionsOf(String dbName) throws Exception {
+		ObservableList<String> list = FXCollections.observableArrayList();
+		;
+		MongoDatabase db = MongoConnManager.INSTANCE.connectToDatabase(dbName);
+		MongoCursor<String> cursor = db.listCollectionNames().iterator();
+		while (cursor.hasNext()) {
+			list.add(cursor.next());
+		}
+		System.out.println(list);
+		return list;
+
+	}
+
+	public void setDatabase(String databaseName) throws Exception {
+		try {
+			collectionList.setItems(getCollectionsOf(DatabaseResource.INSTANCE.getDatabaseName()));
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(databaseName);
+
 	}
 
 }
