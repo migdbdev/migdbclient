@@ -11,6 +11,7 @@ import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
+import org.migdb.migdbclient.resources.DatabaseResource;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.ListCollectionsIterable;
@@ -44,6 +45,7 @@ public class MongoDataManager implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
+		
 		/*
 		 * try { db = MongoConnManager.INSTANCE.connectToDatabase("test"); }
 		 * catch (Exception e) { // TODO Auto-generated catch block
@@ -107,6 +109,27 @@ public class MongoDataManager implements Initializable {
 		}
 
 	}
+	
+	@FXML
+	public void showCollectionManger(){
+		System.out.println(collectionList.getSelectionModel().getSelectedItem());
+		AnchorPane root;
+		root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.COLLECTIONMANAGER.getPath()));
+		AnchorPane mongoCollectionManagerAncPane;
+		try {
+			mongoCollectionManagerAncPane = loader.load();
+			CollectionManager collectionManager = (CollectionManager)loader.getController();
+			collectionManager.setCollection(collectionList.getSelectionModel().getSelectedItem());
+			root.getChildren().clear();
+			root.getChildren().add(mongoCollectionManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
 
 	private ObservableList<String> getCollectionsOf(String dbName) throws Exception {
 		ObservableList<String> list = FXCollections.observableArrayList();
@@ -121,9 +144,9 @@ public class MongoDataManager implements Initializable {
 
 	}
 
-	public void setDatabase(String databaseName) {
+	public void setDatabase(String databaseName) throws Exception {
 		try {
-			collectionList.setItems(getCollectionsOf(databaseName));
+			collectionList.setItems(getCollectionsOf(DatabaseResource.INSTANCE.getDatabaseName()));
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

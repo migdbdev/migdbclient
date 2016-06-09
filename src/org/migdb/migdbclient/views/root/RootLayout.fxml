@@ -71,7 +71,7 @@
                <contextMenu>
                   <ContextMenu fx:id="databaseContextMenu">
                     <items>
-                      <MenuItem mnemonicParsing="false" onAction="#showCollectionManager" text="Select" />
+                      <MenuItem mnemonicParsing="false" onAction="#showMongoDataManager" text="Select" />
                     </items>
                   </ContextMenu>
                </contextMenu></ListView>

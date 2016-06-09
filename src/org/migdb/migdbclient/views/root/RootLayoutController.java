@@ -10,6 +10,7 @@ import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
+import org.migdb.migdbclient.resources.DatabaseResource;
 import org.migdb.migdbclient.resources.LayoutInstance;
 import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
@@ -66,7 +67,7 @@ public class RootLayoutController implements Initializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		// Data manager navigation label click event
 		datamanagerLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
@@ -144,9 +145,11 @@ public class RootLayoutController implements Initializable {
 			e.printStackTrace();
 		}
 	}
+
 	@FXML
-	public void showCollectionManager() {
-		System.out.println(mongoDatabaseList.getSelectionModel().getSelectedItem());
+	public void showMongoDataManager() throws Exception {
+		String databaseName = mongoDatabaseList.getSelectionModel().getSelectedItem();
+		DatabaseResource.INSTANCE.setDB(databaseName);
 		AnchorPane root;
 		root = CenterLayout.INSTANCE.getRootContainer();
 		FXMLLoader loader = new FXMLLoader();
@@ -154,8 +157,8 @@ public class RootLayoutController implements Initializable {
 		AnchorPane mongoDataManagerAncPane;
 		try {
 			mongoDataManagerAncPane = loader.load();
-			MongoDataManager dataManager = (MongoDataManager)loader.getController();
-			dataManager.setDatabase(mongoDatabaseList.getSelectionModel().getSelectedItem());
+			MongoDataManager dataManager = (MongoDataManager) loader.getController();
+			dataManager.setDatabase(databaseName);
 			root.getChildren().clear();
 			root.getChildren().add(mongoDataManagerAncPane);
 		} catch (IOException e) {
@@ -164,7 +167,7 @@ public class RootLayoutController implements Initializable {
 		}
 
 	}
-	
+
 	public List<String> getDatabaseNames() throws Exception {
 		List<String> dbs = new ArrayList<String>();
 		MongoClient client = MongoConnManager.INSTANCE.connect();
