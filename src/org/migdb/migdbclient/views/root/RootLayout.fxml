@@ -67,7 +67,14 @@
          <left>
             <AnchorPane fx:id="sideBarAnchorpane" prefHeight="613.0" prefWidth="226.0" style="-fx-background-color: blue;" BorderPane.alignment="CENTER">
          <children>
-            <ListView fx:id="databaseList" layoutX="13.0" layoutY="322.0" prefHeight="200.0" prefWidth="200.0" />
+            <ListView fx:id="mongoDatabaseList" layoutX="13.0" layoutY="322.0" prefHeight="200.0" prefWidth="200.0">
+               <contextMenu>
+                  <ContextMenu fx:id="databaseContextMenu">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#showMongoDataManager" text="Select" />
+                    </items>
+                  </ContextMenu>
+               </contextMenu></ListView>
             <Label layoutX="14.0" layoutY="298.0" text="Mongo Databases" />
          </children></AnchorPane>
          </left>
