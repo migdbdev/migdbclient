@@ -13,8 +13,7 @@
          <contextMenu>
             <ContextMenu>
               <items>
-                <MenuItem mnemonicParsing="false" text="View" />
-                  <MenuItem mnemonicParsing="false" onAction="#testHandler" text="Click me" />
+                <MenuItem mnemonicParsing="false" onAction="#showCollectionManger" text="View" />
               </items>
             </ContextMenu>
          </contextMenu></ListView>

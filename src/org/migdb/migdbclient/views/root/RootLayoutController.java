@@ -1,5 +1,6 @@
 package org.migdb.migdbclient.views.root;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,9 @@ import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
+import org.migdb.migdbclient.resources.DatabaseResource;
 import org.migdb.migdbclient.resources.LayoutInstance;
+import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
@@ -20,6 +23,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
@@ -38,7 +42,9 @@ public class RootLayoutController implements Initializable {
 	@FXML
 	private Label modificationEvaluatorLabel;
 	@FXML
-	private ListView<String> databaseList;
+	private ListView<String> mongoDatabaseList;
+	@FXML
+	private ContextMenu mongoDatabaseContextMenu;
 
 	/**
 	 * Initialize method Called to initialize a controller after its root
@@ -56,12 +62,12 @@ public class RootLayoutController implements Initializable {
 		ObservableList<String> list;
 		try {
 			list = FXCollections.observableArrayList(getDatabaseNames());
-			databaseList.setItems(list);
+			mongoDatabaseList.setItems(list);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		// Data manager navigation label click event
 		datamanagerLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
@@ -139,7 +145,29 @@ public class RootLayoutController implements Initializable {
 			e.printStackTrace();
 		}
 	}
-	
+
+	@FXML
+	public void showMongoDataManager() throws Exception {
+		String databaseName = mongoDatabaseList.getSelectionModel().getSelectedItem();
+		DatabaseResource.INSTANCE.setDB(databaseName);
+		AnchorPane root;
+		root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.DATAMANAGER.getPath()));
+		AnchorPane mongoDataManagerAncPane;
+		try {
+			mongoDataManagerAncPane = loader.load();
+			MongoDataManager dataManager = (MongoDataManager) loader.getController();
+			dataManager.setDatabase(databaseName);
+			root.getChildren().clear();
+			root.getChildren().add(mongoDataManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
 	public List<String> getDatabaseNames() throws Exception {
 		List<String> dbs = new ArrayList<String>();
 		MongoClient client = MongoConnManager.INSTANCE.connect();
