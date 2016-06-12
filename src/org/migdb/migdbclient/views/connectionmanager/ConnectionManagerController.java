@@ -9,6 +9,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.ImagePath;
+import org.migdb.migdbclient.controllers.DumpGenerator;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.models.dao.MysqlDAO;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
@@ -16,6 +17,7 @@ import org.migdb.migdbclient.models.dto.ConnectorDTO;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ConnectionParameters;
 import org.migdb.migdbclient.resources.LayoutInstance;
+import org.migdb.migdbclient.resources.Session;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -189,6 +191,7 @@ public class ConnectionManagerController implements Initializable {
 
 	public void setSideBarDatabases() {
 		MysqlDAO dao = new MysqlDAO();
+		DumpGenerator obj = new DumpGenerator();
 		String host = ConnectionParameters.SESSION.getMysqlHostName();
 		int port = ConnectionParameters.SESSION.getMysqlPort();
 		String database = "";
@@ -216,7 +219,8 @@ public class ConnectionManagerController implements Initializable {
                         @Override
                         public void handle(ActionEvent arg0)
                         {
-                            System.out.println("Menu Item Clicked!");
+                            Session.INSTANCE.setActiveDB("dbtest");
+                            obj.generateDump();
                         }
                     }
                 )
