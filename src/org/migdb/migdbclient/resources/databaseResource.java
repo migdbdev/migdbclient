@@ -1,24 +1,31 @@
 package org.migdb.migdbclient.resources;
 
-import java.util.Set;
+import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 
-import com.mongodb.DB;
+import com.mongodb.client.MongoDatabase;
 
-public class databaseResource {
-	private String name;
-	private Set<String> collections;
-	public String getName() {
-		return name;
+public enum DatabaseResource {
+	INSTANCE;
+	private MongoDatabase database;
+	private String databaseName;
+
+	public MongoDatabase getDatabase() {
+		return database;
 	}
-	public void setName(String name) {
-		this.name = name;
+
+	public void setDB(String databaseName) {
+		this.databaseName = databaseName;
+		try {
+			this.database = MongoConnManager.INSTANCE.connectToDatabase(databaseName);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
-	public Set<String> getCollections() {
-		return collections;
-	}
-	public void setCollections(DB db ) {
-		Set<String> collections = db.getCollectionNames();
-		this.collections=collections;
+
+	public String getDatabaseName() {
+		return databaseName;
 	}
 
 }
