@@ -10,7 +10,7 @@ package org.migdb.migdbclient.config;
 public enum FilePath {
 
 	DOCUMENT(System.getProperty("user.home") + "\\" + "Documents\\MigDB"),
-	XMLPATH("\\Xml dump.xml"),
+	XMLPATH("\\Xmldump.xml"),
 	DBSTRUCTUREFILE("\\Database structure.json"),
 	DELETEDITEMFILE("\\Item deleted.json"),
 	COLLECTIONFILE("Collection.json");
