@@ -75,7 +75,6 @@ public class ManyToMany {
 				writeMappedJson();
 			}
 		}
-		System.out.println(manyToMany);
 
 	}
 
@@ -136,9 +135,119 @@ public class ManyToMany {
 		JSONObject table2Response = null;
 		JSONObject summary = new JSONObject();
 		summary.put("method", "reference");
-		summary.put("parent", "student");
+		summary.put("parent", "classes");
 		return summary;
 	}
+	public void embed() {
+		JSONObject table1 = ManyToManyResource.INSTANCE.getTable1();
+		
+		if (!isTableMapped(table1)) {
+			insertTable(table1);
+		}
+		setTable2();
+		JSONArray table1Data = (JSONArray) table1.get("data");
+		JSONObject mappingTable = ManyToManyResource.INSTANCE.getMappingTable();
+		JSONObject table1MappingInfo = ManyToManyResource.INSTANCE.getTable1Info();
+		JSONArray mappingData = (JSONArray) mappingTable.get("data");
+		String referencingCol = table1MappingInfo.get("referencingCol").toString();
+		String referencedCol = table1MappingInfo.get("referencedCol").toString();
+		String referencedTable = table1MappingInfo.get("referencedTab").toString();
+		JSONObject table2MappingInfo = ManyToManyResource.INSTANCE.getTable2Info();
+		String referencingTable = table2MappingInfo.get("referencedTab").toString();
+		
+		for (Object object : table1Data) {
+			JSONObject table1DataObject = (JSONObject) object;
+			String table1Value = table1DataObject.get(referencingCol).toString();
+			JSONArray referencingDataArray = new JSONArray();
+			for (Object object2 : mappingData) {
+				JSONObject mappingObject = (JSONObject) object2;
+				String referencedValue = mappingObject.get(referencedCol).toString();
+				if (referencedValue.equals(table1Value)) {
+					JSONObject referencingObject = findTable2Value(mappingObject);
+					// System.out.println(table1DataObject+"###"+referencingObject);
+					referencingDataArray.add(referencingObject);
+				}
+			}
+			// System.out.println(referencingDataArray);
+			generateMappedDataArray(referencedTable, referencingTable, referencingCol, table1Value,
+					referencingDataArray);
+		}
+//		insertToMapped(referencedTable);
+		
+		System.out.println("embed result : " + mapped);
+	}
+	
+	public void setTable2(){
+		JSONObject table = ManyToManyResource.INSTANCE.getTable2();
+		if(isTableMapped(table)){
+			JSONArray array = (JSONArray) mapped.get("collections");
+			for (int i = 0; i < array.size(); i++) {
+				JSONObject object = (JSONObject) array.get(i);
+				if (object.get("collectionName").equals(table.get("name"))) {
+					ManyToManyResource.INSTANCE.setTable2(object);
+					System.out.println("!!!!!"+object);
+				}
+			}
+		}
+		else{
+			JSONArray array = (JSONArray) sqlJson.get("tables");
+			JSONArray tableData = new JSONArray();
+			for (int i = 0; i < array.size(); i++) {
+				JSONObject object = (JSONObject) array.get(i);
+				if (object.get("name").equals(table.get("name"))) {
+					tableData = (JSONArray) object.get("data");
+				}
+			}
+			JSONObject newCollection = new JSONObject();
+			newCollection.put("collectionName", table.get("name").toString());
+			newCollection.put("values", tableData);
+			ManyToManyResource.INSTANCE.setTable2(newCollection);
+		}
+	}
+	
+	public JSONObject findTable2Value(JSONObject mappingObject) {
+
+		JSONObject table2 = ManyToManyResource.INSTANCE.getTable2();
+		JSONArray table2Data = (JSONArray) table2.get("values");
+		JSONObject table2MappingInfo = ManyToManyResource.INSTANCE.getTable2Info();
+		String referencingCol = table2MappingInfo.get("referencingCol").toString();
+		String referencedCol = table2MappingInfo.get("referencedCol").toString();
+		String referencedValue = mappingObject.get(referencedCol).toString();
+		for (Object object : table2Data) {
+			JSONObject table2DataObject = (JSONObject) object;
+			String table2Value = table2DataObject.get(referencingCol).toString();
+			if (referencedValue.equals(table2Value)) {
+				return table2DataObject;
+			}
+		}
+
+		return null;
+	}
+	
+	public void generateMappedDataArray(String referencedCollection, String referencingTable, String referencingCol,
+			String referencingColData, JSONArray referencingDataArray) {
+		JSONArray mappedData = (JSONArray) mapped.get("collections");
+		// JSONArray array = new JSONArray();
+		for (int i = 0; i < mappedData.size(); i++) {
+			JSONObject mappedCollection = (JSONObject) mappedData.get(i);
+			String collectionName = mappedCollection.get("collectionName").toString();
+			if (referencedCollection.equals(collectionName)) {
+				JSONArray mappedValues = (JSONArray) mappedCollection.get("values");
+				for (int j = 0; j < mappedValues.size(); j++) {
+					JSONObject mappedDataObject = (JSONObject) mappedValues.get(j);
+					String mappedDataValue = (String) mappedDataObject.get(referencingCol);
+					if (mappedDataValue.equals(referencingColData)) {
+						mappedDataObject.put(referencingTable, referencingDataArray);
+//						mappedDataArray.add(mappedDataObject);
+					}
+				}
+				// mappedCollection.put(referencingTable, referencingDataArray);
+			}
+
+		}
+
+	}
+
 
 	public void reference() {
 		JSONObject table1 = ManyToManyResource.INSTANCE.getTable1();
@@ -273,72 +382,8 @@ public class ManyToMany {
 		}
 	}
 
-	public void embed() {
-		JSONObject table1 = ManyToManyResource.INSTANCE.getTable1();
 
-		if (!isTableMapped(table1)) {
-			insertTable(table1);
-		}
-		JSONArray table1Data = (JSONArray) table1.get("data");
-		JSONObject mappingTable = ManyToManyResource.INSTANCE.getMappingTable();
-		JSONObject table1MappingInfo = ManyToManyResource.INSTANCE.getTable1Info();
-		JSONArray mappingData = (JSONArray) mappingTable.get("data");
-		String referencingCol = table1MappingInfo.get("referencingCol").toString();
-		String referencedCol = table1MappingInfo.get("referencedCol").toString();
-		String referencedTable = table1MappingInfo.get("referencedTab").toString();
-		JSONObject table2MappingInfo = ManyToManyResource.INSTANCE.getTable2Info();
-		String referencingTable = table2MappingInfo.get("referencedTab").toString();
-
-		for (Object object : table1Data) {
-			JSONObject table1DataObject = (JSONObject) object;
-			String table1Value = table1DataObject.get(referencingCol).toString();
-			JSONArray referencingDataArray = new JSONArray();
-			for (Object object2 : mappingData) {
-				JSONObject mappingObject = (JSONObject) object2;
-				String referencedValue = mappingObject.get(referencedCol).toString();
-				if (referencedValue.equals(table1Value)) {
-					JSONObject referencingObject = findTable2Value(mappingObject);
-					// System.out.println(table1DataObject+"###"+referencingObject);
-					referencingDataArray.add(referencingObject);
-				}
-			}
-			// System.out.println(referencingDataArray);
-			generateMappedDataArray(referencedTable, referencingTable, referencingCol, table1Value,
-					referencingDataArray);
-		}
-//		insertToMapped(referencedTable);
-		
-		System.out.println("embed result : " + mappedDataArray);
-	}
-
-	public void insertToMapped(String referencedCollection) {
-		JSONArray mappedData = (JSONArray) mapped.get("collections");
-		JSONObject object = new JSONObject();
-		for (int i = 0; i < mappedData.size(); i++) {
-			JSONObject mappedCollection = (JSONObject) mappedData.get(i);
-			String collectionName = mappedCollection.get("collectionName").toString();
-			if (referencedCollection.equals(collectionName)) {
-				object.put("collectionName", referencedCollection);
-				object.put("values", mappedDataArray);
-			}
-
-		}
-		// mappedData.add(object);
-		System.out.println("before" + mapped);
-		// mapped.put("collections", mappedData);
-		System.out.println("after" + mapped);
-		FileWriter file;
-		try {
-			file = new FileWriter("C:\\Users\\Lakshan1\\Desktop\\Resources\\mapped.json");
-			file.write(mapped.toJSONString());
-			file.flush();
-			file.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
+	
 	public void writeMappedJson(){
 		FileWriter file;
 		try {
@@ -352,48 +397,7 @@ public class ManyToMany {
 		}
 	}
 
-	public void generateMappedDataArray(String referencedCollection, String referencingTable, String referencingCol,
-			String referencingColData, JSONArray referencingDataArray) {
-		JSONArray mappedData = (JSONArray) mapped.get("collections");
-		// JSONArray array = new JSONArray();
-		for (int i = 0; i < mappedData.size(); i++) {
-			JSONObject mappedCollection = (JSONObject) mappedData.get(i);
-			String collectionName = mappedCollection.get("collectionName").toString();
-			if (referencedCollection.equals(collectionName)) {
-				JSONArray mappedValues = (JSONArray) mappedCollection.get("values");
-				for (int j = 0; j < mappedValues.size(); j++) {
-					JSONObject mappedDataObject = (JSONObject) mappedValues.get(j);
-					String mappedDataValue = (String) mappedDataObject.get(referencingCol);
-					if (mappedDataValue.equals(referencingColData)) {
-						mappedDataObject.put(referencingTable, referencingDataArray);
-						mappedDataArray.add(mappedDataObject);
-					}
-				}
-				// mappedCollection.put(referencingTable, referencingDataArray);
-			}
-
-		}
-
-	}
-
-	public JSONObject findTable2Value(JSONObject mappingObject) {
-
-		JSONObject table2 = ManyToManyResource.INSTANCE.getTable2();
-		JSONArray table2Data = (JSONArray) table2.get("data");
-		JSONObject table2MappingInfo = ManyToManyResource.INSTANCE.getTable2Info();
-		String referencingCol = table2MappingInfo.get("referencingCol").toString();
-		String referencedCol = table2MappingInfo.get("referencedCol").toString();
-		String referencedValue = mappingObject.get(referencedCol).toString();
-		for (Object object : table2Data) {
-			JSONObject table2DataObject = (JSONObject) object;
-			String table2Value = table2DataObject.get(referencingCol).toString();
-			if (referencedValue.equals(table2Value)) {
-				return table2DataObject;
-			}
-		}
-
-		return null;
-	}
+	
 
 	public boolean isTableMapped(JSONObject table) {
 		JSONArray array = (JSONArray) mapped.get("collections");
@@ -417,9 +421,40 @@ public class ManyToMany {
 		newCollection.put("values", collectionData);
 		JSONArray array = (JSONArray) mapped.get("collections");
 		array.add(newCollection);
+//		ManyToManyResource.INSTANCE.setTable1(newCollection);
 		mapped.put("collections", array);
+		
 		// System.out.println(mapped);
 
 	}
+	
+/*	public void insertToMapped(String referencedCollection) {
+		JSONArray mappedData = (JSONArray) mapped.get("collections");
+		JSONObject object = new JSONObject();
+		for (int i = 0; i < mappedData.size(); i++) {
+			JSONObject mappedCollection = (JSONObject) mappedData.get(i);
+			String collectionName = mappedCollection.get("collectionName").toString();
+			if (referencedCollection.equals(collectionName)) {
+//				object.put("collectionName", referencedCollection);
+//				object.put("values", mappedDataArray);
+			}
+
+		}
+		// mappedData.add(object);
+		System.out.println("before" + mapped);
+		// mapped.put("collections", mappedData);
+		System.out.println("after" + mapped);
+		FileWriter file;
+		try {
+			file = new FileWriter("C:\\Users\\Lakshan1\\Desktop\\Resources\\mapped.json");
+			file.write(mapped.toJSONString());
+			file.flush();
+			file.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}*/
 
 }
