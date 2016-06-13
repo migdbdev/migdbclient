@@ -1,7 +1,9 @@
 package org.migdb.migdbclient.main;
 
+import java.io.File;
 import java.io.IOException;
 
+import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.ImagePath;
 
@@ -22,6 +24,10 @@ public class MainApp extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) {
+		// Create application folder in a user's document
+		File migDB = new File(FilePath.DOCUMENT.getPath());
+		if(!migDB.exists()){ migDB.mkdir(); }
+		
 		this.primaryStage = primaryStage;
 		this.primaryStage.setTitle("MigDB");
 		this.primaryStage.getIcons().add(new Image(ImagePath.FAVICON.getPath()));
