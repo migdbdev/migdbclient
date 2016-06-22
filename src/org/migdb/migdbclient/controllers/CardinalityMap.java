@@ -12,15 +12,23 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.migdb.migdbclient.config.FilePath;
+import org.migdb.migdbclient.config.FxmlPath;
+import org.migdb.migdbclient.controllers.mapping.onetoone.OneToOneMap;
+import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.models.dao.MysqlDAO;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ReferenceDTO;
+import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ConnectionParameters;
+import org.migdb.migdbclient.resources.LayoutInstance;
 import org.migdb.migdbclient.resources.Session;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.layout.AnchorPane;
 
 /**
  * @author Kani
@@ -108,6 +116,19 @@ public class CardinalityMap {
 			}
 			MySQLParser mp = new MySQLParser();
 			mp.sqlParser();
+			SqliteDAO sDao = new SqliteDAO();
+			sDao.dropRelationshipTypes();
+			
+			AnchorPane root;
+			root = CenterLayout.INSTANCE.getRootContainer();
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(MainApp.class.getResource(FxmlPath.MODIFICATIONEVALUATOR.getPath()));
+			AnchorPane modificationEvaluator = loader.load();
+			root.getChildren().clear();
+			root.getChildren().add(modificationEvaluator);
+			
+			/*OneToOneMap om = new OneToOneMap();
+			om.oneToOneMapper();*/
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

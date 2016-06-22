@@ -1,7 +1,6 @@
 package org.migdb.migdbclient.controllers;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -14,8 +13,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.models.dao.MysqlDAO;
+import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ColumnsDTO;
 import org.migdb.migdbclient.models.dto.ReferenceDTO;
+import org.migdb.migdbclient.models.dto.RelationshiCardinalityDTO;
 import org.migdb.migdbclient.models.dto.TableDTO;
 import org.migdb.migdbclient.resources.ConnectionParameters;
 import org.migdb.migdbclient.resources.Session;
@@ -24,8 +25,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.google.gson.stream.JsonWriter;
 
 public class MySQLParser {
 	
@@ -47,6 +46,8 @@ public class MySQLParser {
 		
 		try {
 			MysqlDAO dao = new MysqlDAO();
+			SqliteDAO sDao = new SqliteDAO();
+			ArrayList<RelationshiCardinalityDTO> dto = sDao.getReferencedList();
 			ArrayList<TableDTO> arrTab = dao.getTables(host, port, database, username, password);
 			ArrayList<ColumnsDTO> arrCol = dao.getColumnsAccordingTable(host, port, database, username, password);
 			ArrayList<ReferenceDTO> arr = dao.getReferencedList(host, port, database, username, password);
@@ -112,7 +113,13 @@ public class MySQLParser {
 									referencingFromObj.put("referencedCol", dtoColumn.getCOLUMN_NAME());
 									referencingFromObj.put("referencedTab", dtoReference.getReferencedTableName());
 									referencingFromObj.put("referencingCol", dtoReference.getReferencedColumnName());
-									referencingFromObj.put("relationshipType", "----- Coming soon ----");
+									
+									for(RelationshiCardinalityDTO rDto : dto){
+										if(dtoReference.getReferencedTableName().equals(rDto.getREFERENCED_TABLE_NAME()) && dtoReference.getReferencedColumnName().equals(rDto.getREFERENCED_COLUMN_NAME()) && dtoTable.getTableName().equals(rDto.getTABLE_NAME()) && dtoColumn.getCOLUMN_NAME().equals(rDto.getCOLUMN_NAME())){
+											referencingFromObj.put("relationshipType",rDto.getRELATIONSHIP_TYPE());
+										}
+									}
+									
 									/*jw.name("referencedCol");
 									jw.value(dtoColumn.getCOLUMN_NAME());*/
 									/*jw.name("referencedTab");
@@ -147,7 +154,13 @@ public class MySQLParser {
 									referencedByObj.put("referencedCol", dtoColumn.getCOLUMN_NAME());
 									referencedByObj.put("referencingTab", dtoReference.getTableName());
 									referencedByObj.put("referencingCol", dtoReference.getColumnName());
-									referencedByObj.put("relationshipType", "----- Coming soon ----");
+									
+									for(RelationshiCardinalityDTO rDto : dto){
+										if(dtoReference.getTableName().equals(rDto.getTABLE_NAME()) && dtoReference.getColumnName().equals(rDto.getCOLUMN_NAME()) && dtoTable.getTableName().equals(rDto.getREFERENCED_TABLE_NAME()) && dtoColumn.getCOLUMN_NAME().equals(rDto.getREFERENCED_COLUMN_NAME())){
+											referencedByObj.put("relationshipType",rDto.getRELATIONSHIP_TYPE());
+										}
+									}
+									
 									/*jw.name("referencedCol");
 									jw.value(dtoColumn.getCOLUMN_NAME());*/
 									/*jw.name("referencingTab");

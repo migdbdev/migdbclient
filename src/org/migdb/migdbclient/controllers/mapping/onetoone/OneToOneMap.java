@@ -35,7 +35,7 @@ public class OneToOneMap {
 			JSONObject jsonObject = (JSONObject) obj;
 			JSONArray tableList = (JSONArray) jsonObject.get("tables");
 			Iterator<JSONObject> iterator = tableList.iterator();
-			JSONArray values = new JSONArray();
+			//JSONArray values = new JSONArray();
 
 			while (iterator.hasNext()) {
 				JSONObject tbl = (JSONObject) iterator.next();
@@ -51,7 +51,7 @@ public class OneToOneMap {
 					String referencingCol = (String) referencingObj.get("referencingCol");
 					String relationshipType = (String) referencingObj.get("relationshipType");
 
-					if (relationshipType.equals("OneToOne")) {
+					if (relationshipType.equals("1:1")) {
 						System.out.println("Table name : " + tbl.get("name"));
 						System.out.println("Referenced Column : " + referencedCol);
 						System.out.println("Referencing Table : " + referencingTab);
@@ -79,14 +79,14 @@ public class OneToOneMap {
 							}*/
 							getReturn.remove(referencingCol);
 							dataObj.put(referencingTab, getReturn);
-							values.add(dataObj);
-							/*System.out.println(dataObj);
-							System.out.println();*/
+							//values.add(dataObj);
+							System.out.println(dataObj);
+							System.out.println();
 						}
 
 						System.out.println();
-						JSONArray collections = new JSONArray();
-						JSONObject collectionObj = new JSONObject();
+						/*JSONArray collections = new JSONArray();
+						JSONObject collectionObj = new JSONObject();*/
 						
 						
 					}
@@ -105,7 +105,7 @@ public class OneToOneMap {
 		JSONParser parser2 = new JSONParser();
 		Object obj2;
 		try {
-			obj2 = parser2.parse(new FileReader("C:\\Users\\Kani\\Desktop\\Jsondbtest2.json"));
+			obj2 = parser2.parse(new FileReader(FilePath.DOCUMENT.getPath() + FilePath.DBSTRUCTUREFILE.getPath()));
 			JSONObject jsonObject = (JSONObject) obj2;
 			JSONArray tableList = (JSONArray) jsonObject.get("tables");
 			Iterator<JSONObject> iterator = tableList.iterator();
