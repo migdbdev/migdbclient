@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import org.migdb.migdbclient.controllers.dbconnector.SqliteDbConnManager;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
+import org.migdb.migdbclient.models.dto.ReferenceDTO;
 
 public class SqliteDAO {
 
@@ -104,6 +105,40 @@ public class SqliteDAO {
 			dbConnManager.closeConnection(dbConn);
 		}
 		return connectionInfo;
+	}
+	
+	public void createRelationshipTypes(){
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection();
+			String query = "CREATE TABLE IF NOT EXISTS `REFERENCEDLIST` (`TABLE_NAME` TEXT,`COLUMN_NAME` TEXT,`REFERENCED_TABLE_NAME` TEXT,`REFERENCED_COLUMN_NAME` TEXT, `RELATIONSHIP_TYPE` TEXT);";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
+	}
+	
+	public void insertRelationshipTypes(String tablesName, String columnName, String referencedTableName, String referencedColumnName, String relationshipType){
+		boolean result = false;
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection();
+			String query = "INSERT INTO REFERENCEDLIST(TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME, RELATIONSHIP_TYPE) VALUES(?,?,?,?,?)";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ps.setString(1, tablesName);
+			ps.setString(2, columnName);
+			ps.setString(3, referencedTableName);
+			ps.setString(4, referencedColumnName);
+			ps.setString(5, relationshipType);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
 	}
 
 }

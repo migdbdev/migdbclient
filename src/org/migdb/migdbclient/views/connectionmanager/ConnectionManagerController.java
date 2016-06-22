@@ -10,6 +10,7 @@ import org.controlsfx.glyphfont.Glyph;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.ImagePath;
 import org.migdb.migdbclient.controllers.DumpGenerator;
+import org.migdb.migdbclient.controllers.MigrationProcess;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.models.dao.MysqlDAO;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
@@ -191,7 +192,7 @@ public class ConnectionManagerController implements Initializable {
 
 	public void setSideBarDatabases() {
 		MysqlDAO dao = new MysqlDAO();
-		DumpGenerator obj = new DumpGenerator();
+		MigrationProcess migrationObj = new MigrationProcess();
 		String host = ConnectionParameters.SESSION.getMysqlHostName();
 		int port = ConnectionParameters.SESSION.getMysqlPort();
 		String database = "";
@@ -208,19 +209,25 @@ public class ConnectionManagerController implements Initializable {
 		TreeView<String> tree = new TreeView<String>(mysqlItem);
 		tree.setStyle("-fx-pref-width: 226;-fx-border-color: #336699");
 		// instantiate the root context menu
-        ContextMenu rootContextMenu
+        @SuppressWarnings("deprecation")
+		ContextMenu rootContextMenu
             = ContextMenuBuilder.create()
             .items(
                 MenuItemBuilder.create()
-                .text("Menu Item")
+                .text("Migrate")
                 .onAction(
                     new EventHandler<ActionEvent>()
                     {
                         @Override
                         public void handle(ActionEvent arg0)
                         {
-                            Session.INSTANCE.setActiveDB("dbtest");
-                            obj.generateDump();
+                            Session.INSTANCE.setActiveDB(tree.getSelectionModel().getSelectedItem().getValue());
+                            try {
+								migrationObj.initialize();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
                         }
                     }
                 )
