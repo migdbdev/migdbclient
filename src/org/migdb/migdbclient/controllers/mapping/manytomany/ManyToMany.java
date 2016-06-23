@@ -1,4 +1,4 @@
-package org.migdb.migdbclient.controllers.manytomany;
+package org.migdb.migdbclient.controllers.mapping.manytomany;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -9,6 +9,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.resources.ManyToManyResource;
 
 import com.mongodb.util.JSON;
@@ -30,9 +31,9 @@ public class ManyToMany {
 		Object obj;
 		Object obj1;
 		try {
-			obj = parser.parse(new FileReader("C:\\Users\\Lakshan1\\Desktop\\Resources\\jsonfromSQL.json"));
+			obj = parser.parse(new FileReader(FilePath.DOCUMENT.getPath() + FilePath.DBSTRUCTUREFILE.getPath()));
 			sqlJson = (JSONObject) obj;
-			obj1 = parser1.parse(new FileReader("C:\\Users\\Lakshan1\\Desktop\\Resources\\mapped.json"));
+			obj1 = parser1.parse(new FileReader(FilePath.DOCUMENT.getPath() + FilePath.COLLECTIONFILE.getPath()));
 			mapped = (JSONObject) obj1;
 		} catch (IOException | ParseException e) {
 			// TODO Auto-generated catch block
