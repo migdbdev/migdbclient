@@ -3,8 +3,6 @@
  */
 package org.migdb.migdbclient.controllers;
 
-import java.io.File;
-
 import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.resources.ConnectionParameters;
 import org.migdb.migdbclient.resources.Session;
@@ -18,7 +16,6 @@ public class DumpGenerator {
 	public void generateDump() {
 		// Returns the runtime object associated with the current Java
 		// application
-		Runtime rt = Runtime.getRuntime();
 		String path = FilePath.DOCUMENT.getPath() + FilePath.XMLPATH.getPath();
 		String database = Session.INSTANCE.getActiveDB();
 		String host = ConnectionParameters.SESSION.getMysqlHostName();

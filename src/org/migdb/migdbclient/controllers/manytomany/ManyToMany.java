@@ -134,8 +134,8 @@ public class ManyToMany {
 		JSONObject table1Response = null;
 		JSONObject table2Response = null;
 		JSONObject summary = new JSONObject();
-		summary.put("method", "reference");
-		summary.put("parent", "classes");
+		summary.put("method", "embed");
+		summary.put("parent", "employee");
 		return summary;
 	}
 	public void embed() {
@@ -185,7 +185,7 @@ public class ManyToMany {
 				JSONObject object = (JSONObject) array.get(i);
 				if (object.get("collectionName").equals(table.get("name"))) {
 					ManyToManyResource.INSTANCE.setTable2(object);
-					System.out.println("!!!!!"+object);
+//					System.out.println("!!!!!"+object);
 				}
 			}
 		}
