@@ -12,6 +12,7 @@
           <AnchorPane fx:id="modificationEvalAnchor" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="558.0" prefWidth="955.0" />
         </content>
       </ScrollPane>
-      <Button layoutX="855.0" layoutY="575.0" mnemonicParsing="false" onMouseClicked="#evaluate" text="Submit" />
+      <Button layoutX="793.0" layoutY="575.0" mnemonicParsing="false" onMouseClicked="#evaluate" text="Update" />
+      <Button fx:id="nextButton" layoutX="864.0" layoutY="575.0" mnemonicParsing="false" text="Next" />
    </children>
 </AnchorPane>

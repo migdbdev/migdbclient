@@ -1,5 +1,7 @@
 package org.migdb.migdbclient.controllers.manytomany;
 
+import org.migdb.migdbclient.controllers.mapping.manytomany.ManyToMany;
+
 public class MainManyToMany {
 
 	public static void main(String[] args) {
