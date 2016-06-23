@@ -26,6 +26,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 
@@ -38,6 +39,8 @@ public class MongoDataManager implements Initializable {
 	private ListView<String> databaseList;
 	@FXML
 	private AnchorPane rootAncPane;
+	@FXML
+	private Label databaseNameLabel;
 
 	private MongoDatabase db;
 	private String databaseName;
@@ -45,7 +48,6 @@ public class MongoDataManager implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
-		
 		/*
 		 * try { db = MongoConnManager.INSTANCE.connectToDatabase("test"); }
 		 * catch (Exception e) { // TODO Auto-generated catch block
@@ -109,9 +111,9 @@ public class MongoDataManager implements Initializable {
 		}
 
 	}
-	
+
 	@FXML
-	public void showCollectionManger(){
+	public void showCollectionManger() {
 		System.out.println(collectionList.getSelectionModel().getSelectedItem());
 		AnchorPane root;
 		root = CenterLayout.INSTANCE.getRootContainer();
@@ -120,8 +122,9 @@ public class MongoDataManager implements Initializable {
 		AnchorPane mongoCollectionManagerAncPane;
 		try {
 			mongoCollectionManagerAncPane = loader.load();
-			CollectionManager collectionManager = (CollectionManager)loader.getController();
-			collectionManager.setCollection(collectionList.getSelectionModel().getSelectedItem());
+			CollectionManager collectionManager = (CollectionManager) loader.getController();
+			String st = collectionList.getSelectionModel().getSelectedItem();
+			collectionManager.setCollection(st.substring(0, st.indexOf(' ')));
 			root.getChildren().clear();
 			root.getChildren().add(mongoCollectionManagerAncPane);
 		} catch (IOException e) {
@@ -133,11 +136,14 @@ public class MongoDataManager implements Initializable {
 
 	private ObservableList<String> getCollectionsOf(String dbName) throws Exception {
 		ObservableList<String> list = FXCollections.observableArrayList();
-		;
+		databaseNameLabel.setText(dbName);
 		MongoDatabase db = MongoConnManager.INSTANCE.connectToDatabase(dbName);
 		MongoCursor<String> cursor = db.listCollectionNames().iterator();
 		while (cursor.hasNext()) {
-			list.add(cursor.next());
+			String st = cursor.next();
+			MongoCollection<Document> collection = db.getCollection(st);
+			int count = (int) collection.count();
+			list.add(st + "   (" + count + " Documents)");
 		}
 		System.out.println(list);
 		return list;
