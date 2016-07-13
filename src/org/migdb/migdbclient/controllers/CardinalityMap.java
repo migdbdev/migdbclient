@@ -93,17 +93,17 @@ public class CardinalityMap {
 							Set<String> set = new HashSet<String>(columnValue);
 							
 							if (set.size() < columnValue.size()) {
-								relationshipType = "1:M";
+								relationshipType = "OneToMany";
 								for(ReferenceDTO dtos : manytomanytables) {
 									if(dto.getTableName().equals(dtos.getTableName()) 
 											&& dto.getColumnName().equals(dtos.getColumnName()) 
 											&& dto.getReferencedTableName().equals(dtos.getReferencedTableName()) 
 											&& dto.getReferencedColumnName().equals(dtos.getReferencedColumnName())){
-										relationshipType = "M:M";
+										relationshipType = "ManyToMany";
 									}
 								}
 							} else {
-								relationshipType = "1:1";
+								relationshipType = "OneToOne";
 							}
 							
 							SqliteDAO sqliteDao = new SqliteDAO();
