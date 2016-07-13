@@ -7,6 +7,8 @@ import java.util.ArrayList;
 
 import org.migdb.migdbclient.controllers.dbconnector.SqliteDbConnManager;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
+import org.migdb.migdbclient.models.dto.ReferenceDTO;
+import org.migdb.migdbclient.models.dto.RelationshiCardinalityDTO;
 
 public class SqliteDAO {
 
@@ -104,6 +106,80 @@ public class SqliteDAO {
 			dbConnManager.closeConnection(dbConn);
 		}
 		return connectionInfo;
+	}
+	
+	public void createRelationshipTypes(){
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection();
+			String query = "CREATE TABLE IF NOT EXISTS REFERENCEDLIST (`TABLE_NAME` TEXT,`COLUMN_NAME` TEXT,`REFERENCED_TABLE_NAME` TEXT,`REFERENCED_COLUMN_NAME` TEXT, `RELATIONSHIP_TYPE` TEXT);";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
+	}
+	
+	public void insertRelationshipTypes(String tablesName, String columnName, String referencedTableName, String referencedColumnName, String relationshipType){
+		boolean result = false;
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection();
+			String query = "INSERT INTO REFERENCEDLIST(TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME, RELATIONSHIP_TYPE) VALUES(?,?,?,?,?)";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ps.setString(1, tablesName);
+			ps.setString(2, columnName);
+			ps.setString(3, referencedTableName);
+			ps.setString(4, referencedColumnName);
+			ps.setString(5, relationshipType);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
+	}
+	
+	public void dropRelationshipTypes(){
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection();
+			String query = "DROP TABLE REFERENCEDLIST";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
+	}
+	
+	public ArrayList<RelationshiCardinalityDTO> getReferencedList() {
+		ArrayList<RelationshiCardinalityDTO> references = null;
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection();
+			String query = "SELECT * FROM REFERENCEDLIST";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ResultSet rs = ps.executeQuery();
+			references = new ArrayList<RelationshiCardinalityDTO>();
+			while (rs.next()) {
+				RelationshiCardinalityDTO dto = new RelationshiCardinalityDTO();
+				dto.setCOLUMN_NAME(rs.getString("COLUMN_NAME"));
+				dto.setREFERENCED_COLUMN_NAME(rs.getString("REFERENCED_COLUMN_NAME"));
+				dto.setREFERENCED_TABLE_NAME(rs.getString("REFERENCED_TABLE_NAME"));
+				dto.setRELATIONSHIP_TYPE(rs.getString("RELATIONSHIP_TYPE"));
+				dto.setTABLE_NAME(rs.getString("TABLE_NAME"));
+				references.add(dto);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
+		return references;
 	}
 
 }

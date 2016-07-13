@@ -1,22 +1,21 @@
 package org.migdb.migdbclient.views.mongodatamanager;
 
-import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.apache.commons.collections.iterators.IteratorEnumeration;
+import javax.management.openmbean.KeyAlreadyExistsException;
+
 import org.bson.Document;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.migdb.migdbclient.config.TreeviewSize;
-import org.migdb.migdbclient.models.modificationevaluator.TableReference;
+import org.migdb.migdbclient.config.FxmlPath;
+import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.DatabaseResource;
 import org.migdb.migdbclient.tablegen.CustomCellFactory;
@@ -25,24 +24,22 @@ import org.migdb.migdbclient.tablegen.TableBean;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
-import com.twitter.conversions.string;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.control.CheckBoxTreeItem;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TreeView;
-import javafx.scene.control.cell.CheckBoxTreeCell;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 
 public class CollectionManager implements Initializable {
 
@@ -50,6 +47,16 @@ public class CollectionManager implements Initializable {
 	private AnchorPane collectionAncPane;
 	@FXML
 	private TableView<TableBean> collectionTable;
+	@FXML
+	private Label collectionNameLabel;
+	@FXML
+	private Label collectionCountLabel;
+	@FXML
+	private Button backButton;
+	@FXML
+	private Button insertNewDocButton;
+	MongoCollection<Document> collection;
+
 	private String collectionName;
 	private MongoDatabase db;
 
@@ -59,144 +66,25 @@ public class CollectionManager implements Initializable {
 
 	}
 
-	private void generateTreeView() {
-
-		try {
-
-			JSONParser parser = new JSONParser();
-			Object obj = parser.parse(new FileReader("C:\\Users\\Malki\\Desktop\\research\\json.txt"));
-			JSONObject jsonObject = (JSONObject) obj;
-
-			JSONArray tableList = (JSONArray) jsonObject.get("tables");
-
-			Iterator<JSONObject> iterator = tableList.iterator();
-			double x = 10;
-			double y = 10;
-
-			ArrayList<TableReference> fkArr = new ArrayList<TableReference>();
-
-			ArrayList<Line> lineArr = new ArrayList<>();
-
-			while (iterator.hasNext()) {
-				JSONObject tbl = (JSONObject) iterator.next();
-				String name = (String) tbl.get("name");
-
-				CheckBoxTreeItem<String> root = new CheckBoxTreeItem<String>(name);
-				root.setExpanded(true);
-
-				JSONArray columnList = (JSONArray) tbl.get("columns");
-				Iterator<JSONObject> cols = columnList.iterator();
-				JSONArray refColumnList = (JSONArray) tbl.get("referencedBy");
-
-				if (refColumnList != null) {
-					Iterator<JSONObject> refCols = refColumnList.iterator();
-
-					while (refCols.hasNext()) {
-						JSONObject ref = (JSONObject) refCols.next();
-						String referencedCol = (String) ref.get("referencedCol");
-						String referencingTbl = (String) ref.get("referencingTab");
-						String referencingCol = (String) ref.get("referencingCol");
-						String relationship = (String) ref.get("relationshipType");
-
-						TableReference reference = new TableReference(name, referencedCol, referencingTbl,
-								referencingCol, relationship);
-						fkArr.add(reference);
-					}
-				}
-
-				while (cols.hasNext()) {
-					String colName = (String) cols.next().get("colName");
-					CheckBoxTreeItem<String> column = new CheckBoxTreeItem<String>(colName);
-					column.setGraphic(new Label(""));
-					root.getChildren().add(column);
-
-					if (refColumnList != null) {
-						if (fkArr.contains(colName)) {
-							System.out.println(colName);
-						}
-					}
-				}
-
-				TreeView<String> treeView = new TreeView<String>(root);
-				treeView.setEditable(true);
-				treeView.setCellFactory(CheckBoxTreeCell.forTreeView());
-
-				treeView.setMaxHeight(TreeviewSize.TREEVIEWHEIGHT.getSize());
-				treeView.setMaxWidth(TreeviewSize.TREEVIEWIDTH.getSize());
-				treeView.setLayoutX(x);
-				treeView.setLayoutY(y);
-
-				collectionAncPane.getChildren().add(treeView);
-
-				/*
-				 * System.out.println("Current Parent :" + root.getValue());
-				 * for(TreeItem<String> child: root.getChildren()){
-				 * if(child.getChildren().isEmpty()){
-				 * child.getGraphic().getLayoutX();
-				 * System.out.println(child.getGraphic().getBoundsInLocal()); }
-				 * }
-				 */
-
-				x = x + (TreeviewSize.TREEVIEWHEIGHT.getSize());
-			}
-
-			ArrayList<Line> lines = new ArrayList<>();
-			for (TableReference ref : fkArr) {
-				String referencedTab = ref.getReferencedTab();
-				String referencingTab = ref.getReferencingTab();
-				System.out.println(referencedTab + " " + referencingTab);
-				Line line = new Line();
-
-				for (Node tbl : collectionAncPane.getChildren()) {
-					TreeView<String> tree = (TreeView) tbl;
-					String tableName = tree.getRoot().getValue().toString();
-					System.out.println(tableName);
-					if (tableName.equals(referencedTab)) {
-						line.setStartX(tree.getLayoutX() + tree.getMaxWidth());
-						line.setStartY(tree.getLayoutY() + (tree.getMaxHeight() / 2));
-					}
-					if (tableName.equals(referencingTab)) {
-						line.setEndX(tree.getLayoutX());
-						line.setEndY(tree.getLayoutY());
-					}
-
-					// for(TreeItem col: tbl.getC)
-				}
-
-				line.setStrokeWidth(2);
-				line.setStroke(Color.BLACK);
-
-				lines.add(line);
-			}
-
-			for (Line line : lines) {
-				collectionAncPane.getChildren().add(line);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	@FXML
 	public void setCollection(String collectionName) {
-		MongoCollection<Document> collection = db.getCollection(collectionName);
 		this.collectionName = collectionName;
+		collection = db.getCollection(collectionName);
+		collectionNameLabel.setText(collectionName);
+		long documentCount = collection.count();
+		collectionCountLabel.setText("returned " + documentCount + " documents");
 
-	
-		System.out.println(collectionName);
+		// System.out.println(collectionName);
 
 		List<Document> foundDocument = collection.find().into(new ArrayList<Document>());
 
 		Document document = collection.find().first();
-		System.out.println(document.toJson());
+		// System.out.println(document.toJson());
 		JSONObject jsonObject = new JSONObject(document);
 
-		System.out.println("aaaaaaaaaaa" + jsonObject);
-		System.out.println(document.keySet().toString());
-		setTable(foundDocument, document.keySet());
-		getCommonColumns(foundDocument);
+		// System.out.println("aaaaaaaaaaa" + jsonObject);
+		// System.out.println(document.keySet().toString());
+		
+		setTable(foundDocument, getCommonColumns(foundDocument));
 
 	}
 
@@ -221,14 +109,36 @@ public class CollectionManager implements Initializable {
 		// System.out.println(commonColumns);
 		Set<String> set = null;
 		Iterator<?> keys = commonColumns.keySet().iterator();
+		int[] arr = new int[commonColumns.keySet().size()];
+		int cnt = 0;
 		while (keys.hasNext()) {
-			System.out.println(commonColumns.get(keys.next()));
+			// System.out.println(commonColumns.get(keys.next()));
+			arr[cnt++] = Integer.parseInt(commonColumns.get(keys.next()).toString());
 		}
-		return set;
+		for (int i = 0; i < arr.length; i++) {
+
+			System.out.println(arr[i]);
+		}
+		Document commonDoc = new Document();
+		int commonCount = getMostPopularElement(arr);
+		Iterator<?> keyset = commonColumns.keySet().iterator();
+		while (keyset.hasNext()) {
+			Object key = keyset.next();
+			String st = commonColumns.get(key).toString();
+			int value = Integer.parseInt(st);
+			if (value == commonCount) {
+				commonDoc.append((String) key, value);
+			}
+
+		}
+		System.out.println(commonDoc);
+
+		return commonDoc.keySet();
 	}
 
 	public void setTable(List<Document> documents, Set<String> keySet) {
 
+		double tableWidth = 0;
 		for (String col : keySet) {
 			TableColumn<TableBean, String> column = new TableColumn<>();
 			column.setCellValueFactory(new CustomCellFactory<TableBean, String>(col));
@@ -248,16 +158,103 @@ public class CollectionManager implements Initializable {
 			tableList.add(bean);
 		}
 
+		collectionTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 		collectionTable.getItems().addAll(tableList);
+		collectionTable.getColumns().stream().forEach(cell -> {
+			// System.out.println("width " + cell.getPrefWidth());
+		});
+		// collectionTable.setPrefWidth(tableWidth);
 
 	}
+
 	@FXML
-	public void deleteDocument(){
-//		SimpleStringProperty st = (SimpleStringProperty) collectionTable.getSelectionModel().getSelectedItem().getCellValue("_id");
-//		String selectedId = st.getValue();
-//		DeleteResult result = db.getCollection(collectionName).deleteMany(new Document("_id", selectedId));
-//		System.out.println(result.toString());
-		
+	public void deleteDocument() {
+		SimpleStringProperty st = (SimpleStringProperty) collectionTable.getSelectionModel().getSelectedItem()
+				.getCellValue("_id");
+		String selectedId = st.getValue();
+		int selectedIndex = collectionTable.getSelectionModel().getSelectedIndex();
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Confirmation");
+		alert.setHeaderText("Delete Document");
+		alert.setContentText(
+				"Command = db." + collectionName + ".deleteMany({ _id : \"" + selectedId + "\" })\n Are you sure?");
+
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.get() == ButtonType.OK) {
+			// ... user chose OK
+			DeleteResult MongoResult = db.getCollection(collectionName).deleteMany(new Document("_id", selectedId));
+			collectionTable.getItems().remove(selectedIndex);
+			// System.out.println(MongoResult.toString());
+		} else {
+			// ... user chose CANCEL or closed the dialog
+		}
+
+	}
+
+	@FXML
+	public void showDocument() {
+		SimpleStringProperty st = (SimpleStringProperty) collectionTable.getSelectionModel().getSelectedItem()
+				.getCellValue("_id");
+		String selectedId = st.getValue();
+		AnchorPane root;
+		root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.DOCUMENTMANAGER.getPath()));
+		AnchorPane documentManagerAncPane;
+		try {
+			documentManagerAncPane = loader.load();
+			DocumentManager documentManager = (DocumentManager) loader.getController();
+			documentManager.setDocument(collection, collectionName, selectedId);
+			root.getChildren().clear();
+			root.getChildren().add(documentManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@FXML
+	public void showMongoDataManager() throws Exception {
+		AnchorPane root;
+		root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.DATAMANAGER.getPath()));
+		AnchorPane mongoDataManagerAncPane;
+		try {
+			mongoDataManagerAncPane = loader.load();
+			MongoDataManager dataManager = (MongoDataManager) loader.getController();
+			dataManager.setDatabase(DatabaseResource.INSTANCE.getDatabaseName());
+			root.getChildren().clear();
+			root.getChildren().add(mongoDataManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	@FXML
+	public void insertNewDocument() {
+
+	}
+
+	private static int getMostPopularElement(int[] a) {
+		int maxElementIndex = getArrayMaximumElementIndex(a);
+		int[] b = new int[a[maxElementIndex] + 1];
+		for (int i = 0; i < a.length; i++) {
+			++b[a[i]];
+		}
+		return getArrayMaximumElementIndex(b);
+	}
+
+	private static int getArrayMaximumElementIndex(int[] a) {
+		int maxElementIndex = 0;
+		for (int i = 1; i < a.length; i++) {
+			if (a[i] >= a[maxElementIndex]) {
+				maxElementIndex = i;
+			}
+		}
+		return maxElementIndex;
 	}
 
 }

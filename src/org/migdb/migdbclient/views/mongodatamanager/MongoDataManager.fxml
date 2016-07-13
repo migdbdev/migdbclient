@@ -7,9 +7,9 @@
 
 <AnchorPane fx:id="rootAncPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="973.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.mongodatamanager.MongoDataManager">
    <children>
-      <Label layoutX="22.0" layoutY="30.0" prefHeight="17.0" prefWidth="252.0" text="Mongo DB Collections" />
+      <Label layoutX="22.0" layoutY="81.0" prefHeight="17.0" prefWidth="252.0" text="Collections" />
       <Button fx:id="btnTest" layoutX="22.0" layoutY="445.0" mnemonicParsing="false" onAction="#display" text="Button" />
-      <ListView fx:id="collectionList" layoutX="22.0" layoutY="47.0" prefHeight="241.0" prefWidth="252.0">
+      <ListView fx:id="collectionList" layoutX="24.0" layoutY="107.0" prefHeight="309.0" prefWidth="490.0">
          <contextMenu>
             <ContextMenu>
               <items>
@@ -17,6 +17,7 @@
               </items>
             </ContextMenu>
          </contextMenu></ListView>
-      <ListView fx:id="databaseList" layoutX="344.0" layoutY="47.0" prefHeight="200.0" prefWidth="200.0" />
+      <Label layoutX="24.0" layoutY="43.0" text="Database" />
+      <Label fx:id="databaseNameLabel" layoutX="81.0" layoutY="43.0" text="Label" />
    </children>
 </AnchorPane>

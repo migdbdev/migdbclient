@@ -14,8 +14,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.config.TreeviewSize;
+import org.migdb.migdbclient.controllers.mapping.manytomany.ManyToMany;
+import org.migdb.migdbclient.controllers.mapping.onetomany.OneToManyMapper;
 import org.migdb.migdbclient.models.modificationevaluator.TableReference;
+import org.migdb.migdbclient.resources.CenterLayout;
+import org.migdb.migdbclient.resources.LayoutInstance;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -23,10 +28,12 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.CheckBoxTreeCell;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -37,6 +44,7 @@ public class ModificationEvaluator {
 	private AnchorPane modificationEvalAnchor;
 	@FXML
 	private ScrollPane modificationEvalScroll;
+	@FXML Button nextButton;
 
 	JSONArray tableList = new JSONArray();
 	ArrayList<TableReference> fkArr = new ArrayList<TableReference>();
@@ -47,7 +55,7 @@ public class ModificationEvaluator {
 	JSONParser parser = new JSONParser();
 	Object obj;
 	JSONObject jsonObject;
-	File file = new File("C:\\Users\\Malki\\Desktop\\research\\data.json");
+	File file = new File(FilePath.DOCUMENT.getPath() + FilePath.DBSTRUCTUREFILE.getPath());
 
 	@FXML
 	private void initialize() {
@@ -60,6 +68,20 @@ public class ModificationEvaluator {
 		}
 
 		generateTreeView();
+		
+		nextButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent mouseevent) {
+				AnchorPane root;
+				root = CenterLayout.INSTANCE.getRootContainer();
+				root.getChildren().clear();
+				
+				OneToManyMapper omObj = new OneToManyMapper();
+				omObj.mapOneToMany();
+				
+				ManyToMany many = new ManyToMany();
+				many.identifyM2M();
+			}
+		});
 
 	}
 
@@ -224,7 +246,7 @@ public class ModificationEvaluator {
 	@FXML
 	private void evaluate() {
 		try {
-			File jsonFile = new File("C:\\Users\\Malki\\Desktop\\research\\deletedData.json");
+			File jsonFile = new File(FilePath.DOCUMENT.getPath() + FilePath.DELETEDITEMFILE.getPath());
 			boolean exist = jsonFile.exists();
 			int errorCount = 0;
 			String message = "";

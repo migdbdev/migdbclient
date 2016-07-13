@@ -7,7 +7,9 @@ public enum FxmlPath {
 	MODIFICATIONEVALUATOR("/org/migdb/migdbclient/views/modificationevaluator/ModificationEvaluator.fxml"),
 	DATAMANAGER("/org/migdb/migdbclient/views/mongodatamanager/MongoDataManager.fxml"),
 	NEWDBCONNECTION("/org/migdb/migdbclient/views/connectionmanager/NewDBConnection.fxml"),
-	COLLECTIONMANAGER("/org/migdb/migdbclient/views/mongodatamanager/CollectionManager.fxml");
+	COLLECTIONMANAGER("/org/migdb/migdbclient/views/mongodatamanager/CollectionManager.fxml"),
+	DOCUMENTMANAGER("/org/migdb/migdbclient/views/mongodatamanager/DocumentManager.fxml"),
+	MANYTOMANYSELECTOR("/org/migdb/migdbclient/views/cardinalityselector/ManyToManySelector.fxml");
 	
 	private String path;
 	
