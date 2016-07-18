@@ -61,35 +61,38 @@ public class MysqlDAO {
 		}
 		return tables;
 	}
-	
-	public String getPrimaryKey(String host, int port, String database, String username, String password, String table) {
+
+	public String getPrimaryKey(String host, int port, String database, String username, String password,
+			String table) {
 		String primaryField = null;
 		Connection dbConn = null;
 		try {
 			dbConn = dbConnManager.getConnection(host, port, database, username, password);
-			String query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+table+"' AND COLUMN_KEY = 'PRI'";
+			String query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + table
+					+ "' AND COLUMN_KEY = 'PRI'";
 			PreparedStatement ps = dbConn.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				primaryField = rs.getString(1);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally{
+		} finally {
 			dbConnManager.closeConnection(dbConn);
 		}
 		return primaryField;
 	}
-	
-	public int getColumnCount(String host, int port, String database, String username, String password, String table){
+
+	public int getColumnCount(String host, int port, String database, String username, String password, String table) {
 		int count = 0;
 		Connection dbConn = null;
 		try {
 			dbConn = dbConnManager.getConnection(host, port, database, username, password);
-			String query = "SELECT COUNT(COLUMN_NAME) FROM INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"+table+"'";
+			String query = "SELECT COUNT(COLUMN_NAME) FROM INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '" + table
+					+ "'";
 			PreparedStatement ps = dbConn.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				count = rs.getInt(1);
 			}
 		} catch (Exception e) {
@@ -99,17 +102,19 @@ public class MysqlDAO {
 		}
 		return count;
 	}
-	
-	public ArrayList<RelationshiptypeDTO> getRelationshipType(String host, int port, String database, String username, String password, String table){
+
+	public ArrayList<RelationshiptypeDTO> getRelationshipType(String host, int port, String database, String username,
+			String password, String table) {
 		ArrayList<RelationshiptypeDTO> type = null;
 		Connection dbConn = null;
 		try {
 			dbConn = dbConnManager.getConnection(host, port, database, username, password);
-			String query = "select INFORMATION_SCHEMA.COLUMNS.COLUMN_KEY, INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME, INFORMATION_SCHEMA.COLUMNS.TABLE_NAME from INFORMATION_SCHEMA.COLUMNS join INFORMATION_SCHEMA.KEY_COLUMN_USAGE on INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME=INFORMATION_SCHEMA.KEY_COLUMN_USAGE.COLUMN_NAME where INFORMATION_SCHEMA.KEY_COLUMN_USAGE.TABLE_NAME= '"+table+"' and referenced_table_name is not null";
+			String query = "select INFORMATION_SCHEMA.COLUMNS.COLUMN_KEY, INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME, INFORMATION_SCHEMA.COLUMNS.TABLE_NAME from INFORMATION_SCHEMA.COLUMNS join INFORMATION_SCHEMA.KEY_COLUMN_USAGE on INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME=INFORMATION_SCHEMA.KEY_COLUMN_USAGE.COLUMN_NAME where INFORMATION_SCHEMA.KEY_COLUMN_USAGE.TABLE_NAME= '"
+					+ table + "' and referenced_table_name is not null";
 			PreparedStatement ps = dbConn.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
 			type = new ArrayList<RelationshiptypeDTO>();
-			while(rs.next()){
+			while (rs.next()) {
 				RelationshiptypeDTO dto = new RelationshiptypeDTO();
 				dto.setCOLUMN_KEY(rs.getString(1));
 				dto.setCOLUMN_NAME(rs.getString(2));
@@ -120,23 +125,22 @@ public class MysqlDAO {
 		} finally {
 			dbConnManager.closeConnection(dbConn);
 		}
-		
+
 		return type;
 	}
-	
-	public ArrayList<ColumnsDTO> getColumnsAccordingTable(String host, int port, String database, String username, String password){
+
+	public ArrayList<ColumnsDTO> getColumnsAccordingTable(String host, int port, String database, String username,
+			String password) {
 		ArrayList<ColumnsDTO> columns = null;
 		Connection dbConn = null;
 		try {
 			dbConn = dbConnManager.getConnection(host, port, database, username, password);
-			String query = "SELECT * "
-					+ "FROM INFORMATION_SCHEMA.COLUMNS "
-					+ "WHERE TABLE_SCHEMA = SCHEMA() "
+			String query = "SELECT * " + "FROM INFORMATION_SCHEMA.COLUMNS " + "WHERE TABLE_SCHEMA = SCHEMA() "
 					+ "ORDER BY TABLE_NAME,ORDINAL_POSITION";
 			PreparedStatement ps = dbConn.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
 			columns = new ArrayList<ColumnsDTO>();
-			while(rs.next()){
+			while (rs.next()) {
 				ColumnsDTO dto = new ColumnsDTO();
 				dto.setCOLUMN_KEY(rs.getString("COLUMN_KEY"));
 				dto.setCOLUMN_NAME(rs.getString("COLUMN_NAME"));
@@ -183,6 +187,71 @@ public class MysqlDAO {
 			dbConnManager.closeConnection(dbConn);
 		}
 		return references;
+	}
+
+	/**
+	 * Get most frequently available values
+	 * from the database as a descending order
+	 * @param host
+	 * @param port
+	 * @param database
+	 * @param username
+	 * @param password
+	 * @param table
+	 * @param column
+	 * @return
+	 */
+	public ArrayList<String> getMostFrequentValues(String host, int port, String database, String username,
+			String password, String table, String column) {
+		ArrayList<String> frequentObject = new ArrayList<String>();
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection(host, port, database, username, password);
+			String query = "SELECT " + column + " FROM " + table + " GROUP BY " + column + " ORDER BY COUNT(" + column
+					+ ") desc";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				frequentObject.add(rs.getString(column));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
+		return frequentObject;
+	}
+
+	/**
+	 * Get distinct object count
+	 * @param host
+	 * @param port
+	 * @param database
+	 * @param username
+	 * @param password
+	 * @param table
+	 * @param criteriaCol
+	 * @param countedCol
+	 * @param criteriaVal
+	 * @return
+	 */
+	public int getDistinctObjCount(String host, int port, String database, String username, String password, String table, String criteriaCol,String countedCol,String criteriaVal){
+		int countObject = 0;
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection(host, port, database, username, password);
+			String query = "SELECT COUNT(DISTINCT "+countedCol+") FROM "+table+" WHERE "+criteriaCol+"='"+criteriaVal+"'";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ResultSet rs = ps.executeQuery();
+			if(rs.next()){
+				countObject = rs.getInt(1);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
+		return countObject;
 	}
 
 }
