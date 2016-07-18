@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.commons.io.FileUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -27,6 +28,10 @@ public class OneToOneMap {
 		JSONParser parser = new JSONParser();
 
 		Object obj;
+		JSONObject dataObj;
+		JSONArray collectionArray = new JSONArray();
+		JSONObject collectionObject = new JSONObject();
+		String collectionName = null;
 
 		try {
 
@@ -35,6 +40,8 @@ public class OneToOneMap {
 			JSONObject jsonObject = (JSONObject) obj;
 			JSONArray tableList = (JSONArray) jsonObject.get("tables");
 			Iterator<JSONObject> iterator = tableList.iterator();
+			JSONObject valueObject = new JSONObject();
+			JSONArray valueArray = new JSONArray();
 			//JSONArray values = new JSONArray();
 
 			while (iterator.hasNext()) {
@@ -52,16 +59,17 @@ public class OneToOneMap {
 					String relationshipType = (String) referencingObj.get("relationshipType");
 
 					if (relationshipType.equals("OneToOne")) {
-						System.out.println("Table name : " + tbl.get("name"));
+						/*System.out.println("Table name : " + tbl.get("name"));
 						System.out.println("Referenced Column : " + referencedCol);
 						System.out.println("Referencing Table : " + referencingTab);
 						System.out.println("Referencing Column : " + referencingCol);
-						System.out.println("Relationship Type : " + relationshipType);
+						System.out.println("Relationship Type : " + relationshipType);*/
+						collectionName = (String) tbl.get("name");
 
 						JSONArray data = (JSONArray) tbl.get("data");
 						Iterator<JSONObject> iterateData = data.iterator();
 						while (iterateData.hasNext()) {
-							JSONObject dataObj = iterateData.next();
+							dataObj = iterateData.next();
 							String column = (String) dataObj.get(referencedCol);
 							JSONObject getReturn = getReferencedBy(referencingTab, referencingCol, column);
 							
@@ -80,11 +88,12 @@ public class OneToOneMap {
 							getReturn.remove(referencingCol);
 							dataObj.put(referencingTab, getReturn);
 							//values.add(dataObj);
-							System.out.println(dataObj);
-							System.out.println();
+							/*System.out.println(dataObj);*/
+							valueArray.add(dataObj);
+							/*System.out.println();*/
 						}
 
-						System.out.println();
+						/*System.out.println();*/
 						/*JSONArray collections = new JSONArray();
 						JSONObject collectionObj = new JSONObject();*/
 						
@@ -92,6 +101,14 @@ public class OneToOneMap {
 					}
 				}
 			}
+			
+			valueObject.put("values", valueArray);
+			valueObject.put("collectionName", collectionName);
+			collectionArray.add(valueObject);
+			collectionObject.put("collections", collectionArray);
+			JSONObject json = new JSONObject();
+			String updatedson = json.toJSONString(collectionObject);
+			FileUtils.writeStringToFile(collectionFile, updatedson);
 
 		} catch (Exception e) {
 			e.printStackTrace();
