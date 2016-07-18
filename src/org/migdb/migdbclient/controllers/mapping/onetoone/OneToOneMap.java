@@ -51,7 +51,7 @@ public class OneToOneMap {
 					String referencingCol = (String) referencingObj.get("referencingCol");
 					String relationshipType = (String) referencingObj.get("relationshipType");
 
-					if (relationshipType.equals("1:1")) {
+					if (relationshipType.equals("OneToOne")) {
 						System.out.println("Table name : " + tbl.get("name"));
 						System.out.println("Referenced Column : " + referencedCol);
 						System.out.println("Referencing Table : " + referencingTab);

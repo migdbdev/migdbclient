@@ -18,6 +18,7 @@ import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.config.TreeviewSize;
 import org.migdb.migdbclient.controllers.mapping.manytomany.ManyToMany;
 import org.migdb.migdbclient.controllers.mapping.onetomany.OneToManyMapper;
+import org.migdb.migdbclient.controllers.mapping.onetoone.OneToOneMap;
 import org.migdb.migdbclient.models.modificationevaluator.TableReference;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.LayoutInstance;
@@ -75,11 +76,14 @@ public class ModificationEvaluator {
 				root = CenterLayout.INSTANCE.getRootContainer();
 				root.getChildren().clear();
 				
-				OneToManyMapper omObj = new OneToManyMapper();
+				OneToOneMap ooObj = new OneToOneMap();
+				ooObj.oneToOneMapper();
+				
+				/*OneToManyMapper omObj = new OneToManyMapper();
 				omObj.mapOneToMany();
 				
 				ManyToMany many = new ManyToMany();
-				many.identifyM2M();
+				many.identifyM2M();*/
 			}
 		});
 
