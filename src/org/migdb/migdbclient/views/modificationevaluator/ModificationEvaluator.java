@@ -79,11 +79,11 @@ public class ModificationEvaluator {
 				OneToOneMap ooObj = new OneToOneMap();
 				ooObj.oneToOneMapper();
 				
-				/*OneToManyMapper omObj = new OneToManyMapper();
+				OneToManyMapper omObj = new OneToManyMapper();
 				omObj.mapOneToMany();
 				
 				ManyToMany many = new ManyToMany();
-				many.identifyM2M();*/
+				many.identifyM2M();
 			}
 		});
 
