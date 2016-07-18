@@ -42,6 +42,8 @@ public class RootLayoutController implements Initializable {
 	@FXML
 	private Label modificationEvaluatorLabel;
 	@FXML
+	private Label queryConverterLabel;
+	@FXML
 	private ListView<String> mongoDatabaseList;
 	@FXML
 	private ContextMenu mongoDatabaseContextMenu;
@@ -86,6 +88,13 @@ public class RootLayoutController implements Initializable {
 		modificationEvaluatorLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
 				showModificationEvaluator();
+			}
+		});
+		
+		// Connection manager navigation label click event
+		queryConverterLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent mouseevent) {
+				showQueryConverter();
 			}
 		});
 	}
@@ -140,6 +149,24 @@ public class RootLayoutController implements Initializable {
 			AnchorPane dataManager = loader.load();
 			root.getChildren().clear();
 			root.getChildren().add(dataManager);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Method for add query converter layout to the root container anchor pane
+	 */
+	public void showQueryConverter() {
+		try {
+			AnchorPane root;
+			root = CenterLayout.INSTANCE.getRootContainer();
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(MainApp.class.getResource(FxmlPath.QUERYCONVERTER.getPath()));
+			AnchorPane queryConverter = loader.load();
+			root.getChildren().clear();
+			root.getChildren().add(queryConverter);
 
 		} catch (Exception e) {
 			e.printStackTrace();
