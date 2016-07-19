@@ -27,16 +27,16 @@ public class MigrationProcess {
 		DumpGenerator obj = new DumpGenerator();
 		obj.generateDump();
 		
-		Stage newConnectionStage = new Stage();
-		FXMLLoader loader = new FXMLLoader();
-		loader.setLocation(MainApp.class.getResource(FxmlPath.MANYTOMANYSELECTOR.getPath()));
-		Scene scene = new Scene(loader.load());
-		newConnectionStage.setScene(scene);
-		newConnectionStage.setAlwaysOnTop(true);
-		newConnectionStage.setResizable(false);
-		newConnectionStage.centerOnScreen();
-		newConnectionStage.show();
+		CardinalityMap cmObj = new CardinalityMap();
+		cmObj.cardinalityAnalyze();
 		
+		AnchorPane root;
+		root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.MODIFICATIONEVALUATOR.getPath()));
+		AnchorPane modificationEvaluator = loader.load();
+		root.getChildren().clear();
+		root.getChildren().add(modificationEvaluator);
 		
 	}
 	

@@ -9,7 +9,7 @@ public enum FxmlPath {
 	NEWDBCONNECTION("/org/migdb/migdbclient/views/connectionmanager/NewDBConnection.fxml"),
 	COLLECTIONMANAGER("/org/migdb/migdbclient/views/mongodatamanager/CollectionManager.fxml"),
 	DOCUMENTMANAGER("/org/migdb/migdbclient/views/mongodatamanager/DocumentManager.fxml"),
-	MANYTOMANYSELECTOR("/org/migdb/migdbclient/views/cardinalityselector/ManyToManySelector.fxml");
+	QUERYCONVERTER("/org/migdb/migdbclient/views/queryconverter/QueryConverter.fxml");
 	
 	private String path;
 	
