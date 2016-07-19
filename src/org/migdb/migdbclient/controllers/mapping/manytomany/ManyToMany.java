@@ -388,7 +388,7 @@ public class ManyToMany {
 	public void writeMappedJson(){
 		FileWriter file;
 		try {
-			file = new FileWriter("C:\\Users\\Lakshan1\\Desktop\\Resources\\mapped.json");
+			file = new FileWriter(FilePath.DOCUMENT.getPath() + FilePath.COLLECTIONFILE.getPath());
 			file.write(mapped.toJSONString());
 			file.flush();
 			file.close();
