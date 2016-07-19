@@ -9,6 +9,7 @@ public class MainManyToMany {
 		System.out.println("mapping module started...");
 		ManyToMany many = new ManyToMany();
 		many.identifyM2M();
+		System.out.println("mapping module stopped...");
 	}
 
 }
