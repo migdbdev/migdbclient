@@ -196,68 +196,75 @@ public class ConnectionManagerController implements Initializable {
 	}
 
 	public void setSideBarDatabases() {
-		MysqlDAO dao = new MysqlDAO();
-		MigrationProcess migrationObj = new MigrationProcess();
-		String host = ConnectionParameters.SESSION.getMysqlHostName();
-		int port = ConnectionParameters.SESSION.getMysqlPort();
-		String database = "";
-		String username = ConnectionParameters.SESSION.getUserName();
-		String password = ConnectionParameters.SESSION.getPassword();
-		ArrayList<String> databases = dao.getDatabases(host, port, database, username, password);
-		final Node dbIcon = new ImageView(new Image(getClass().getResourceAsStream(ImagePath.DBICON.getPath())));
-		TreeItem<String> mysqlItem = new TreeItem<String>("MySQL Databases", dbIcon);
-		mysqlItem.setExpanded(true);
-		for (int i = 1; i < databases.size(); i++) {
-			TreeItem<String> item = new TreeItem<String>(databases.get(i));
-			mysqlItem.getChildren().add(item);
-		}
-		TreeView<String> tree = new TreeView<String>(mysqlItem);
-		tree.setStyle("-fx-pref-width: 226;-fx-border-color: #336699");
-		// instantiate the root context menu
-        @SuppressWarnings("deprecation")
-		ContextMenu rootContextMenu
-            = ContextMenuBuilder.create()
-            .items(
-                MenuItemBuilder.create()
-                .text("Migrate")
-                .onAction(
-                    new EventHandler<ActionEvent>()
-                    {
-                        @Override
-                        public void handle(ActionEvent arg0)
-                        {
-                            Session.INSTANCE.setActiveDB(tree.getSelectionModel().getSelectedItem().getValue());
-                            try {
+		
+		try {
+			
+			MysqlDAO dao = new MysqlDAO();
+			MigrationProcess migrationObj = new MigrationProcess();
+			String host = ConnectionParameters.SESSION.getMysqlHostName();
+			int port = ConnectionParameters.SESSION.getMysqlPort();
+			String database = "";
+			String username = ConnectionParameters.SESSION.getUserName();
+			String password = ConnectionParameters.SESSION.getPassword();
+			ArrayList<String> databases = dao.getDatabases(host, port, database, username, password);
+			final Node dbIcon = new ImageView(new Image(getClass().getResourceAsStream(ImagePath.DBICON.getPath())));
+			final Node dbIcon2 = new ImageView(new Image(getClass().getResourceAsStream(ImagePath.DBICON.getPath())));
+			TreeItem<String> mysqlItem = new TreeItem<String>("MySQL Databases", dbIcon);
+			TreeItem<String> mongoItem = new TreeItem<String>("Mongo Databases", dbIcon2);
+			TreeItem<String> mainRoot = new TreeItem<>();
+			mainRoot.getChildren().addAll(mysqlItem, mongoItem);
+			mysqlItem.setExpanded(true);
+			for (int i = 1; i < databases.size(); i++) {
+				TreeItem<String> item = new TreeItem<String>(databases.get(i));
+				mysqlItem.getChildren().add(item);
+			}
+			ArrayList<String> mongoDatabses = (ArrayList<String>) getDatabaseNames();
+			for(int k = 0; k < mongoDatabses.size(); k++){
+				TreeItem<String> mongoDB = new TreeItem<String>(mongoDatabses.get(k));
+				mongoItem.getChildren().add(mongoDB);
+			}
+			
+			TreeView<String> tree = new TreeView<String>(mainRoot);
+			tree.setShowRoot(false);
+			tree.setStyle("-fx-pref-width: 226;-fx-border-color: #336699");
+			// instantiate the root context menu
+			@SuppressWarnings("deprecation")
+			ContextMenu rootContextMenu = ContextMenuBuilder.create()
+					.items(MenuItemBuilder.create().text("Migrate").onAction(new EventHandler<ActionEvent>() {
+						@Override
+						public void handle(ActionEvent arg0) {
+							Session.INSTANCE.setActiveDB(tree.getSelectionModel().getSelectedItem().getValue());
+							try {
 								migrationObj.initialize();
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-                        }
-                    }
-                )
-                .build()
-            )
-            .build();
+						}
+					}).build()).build();
 
-        tree.setContextMenu(rootContextMenu);
-		AnchorPane sidebar;
-		sidebar = LayoutInstance.INSTANCE.getSidebar();
-		sidebar.getChildren().clear();
-		sidebar.getChildren().add(tree);
+			tree.setContextMenu(rootContextMenu);
+			AnchorPane sidebar;
+			sidebar = LayoutInstance.INSTANCE.getSidebar();
+			sidebar.getChildren().clear();
+			sidebar.getChildren().add(tree);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
-	
+
 	public List<String> getDatabaseNames() throws Exception {
 		List<String> dbs = new ArrayList<String>();
 		String host = ConnectionParameters.SESSION.getMongoHostName();
 		int port = ConnectionParameters.SESSION.getMongoPort();
-		MongoClient client = MongoConnManager.INSTANCE.connect(host,port);
+		MongoClient client = MongoConnManager.INSTANCE.connect(host, port);
 		MongoCursor<String> dbsCursor = client.listDatabaseNames().iterator();
 		while (dbsCursor.hasNext()) {
 			dbs.add(dbsCursor.next());
 		}
 		return dbs;
 	}
-
 
 }
