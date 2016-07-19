@@ -10,9 +10,9 @@ public enum MongoConnManager {
 	
 	private MongoClient client = null;
 	
-	public MongoClient connect() throws Exception {
+	public MongoClient connect(String host, int port) throws Exception {
 		if(client == null) {
-			client = new MongoClient(new MongoClientURI("mongodb://localhost:27017"));
+			client = new MongoClient(new MongoClientURI("mongodb://"+host+":"+port));
 		}
 		
 		return client;	

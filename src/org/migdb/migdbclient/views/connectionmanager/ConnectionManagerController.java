@@ -3,6 +3,7 @@ package org.migdb.migdbclient.views.connectionmanager;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.controlsfx.glyphfont.FontAwesome;
@@ -11,6 +12,7 @@ import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.ImagePath;
 import org.migdb.migdbclient.controllers.DumpGenerator;
 import org.migdb.migdbclient.controllers.MigrationProcess;
+import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.models.dao.MysqlDAO;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
@@ -19,6 +21,9 @@ import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ConnectionParameters;
 import org.migdb.migdbclient.resources.LayoutInstance;
 import org.migdb.migdbclient.resources.Session;
+
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCursor;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -241,5 +246,18 @@ public class ConnectionManagerController implements Initializable {
 		sidebar.getChildren().clear();
 		sidebar.getChildren().add(tree);
 	}
+	
+	public List<String> getDatabaseNames() throws Exception {
+		List<String> dbs = new ArrayList<String>();
+		String host = ConnectionParameters.SESSION.getMongoHostName();
+		int port = ConnectionParameters.SESSION.getMongoPort();
+		MongoClient client = MongoConnManager.INSTANCE.connect(host,port);
+		MongoCursor<String> dbsCursor = client.listDatabaseNames().iterator();
+		while (dbsCursor.hasNext()) {
+			dbs.add(dbsCursor.next());
+		}
+		return dbs;
+	}
+
 
 }
