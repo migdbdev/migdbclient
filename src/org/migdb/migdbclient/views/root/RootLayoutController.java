@@ -45,6 +45,8 @@ public class RootLayoutController implements Initializable {
 	@FXML
 	private Label queryConverterLabel;
 	@FXML
+	private Label queryGeneratorLabel;
+	@FXML
 	private ListView<String> mongoDatabaseList;
 	@FXML
 	private ContextMenu mongoDatabaseContextMenu;
@@ -91,11 +93,18 @@ public class RootLayoutController implements Initializable {
 				showModificationEvaluator();
 			}
 		});
-		
-		// Connection manager navigation label click event
+
+		// Query converter navigation label click event
 		queryConverterLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
 				showQueryConverter();
+			}
+		});
+
+		// Query generator navigation label click event
+		queryGeneratorLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent mouseevent) {
+				showQueryGenerator();
 			}
 		});
 	}
@@ -174,6 +183,24 @@ public class RootLayoutController implements Initializable {
 		}
 	}
 
+	/**
+	 * Method for add query generator layout to the root container anchor pane
+	 */
+	public void showQueryGenerator() {
+		try {
+			AnchorPane root;
+			root = CenterLayout.INSTANCE.getRootContainer();
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(MainApp.class.getResource(FxmlPath.QUERYGENERATOR.getPath()));
+			AnchorPane queryGenerator = loader.load();
+			root.getChildren().clear();
+			root.getChildren().add(queryGenerator);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	@FXML
 	public void showMongoDataManager() throws Exception {
 		String databaseName = mongoDatabaseList.getSelectionModel().getSelectedItem();
@@ -200,7 +227,7 @@ public class RootLayoutController implements Initializable {
 		List<String> dbs = new ArrayList<String>();
 		String host = ConnectionParameters.SESSION.getMongoHostName();
 		int port = ConnectionParameters.SESSION.getMongoPort();
-		MongoClient client = MongoConnManager.INSTANCE.connect(host,port);
+		MongoClient client = MongoConnManager.INSTANCE.connect(host, port);
 		MongoCursor<String> dbsCursor = client.listDatabaseNames().iterator();
 		while (dbsCursor.hasNext()) {
 			dbs.add(dbsCursor.next());
