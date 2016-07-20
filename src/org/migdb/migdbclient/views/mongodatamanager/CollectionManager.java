@@ -83,7 +83,6 @@ public class CollectionManager implements Initializable {
 
 		// System.out.println("aaaaaaaaaaa" + jsonObject);
 		// System.out.println(document.keySet().toString());
-		
 		setTable(foundDocument, getCommonColumns(foundDocument));
 
 	}

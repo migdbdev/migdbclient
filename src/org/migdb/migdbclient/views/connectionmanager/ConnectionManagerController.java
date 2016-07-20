@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import org.controlsfx.glyphfont.FontAwesome;
@@ -22,6 +23,7 @@ import org.migdb.migdbclient.resources.ConnectionParameters;
 import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.resources.LayoutInstance;
 import org.migdb.migdbclient.resources.Session;
+import org.migdb.migdbclient.resources.widgets.Confirmation;
 import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
 import com.mongodb.MongoClient;
@@ -35,6 +37,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ContextMenuBuilder;
 import javafx.scene.control.Label;
@@ -259,7 +262,24 @@ public class ConnectionManagerController implements Initializable {
 					}
 				}
 			});
-			mongoContext.getItems().add(select);
+			MenuItem drop = new MenuItem("Drop");
+			drop.setOnAction(new EventHandler<ActionEvent>() {
+				public void handle(ActionEvent e) {
+					try {
+						String dbName = mongoTree.getSelectionModel().getSelectedItem().getValue();
+						Confirmation confirmation = new Confirmation("Confirmation Dialog", "Drop database "+dbName, "Command : Drop "+dbName);
+						Optional<ButtonType> result = confirmation.showAndWait();
+						if (result.get() == ButtonType.OK){
+						    System.out.println("Ok");
+						} else {
+						    System.out.println("cancel");
+						}
+					} catch (Exception e3) {
+						e3.printStackTrace();
+					}
+				}
+			});
+			mongoContext.getItems().addAll(select,drop);
 
 			mysqlTree.setContextMenu(mysqlContext);
 			mongoTree.setContextMenu(mongoContext);
