@@ -11,7 +11,7 @@ import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
-import org.migdb.migdbclient.resources.DatabaseResource;
+import org.migdb.migdbclient.resources.MongoDBResource;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.ListCollectionsIterable;
@@ -152,7 +152,7 @@ public class MongoDataManager implements Initializable {
 
 	public void setDatabase(String databaseName) throws Exception {
 		try {
-			collectionList.setItems(getCollectionsOf(DatabaseResource.INSTANCE.getDatabaseName()));
+			collectionList.setItems(getCollectionsOf(MongoDBResource.INSTANCE.getDatabaseName()));
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

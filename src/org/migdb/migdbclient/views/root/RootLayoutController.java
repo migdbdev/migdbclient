@@ -11,7 +11,7 @@ import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ConnectionParameters;
-import org.migdb.migdbclient.resources.DatabaseResource;
+import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.resources.LayoutInstance;
 import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
@@ -64,14 +64,14 @@ public class RootLayoutController implements Initializable {
 		LayoutInstance.INSTANCE.setSidebar(sideBarAnchorpane);
 		showConnectionManager();
 
-		ObservableList<String> list;
-		try {
-			list = FXCollections.observableArrayList(getDatabaseNames());
-			mongoDatabaseList.setItems(list);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		ObservableList<String> list;
+//		try {
+//			list = FXCollections.observableArrayList(getDatabaseNames());
+//			mongoDatabaseList.setItems(list);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		// Data manager navigation label click event
 		datamanagerLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -204,7 +204,7 @@ public class RootLayoutController implements Initializable {
 	@FXML
 	public void showMongoDataManager() throws Exception {
 		String databaseName = mongoDatabaseList.getSelectionModel().getSelectedItem();
-		DatabaseResource.INSTANCE.setDB(databaseName);
+		MongoDBResource.INSTANCE.setDB(databaseName);
 		AnchorPane root;
 		root = CenterLayout.INSTANCE.getRootContainer();
 		FXMLLoader loader = new FXMLLoader();
@@ -223,16 +223,16 @@ public class RootLayoutController implements Initializable {
 
 	}
 
-	public List<String> getDatabaseNames() throws Exception {
-		List<String> dbs = new ArrayList<String>();
-		String host = ConnectionParameters.SESSION.getMongoHostName();
-		int port = ConnectionParameters.SESSION.getMongoPort();
-		MongoClient client = MongoConnManager.INSTANCE.connect(host, port);
-		MongoCursor<String> dbsCursor = client.listDatabaseNames().iterator();
-		while (dbsCursor.hasNext()) {
-			dbs.add(dbsCursor.next());
-		}
-		return dbs;
-	}
+//	public List<String> getDatabaseNames() throws Exception {
+//		List<String> dbs = new ArrayList<String>();
+//		String host = ConnectionParameters.SESSION.getMongoHostName();
+//		int port = ConnectionParameters.SESSION.getMongoPort();
+//		MongoClient client = MongoConnManager.INSTANCE.connect(host, port);
+//		MongoCursor<String> dbsCursor = client.listDatabaseNames().iterator();
+//		while (dbsCursor.hasNext()) {
+//			dbs.add(dbsCursor.next());
+//		}
+//		return dbs;
+//	}
 
 }

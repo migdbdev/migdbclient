@@ -19,8 +19,10 @@ import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ConnectionParameters;
+import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.resources.LayoutInstance;
 import org.migdb.migdbclient.resources.Session;
+import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
@@ -196,9 +198,9 @@ public class ConnectionManagerController implements Initializable {
 	}
 
 	public void setSideBarDatabases() {
-		
+
 		try {
-			
+
 			MysqlDAO dao = new MysqlDAO();
 			MigrationProcess migrationObj = new MigrationProcess();
 			String host = ConnectionParameters.SESSION.getMysqlHostName();
@@ -211,29 +213,30 @@ public class ConnectionManagerController implements Initializable {
 			final Node dbIcon2 = new ImageView(new Image(getClass().getResourceAsStream(ImagePath.DBICON.getPath())));
 			TreeItem<String> mysqlItem = new TreeItem<String>("MySQL Databases", dbIcon);
 			TreeItem<String> mongoItem = new TreeItem<String>("Mongo Databases", dbIcon2);
-			TreeItem<String> mainRoot = new TreeItem<>();
-			mainRoot.getChildren().addAll(mysqlItem, mongoItem);
 			mysqlItem.setExpanded(true);
+			mongoItem.setExpanded(true);
 			for (int i = 1; i < databases.size(); i++) {
 				TreeItem<String> item = new TreeItem<String>(databases.get(i));
 				mysqlItem.getChildren().add(item);
 			}
 			ArrayList<String> mongoDatabses = (ArrayList<String>) getDatabaseNames();
-			for(int k = 0; k < mongoDatabses.size(); k++){
+			for (int k = 0; k < mongoDatabses.size(); k++) {
 				TreeItem<String> mongoDB = new TreeItem<String>(mongoDatabses.get(k));
 				mongoItem.getChildren().add(mongoDB);
 			}
-			
-			TreeView<String> tree = new TreeView<String>(mainRoot);
-			tree.setShowRoot(false);
-			tree.setStyle("-fx-pref-width: 226;-fx-border-color: #336699");
-			// instantiate the root context menu
+
+			TreeView<String> mysqlTree = new TreeView<String>(mysqlItem);
+			TreeView<String> mongoTree = new TreeView<String>(mongoItem);
+			mysqlTree.setStyle("-fx-pref-width: 226;-fx-border-color: #336699");
+			mongoTree.setStyle("-fx-pref-width: 226;-fx-border-color: #336699");
+
+			// instantiate the mysql context menu
 			@SuppressWarnings("deprecation")
-			ContextMenu rootContextMenu = ContextMenuBuilder.create()
+			ContextMenu mysqlContextMenu = ContextMenuBuilder.create()
 					.items(MenuItemBuilder.create().text("Migrate").onAction(new EventHandler<ActionEvent>() {
 						@Override
 						public void handle(ActionEvent arg0) {
-							Session.INSTANCE.setActiveDB(tree.getSelectionModel().getSelectedItem().getValue());
+							Session.INSTANCE.setActiveDB(mysqlTree.getSelectionModel().getSelectedItem().getValue());
 							try {
 								migrationObj.initialize();
 							} catch (IOException e) {
@@ -243,16 +246,35 @@ public class ConnectionManagerController implements Initializable {
 						}
 					}).build()).build();
 
-			tree.setContextMenu(rootContextMenu);
+			// instantiate the mongo context menu
+			@SuppressWarnings("deprecation")
+			ContextMenu mongoContextMenu = ContextMenuBuilder.create()
+					.items(MenuItemBuilder.create().text("Select").onAction(new EventHandler<ActionEvent>() {
+						@Override
+						public void handle(ActionEvent arg0) {
+							MongoDBResource.INSTANCE.setDB(mongoTree.getSelectionModel().getSelectedItem().getValue());
+							try {
+								showMongoDataManager();
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}).build()).build();
+			mysqlTree.setContextMenu(mysqlContextMenu);
+			mongoTree.setContextMenu(mongoContextMenu);
+			VBox sidebarVbox = new VBox();
+			sidebarVbox.setStyle("-fx-pref-height: 613;");
+			sidebarVbox.getChildren().addAll(mysqlTree, mongoTree);
 			AnchorPane sidebar;
 			sidebar = LayoutInstance.INSTANCE.getSidebar();
 			sidebar.getChildren().clear();
-			sidebar.getChildren().add(tree);
-			
+			sidebar.getChildren().add(sidebarVbox);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	public List<String> getDatabaseNames() throws Exception {
@@ -266,5 +288,27 @@ public class ConnectionManagerController implements Initializable {
 		}
 		return dbs;
 	}
+	
+	@FXML
+	public void showMongoDataManager() throws Exception {
+		
+		AnchorPane root;
+		root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.DATAMANAGER.getPath()));
+		AnchorPane mongoDataManagerAncPane;
+		try {
+			mongoDataManagerAncPane = loader.load();
+			MongoDataManager dataManager = (MongoDataManager) loader.getController();
+			dataManager.setDatabase(MongoDBResource.INSTANCE.getDatabaseName());
+			root.getChildren().clear();
+			root.getChildren().add(mongoDataManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
 
 }
