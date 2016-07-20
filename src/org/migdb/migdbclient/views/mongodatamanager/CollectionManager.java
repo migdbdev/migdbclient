@@ -17,7 +17,7 @@ import org.json.simple.JSONObject;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
-import org.migdb.migdbclient.resources.DatabaseResource;
+import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.tablegen.CustomCellFactory;
 import org.migdb.migdbclient.tablegen.TableBean;
 
@@ -62,7 +62,7 @@ public class CollectionManager implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		db = DatabaseResource.INSTANCE.getDatabase();
+		db = MongoDBResource.INSTANCE.getDatabase();
 
 	}
 
@@ -223,7 +223,7 @@ public class CollectionManager implements Initializable {
 		try {
 			mongoDataManagerAncPane = loader.load();
 			MongoDataManager dataManager = (MongoDataManager) loader.getController();
-			dataManager.setDatabase(DatabaseResource.INSTANCE.getDatabaseName());
+			dataManager.setDatabase(MongoDBResource.INSTANCE.getDatabaseName());
 			root.getChildren().clear();
 			root.getChildren().add(mongoDataManagerAncPane);
 		} catch (IOException e) {
