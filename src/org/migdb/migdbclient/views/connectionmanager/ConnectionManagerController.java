@@ -38,6 +38,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ContextMenuBuilder;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.MenuItemBuilder;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -230,39 +231,38 @@ public class ConnectionManagerController implements Initializable {
 			mysqlTree.setStyle("-fx-pref-width: 226;-fx-border-color: #336699");
 			mongoTree.setStyle("-fx-pref-width: 226;-fx-border-color: #336699");
 
-			// instantiate the mysql context menu
-			@SuppressWarnings("deprecation")
-			ContextMenu mysqlContextMenu = ContextMenuBuilder.create()
-					.items(MenuItemBuilder.create().text("Migrate").onAction(new EventHandler<ActionEvent>() {
-						@Override
-						public void handle(ActionEvent arg0) {
-							Session.INSTANCE.setActiveDB(mysqlTree.getSelectionModel().getSelectedItem().getValue());
-							try {
-								migrationObj.initialize();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-					}).build()).build();
+			// MYSQL tree item context menu
+			ContextMenu mysqlContext = new ContextMenu();
+			MenuItem migrate = new MenuItem("Migrate");
+			migrate.setOnAction(new EventHandler<ActionEvent>() {
+				public void handle(ActionEvent e) {
+					try {
+						Session.INSTANCE.setActiveDB(mysqlTree.getSelectionModel().getSelectedItem().getValue());
+						migrationObj.initialize();
+					} catch (Exception e2) {
+						e2.printStackTrace();
+					}
+				}
+			});
+			mysqlContext.getItems().add(migrate);
 
-			// instantiate the mongo context menu
-			@SuppressWarnings("deprecation")
-			ContextMenu mongoContextMenu = ContextMenuBuilder.create()
-					.items(MenuItemBuilder.create().text("Select").onAction(new EventHandler<ActionEvent>() {
-						@Override
-						public void handle(ActionEvent arg0) {
-							MongoDBResource.INSTANCE.setDB(mongoTree.getSelectionModel().getSelectedItem().getValue());
-							try {
-								showMongoDataManager();
-							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-					}).build()).build();
-			mysqlTree.setContextMenu(mysqlContextMenu);
-			mongoTree.setContextMenu(mongoContextMenu);
+			// Mongo tree item context menu
+			ContextMenu mongoContext = new ContextMenu();
+			MenuItem select = new MenuItem("Select");
+			select.setOnAction(new EventHandler<ActionEvent>() {
+				public void handle(ActionEvent e) {
+					try {
+						MongoDBResource.INSTANCE.setDB(mongoTree.getSelectionModel().getSelectedItem().getValue());
+						showMongoDataManager();
+					} catch (Exception e3) {
+						e3.printStackTrace();
+					}
+				}
+			});
+			mongoContext.getItems().add(select);
+
+			mysqlTree.setContextMenu(mysqlContext);
+			mongoTree.setContextMenu(mongoContext);
 			VBox sidebarVbox = new VBox();
 			sidebarVbox.setStyle("-fx-pref-height: 613;");
 			sidebarVbox.getChildren().addAll(mysqlTree, mongoTree);
@@ -288,10 +288,10 @@ public class ConnectionManagerController implements Initializable {
 		}
 		return dbs;
 	}
-	
+
 	@FXML
 	public void showMongoDataManager() throws Exception {
-		
+
 		AnchorPane root;
 		root = CenterLayout.INSTANCE.getRootContainer();
 		FXMLLoader loader = new FXMLLoader();
@@ -309,6 +309,5 @@ public class ConnectionManagerController implements Initializable {
 		}
 
 	}
-
 
 }
