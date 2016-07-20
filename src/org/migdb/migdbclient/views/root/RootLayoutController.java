@@ -10,6 +10,7 @@ import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
+import org.migdb.migdbclient.resources.ConnectionParameters;
 import org.migdb.migdbclient.resources.DatabaseResource;
 import org.migdb.migdbclient.resources.LayoutInstance;
 import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
@@ -43,6 +44,8 @@ public class RootLayoutController implements Initializable {
 	private Label modificationEvaluatorLabel;
 	@FXML
 	private Label queryConverterLabel;
+	@FXML
+	private Label queryGeneratorLabel;
 	@FXML
 	private ListView<String> mongoDatabaseList;
 	@FXML
@@ -90,11 +93,18 @@ public class RootLayoutController implements Initializable {
 				showModificationEvaluator();
 			}
 		});
-		
-		// Connection manager navigation label click event
+
+		// Query converter navigation label click event
 		queryConverterLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
 				showQueryConverter();
+			}
+		});
+
+		// Query generator navigation label click event
+		queryGeneratorLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			public void handle(MouseEvent mouseevent) {
+				showQueryGenerator();
 			}
 		});
 	}
@@ -173,6 +183,24 @@ public class RootLayoutController implements Initializable {
 		}
 	}
 
+	/**
+	 * Method for add query generator layout to the root container anchor pane
+	 */
+	public void showQueryGenerator() {
+		try {
+			AnchorPane root;
+			root = CenterLayout.INSTANCE.getRootContainer();
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(MainApp.class.getResource(FxmlPath.QUERYGENERATOR.getPath()));
+			AnchorPane queryGenerator = loader.load();
+			root.getChildren().clear();
+			root.getChildren().add(queryGenerator);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	@FXML
 	public void showMongoDataManager() throws Exception {
 		String databaseName = mongoDatabaseList.getSelectionModel().getSelectedItem();
@@ -197,7 +225,9 @@ public class RootLayoutController implements Initializable {
 
 	public List<String> getDatabaseNames() throws Exception {
 		List<String> dbs = new ArrayList<String>();
-		MongoClient client = MongoConnManager.INSTANCE.connect();
+		String host = ConnectionParameters.SESSION.getMongoHostName();
+		int port = ConnectionParameters.SESSION.getMongoPort();
+		MongoClient client = MongoConnManager.INSTANCE.connect(host, port);
 		MongoCursor<String> dbsCursor = client.listDatabaseNames().iterator();
 		while (dbsCursor.hasNext()) {
 			dbs.add(dbsCursor.next());
