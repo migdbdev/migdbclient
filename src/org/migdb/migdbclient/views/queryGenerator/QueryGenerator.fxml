@@ -20,9 +20,30 @@
                                  <children>
                                     <Label layoutX="14.0" layoutY="27.0" prefHeight="20.0" prefWidth="124.0" text="Collection Name" />
                                     <ComboBox fx:id="collectionListComboBox" layoutX="156.0" layoutY="23.0" prefWidth="150.0" />
-                                    <RadioButton layoutX="323.0" layoutY="27.0" mnemonicParsing="false" text="find" />
+                                    <RadioButton fx:id="findRadioButton" layoutX="323.0" layoutY="27.0" mnemonicParsing="false" text="find" />
                                     <Separator layoutX="396.0" layoutY="14.0" orientation="VERTICAL" prefHeight="42.0" prefWidth="4.0" />
-                                    <RadioButton layoutX="428.0" layoutY="27.0" mnemonicParsing="false" text="findOne" />
+                                    <RadioButton fx:id="findOneRadioButton" layoutX="428.0" layoutY="27.0" mnemonicParsing="false" text="findOne" />
+                                    <ComboBox layoutX="32.0" layoutY="94.0" prefWidth="150.0" promptText="Document's fields" />
+                                    <ComboBox layoutX="205.0" layoutY="94.0" prefWidth="150.0" promptText="Operators" />
+                                    <TextField layoutX="376.0" layoutY="94.0" promptText="Value" />
+                                    <RadioButton layoutX="557.0" layoutY="98.0" mnemonicParsing="false" text="AND" />
+                                    <RadioButton layoutX="658.0" layoutY="98.0" mnemonicParsing="false" text="OR" />
+                                    <Button layoutX="753.0" layoutY="94.0" mnemonicParsing="false" text="Add rule" />
+                                    <TableView layoutX="32.0" layoutY="133.0" prefHeight="200.0" prefWidth="848.0">
+                                       <columns>
+                                          <TableColumn prefWidth="181.0" text="Fields" />
+                                          <TableColumn prefWidth="230.0" text="Operators" />
+                                          <TableColumn prefWidth="145.0" text="Values" />
+                                          <TableColumn minWidth="0.0" prefWidth="198.0" text="Condition(AND/OR))" />
+                                          <TableColumn prefWidth="93.0" />
+                                       </columns>
+                                    </TableView>
+                                    <Label layoutX="39.0" layoutY="354.0" text="Limit" />
+                                    <TextField layoutX="114.0" layoutY="352.0" />
+                                    <Label layoutX="309.0" layoutY="356.0" text="Skip" />
+                                    <TextField layoutX="376.0" layoutY="354.0" />
+                                    <Label layoutX="590.0" layoutY="358.0" text="Sort" />
+                                    <TextField layoutX="666.0" layoutY="356.0" />
                                  </children></AnchorPane>
                         </content>
                       </Tab>

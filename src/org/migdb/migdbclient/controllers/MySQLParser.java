@@ -3,6 +3,8 @@ package org.migdb.migdbclient.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -12,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.config.FilePath;
+import org.migdb.migdbclient.config.JsonConstants;
 import org.migdb.migdbclient.models.dao.MysqlDAO;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ColumnsDTO;
@@ -28,14 +31,13 @@ import org.xml.sax.SAXException;
 
 public class MySQLParser {
 	
+	String host = ConnectionParameters.SESSION.getMysqlHostName();
+	int port = ConnectionParameters.SESSION.getMysqlPort();
+	String username = ConnectionParameters.SESSION.getUserName();
+	String password = ConnectionParameters.SESSION.getPassword();
+	String database = Session.INSTANCE.getActiveDB();
+	
 	public void sqlParser() throws ParserConfigurationException, SAXException, IOException{
-		
-		String host = ConnectionParameters.SESSION.getMysqlHostName();
-		int port = ConnectionParameters.SESSION.getMysqlPort();
-		String username = ConnectionParameters.SESSION.getUserName();
-		String password = ConnectionParameters.SESSION.getPassword();
-		String database = Session.INSTANCE.getActiveDB();
-		/*JsonWriter jw = null;*/
 		
 		File fXmlFile = new File(FilePath.DOCUMENT.getPath() + FilePath.XMLPATH.getPath());
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -65,9 +67,19 @@ public class MySQLParser {
 				for (TableDTO dtoTable : arrTab) {
 					/*jw.beginObject();// begin
 */					JSONObject jo = new JSONObject();
-					jo.put("name", dtoTable.getTableName());
-					jo.put("colCount", dao.getColumnCount(host, port, database, username, password, dtoTable.getTableName().toString()));
-					jo.put("primaryKey", dao.getPrimaryKey(host, port, database, username, password, dtoTable.getTableName().toString()));
+					jo.put(JsonConstants.TABLENAME.getJsonContant(), dtoTable.getTableName());
+					int colCount = dataTypeObject( dtoTable.getTableName().toString()).get("STRING") + dataTypeObject( dtoTable.getTableName().toString()).get("NUMERIC") + dataTypeObject( dtoTable.getTableName().toString()).get("DATE");
+					jo.put(JsonConstants.COLUMNCOUNT.getJsonContant(), colCount);
+					jo.put(JsonConstants.PRIMARYKEY.getJsonContant(), dao.getPrimaryKey(host, port, database, username, password, dtoTable.getTableName().toString()));
+					
+					JSONArray dataTypeArray = new JSONArray();
+					JSONObject dataTypeObject = new JSONObject();
+					dataTypeObject.put("STRING_COUNT", dataTypeObject( dtoTable.getTableName().toString()).get("STRING"));
+					dataTypeObject.put("NUMERIC_COUNT", dataTypeObject( dtoTable.getTableName().toString()).get("NUMERIC"));
+					dataTypeObject.put("DATE_COUNT", dataTypeObject( dtoTable.getTableName().toString()).get("DATE"));
+					dataTypeArray.add(dataTypeObject);
+					jo.put("dataTypeCount", dataTypeArray);
+					
 					/*jw.name("name");
 					jw.value(dtoTable.getTableName());*/
 					/*jw.name("colCount");
@@ -83,8 +95,8 @@ public class MySQLParser {
 						if (dtoTable.getTableName().equals(dtoColumn.getTABLE_NAME())) {
 							/*jw.beginObject();*/
 							JSONObject columnObj = new JSONObject();
-							columnObj.put("colName", dtoColumn.getCOLUMN_NAME());
-							columnObj.put("dataType", dtoColumn.getDATA_TYPE());
+							columnObj.put(JsonConstants.COLUMNNAME.getJsonContant(), dtoColumn.getCOLUMN_NAME());
+							columnObj.put(JsonConstants.DATATYPE.getJsonContant(), dtoColumn.getDATA_TYPE());
 							/*jw.name("colName");
 							jw.value(dtoColumn.getCOLUMN_NAME());*/
 							/*jw.name("dataType");
@@ -93,7 +105,7 @@ public class MySQLParser {
 							columns.add(columnObj);
 						}
 					}
-					jo.put("columns", columns);
+					jo.put(JsonConstants.COLUMNOBJECT.getJsonContant(), columns);
 					/*jw.endArray(); // End columns array
 					 * 
 */
@@ -110,13 +122,13 @@ public class MySQLParser {
 										&& dtoColumn.getCOLUMN_NAME().equals(dtoReference.getColumnName())) {
 									/*jw.beginObject();*/
 									JSONObject referencingFromObj = new JSONObject();
-									referencingFromObj.put("referencedCol", dtoColumn.getCOLUMN_NAME());
-									referencingFromObj.put("referencedTab", dtoReference.getReferencedTableName());
-									referencingFromObj.put("referencingCol", dtoReference.getReferencedColumnName());
+									referencingFromObj.put(JsonConstants.REFERENCEDCOLUMN.getJsonContant(), dtoColumn.getCOLUMN_NAME());
+									referencingFromObj.put(JsonConstants.REFERENCEDTABLE.getJsonContant(), dtoReference.getReferencedTableName());
+									referencingFromObj.put(JsonConstants.REFERENCINGCOLUMN.getJsonContant(), dtoReference.getReferencedColumnName());
 									
 									for(RelationshiCardinalityDTO rDto : dto){
 										if(dtoReference.getReferencedTableName().equals(rDto.getREFERENCED_TABLE_NAME()) && dtoReference.getReferencedColumnName().equals(rDto.getREFERENCED_COLUMN_NAME()) && dtoTable.getTableName().equals(rDto.getTABLE_NAME()) && dtoColumn.getCOLUMN_NAME().equals(rDto.getCOLUMN_NAME())){
-											referencingFromObj.put("relationshipType",rDto.getRELATIONSHIP_TYPE());
+											referencingFromObj.put(JsonConstants.RELATIONSHIPTYPE.getJsonContant(),rDto.getRELATIONSHIP_TYPE());
 										}
 									}
 									
@@ -138,7 +150,7 @@ public class MySQLParser {
 					}
 
 					/*jw.endArray(); // End reference*/
-					jo.put("referencingFrom", referencingFrom);
+					jo.put(JsonConstants.REFERENCINGFROMOBJECT.getJsonContant(), referencingFrom);
 					
 					/*jw.name("referencedBy");
 					jw.beginArray(); // Begin reference*/
@@ -151,13 +163,13 @@ public class MySQLParser {
 										.getCOLUMN_NAME().equals(dtoReference.getReferencedColumnName())) {
 									/*jw.beginObject();*/
 									JSONObject referencedByObj = new JSONObject();
-									referencedByObj.put("referencedCol", dtoColumn.getCOLUMN_NAME());
-									referencedByObj.put("referencingTab", dtoReference.getTableName());
-									referencedByObj.put("referencingCol", dtoReference.getColumnName());
+									referencedByObj.put(JsonConstants.REFERENCEDCOLUMN.getJsonContant(), dtoColumn.getCOLUMN_NAME());
+									referencedByObj.put(JsonConstants.REFERENCINGTABLE.getJsonContant(), dtoReference.getTableName());
+									referencedByObj.put(JsonConstants.REFERENCINGCOLUMN.getJsonContant(), dtoReference.getColumnName());
 									
 									for(RelationshiCardinalityDTO rDto : dto){
 										if(dtoReference.getTableName().equals(rDto.getTABLE_NAME()) && dtoReference.getColumnName().equals(rDto.getCOLUMN_NAME()) && dtoTable.getTableName().equals(rDto.getREFERENCED_TABLE_NAME()) && dtoColumn.getCOLUMN_NAME().equals(rDto.getREFERENCED_COLUMN_NAME())){
-											referencedByObj.put("relationshipType",rDto.getRELATIONSHIP_TYPE());
+											referencedByObj.put(JsonConstants.RELATIONSHIPTYPE.getJsonContant(),rDto.getRELATIONSHIP_TYPE());
 										}
 									}
 									
@@ -177,7 +189,7 @@ public class MySQLParser {
 					}
 
 					/*jw.endArray(); // End reference*/
-					jo.put("referencedBy", referencedBy);
+					jo.put(JsonConstants.REFERENCEDBYOBJECT.getJsonContant(), referencedBy);
 					
 					/*jw.name("data");
 					jw.beginArray(); // Data begin array*/	
@@ -232,24 +244,53 @@ public class MySQLParser {
 					}
 					
 					/*jw.endArray(); // Data end array*/
-					jo.put("data", data);
+					jo.put(JsonConstants.DATA.getJsonContant(), data);
 					
 					/*jw.endObject();// begin-end*/		
 					jsonArr.add(jo);
 					}
 			}
 
-			jsonObj.put("tables", jsonArr);
+			jsonObj.put(JsonConstants.TABLESOBJECT.getJsonContant(), jsonArr);
 
 			/*jw.endObject();*/
 			JSONObject json = new JSONObject();
 			String updatedson = json.toJSONString(jsonObj);
 			FileUtils.writeStringToFile(jsonFiel, updatedson);
-			System.out.println("Finish");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
 	}
+	
+	public Map<String,Integer> dataTypeObject(String table){
+		ArrayList<ColumnsDTO> dataType = null;
+		Map<String,Integer> requestParam = new HashMap<String,Integer>();
+		int stringCount = 0;
+		int nymericCount = 0;
+		int dateCount = 0;
+		try {
+			MysqlDAO dataDAO = new MysqlDAO();
+			dataType = dataDAO.getDataTypeCount(host, port, database, username, password, table);
+			for(ColumnsDTO colDto : dataType){
+				String key = colDto.getDATA_TYPE();
+				if(key.equals("date") || key.equals("datetime") || key.equals("timestamp") || key.equals("time") || key.equals("year")){
+					dateCount = dateCount + colDto.getDATA_TYPE_COUNT();
+				}else if(key.equals("int") || key.equals("tinyint") || key.equals("smallint") || key.equals("mediumint") || key.equals("bigint") || key.equals("float") || key.equals("double") || key.equals("decimal")){
+					nymericCount = nymericCount + colDto.getDATA_TYPE_COUNT();
+				} else {
+					stringCount = stringCount + colDto.getDATA_TYPE_COUNT();
+				}
+			}
+			
+			requestParam.put("STRING", stringCount);
+			requestParam.put("NUMERIC", nymericCount);
+			requestParam.put("DATE", dateCount);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return requestParam;
+	}
+	
 
 }
