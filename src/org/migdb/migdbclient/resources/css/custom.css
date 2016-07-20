@@ -2,6 +2,12 @@
     -fx-background-color: #FFFFFF;
 }
 
+.label {
+	-fx-font-size: 10pt;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-label-padding : 0 0 0 20px;
+}
+
 .label_Connections {
 	-fx-font-size: 20pt;
     -fx-font-family: "Segoe UI Semibold";
