@@ -4,10 +4,14 @@ import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 
 import com.mongodb.client.MongoDatabase;
 
-public enum DatabaseResource {
+public enum MongoDBResource {
 	INSTANCE;
 	private MongoDatabase database;
 	private String databaseName;
+
+	public void setDatabaseName(String databaseName) {
+		this.databaseName = databaseName;
+	}
 
 	public MongoDatabase getDatabase() {
 		return database;

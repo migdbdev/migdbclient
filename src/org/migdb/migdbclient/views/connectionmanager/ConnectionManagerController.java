@@ -19,8 +19,10 @@ import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ConnectionParameters;
+import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.resources.LayoutInstance;
 import org.migdb.migdbclient.resources.Session;
+import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
@@ -247,19 +249,18 @@ public class ConnectionManagerController implements Initializable {
 			// instantiate the mongo context menu
 			@SuppressWarnings("deprecation")
 			ContextMenu mongoContextMenu = ContextMenuBuilder.create()
-					.items(MenuItemBuilder.create().text("Edit").onAction(new EventHandler<ActionEvent>() {
+					.items(MenuItemBuilder.create().text("Select").onAction(new EventHandler<ActionEvent>() {
 						@Override
 						public void handle(ActionEvent arg0) {
-							
+							MongoDBResource.INSTANCE.setDB(mongoTree.getSelectionModel().getSelectedItem().getValue());
 							try {
-								System.out.println("Called method here");
+								showMongoDataManager();
 							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
 					}).build()).build();
-
 			mysqlTree.setContextMenu(mysqlContextMenu);
 			mongoTree.setContextMenu(mongoContextMenu);
 			VBox sidebarVbox = new VBox();
@@ -287,5 +288,27 @@ public class ConnectionManagerController implements Initializable {
 		}
 		return dbs;
 	}
+	
+	@FXML
+	public void showMongoDataManager() throws Exception {
+		
+		AnchorPane root;
+		root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.DATAMANAGER.getPath()));
+		AnchorPane mongoDataManagerAncPane;
+		try {
+			mongoDataManagerAncPane = loader.load();
+			MongoDataManager dataManager = (MongoDataManager) loader.getController();
+			dataManager.setDatabase(MongoDBResource.INSTANCE.getDatabaseName());
+			root.getChildren().clear();
+			root.getChildren().add(mongoDataManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
 
 }
