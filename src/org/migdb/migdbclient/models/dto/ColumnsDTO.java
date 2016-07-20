@@ -13,6 +13,7 @@ public class ColumnsDTO {
 	private String COLUMN_NAME;
 	private String DATA_TYPE;
 	private String COLUMN_KEY;
+	private int DATA_TYPE_COUNT;
 	
 	public ColumnsDTO(){
 		
@@ -58,5 +59,12 @@ public class ColumnsDTO {
 		COLUMN_KEY = cOLUMN_KEY;
 	}
 
+	public int getDATA_TYPE_COUNT() {
+		return DATA_TYPE_COUNT;
+	}
+
+	public void setDATA_TYPE_COUNT(int dATA_TYPE_COUNT) {
+		DATA_TYPE_COUNT = dATA_TYPE_COUNT;
+	}
 
 }
