@@ -1,5 +1,6 @@
 package org.migdb.migdbclient.views.queryconverter;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -24,6 +25,14 @@ public class QueryConverterController {
 	private TextArea sqlQueryTxt;
 	@FXML
 	private TextArea mongoQueryTxt;
+	
+	/*List<String> textTypes = Arrays.asList("char","varchar","tinytext","text","blob","mediumtext"
+			,"mediumblob","longtext","longblob","enum","set");*/
+	
+	List<String> numberTypes = Arrays.asList("tinyint","smallint","mediumint","int","bigint","float"
+			,"double","decimal");
+	
+	List<String> dateTypes = Arrays.asList("date","datetime","timestamp","time","year");
 
 	@FXML
 	private void convert() {
@@ -72,7 +81,7 @@ public class QueryConverterController {
 		}
 		
 		String mongoQuery = "db."+table.getName()+".insert("+pairs.toString().replace("=", ":")
-				.replace(",", ",\n\t").replace("{", "{\n\t").replace("}", "\n}")+")";
+				.replace(",", ",\n\t").replace("{", "{\n\t").replace("}", "\n}").replace(" ", "")+")";
 		return mongoQuery;
 	}
 	
@@ -85,15 +94,39 @@ public class QueryConverterController {
 		
 		for(int i=0; i<colDef.size();i++) {
 			ColumnDefinition def = colDef.get(i);
+			String dataType = def.getColDataType().getDataType();	
+			if(containsCaseInsensitive(dataType, numberTypes)) {
+				if(dataType.equalsIgnoreCase("int")) {
+					pairs.put(def.getColumnName(), "NumberInt(\"<Value"+(i+1)+">\")");
+				} else if(dataType.equalsIgnoreCase("bigint")) {
+					pairs.put(def.getColumnName(), "NumberLong(\"<Value"+(i+1)+">\")");
+				} else {
+					pairs.put(def.getColumnName(), "<Value"+(i+1)+">");
+				}
+			} else if(containsCaseInsensitive(dataType, dateTypes)) {
+				pairs.put(def.getColumnName(), "ISODate(\"<Value"+(i+1)+">\")");
+			} else {
+				pairs.put(def.getColumnName(), "\"<Value"+(i+1)+">\"");
+			}
+
 			System.out.println(def.getColDataType());
-			pairs.put(def.getColumnName(), "<Value"+(i+1)+">");
+			
 		}
-		String mongoQuery = "db."+table.getName()+".insert("+pairs.toString().replace("=", ":")
-				.replace(",", ",\n\t").replace("{", "{\n\t").replace("}", "\n}")+") \n\n"
-						+ "OR \n\n"
-						+ "db.createCollection(\""+table.getName()+"\")";
+		String mongoQuery = "db.createCollection(\""+table.getName()+"\") \n\n OR \n\n"
+		+"db."+table.getName()+".insert("+pairs.toString().replace("=", ":").replace(",", ",\n\t")
+		.replace("{", "{\n\t").replace("}", "\n}").replace(" ", "")+")";
 		return mongoQuery;
 	}
+	
+	
+	public boolean containsCaseInsensitive(String str, List<String> list){
+	     for (String string : list){
+	        if (string.equalsIgnoreCase(str)){
+	            return true;
+	         }
+	     }
+	    return false;
+	  }
 
 	/*public static boolean isNumeric(String str) {
 		return str.matches("[+-]?\\d*(\\.\\d+)?");
