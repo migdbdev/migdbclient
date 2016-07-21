@@ -86,7 +86,10 @@ public class OneToOneMap {
 								dataObj.put(referencingTab, getReturn);
 							}*/
 							getReturn.remove(referencingCol);
-							dataObj.put(referencingTab, getReturn);
+							if(!getReturn.isEmpty()){
+								dataObj.put(referencingTab, getReturn);
+							}
+							
 							//values.add(dataObj);
 							/*System.out.println(dataObj);*/
 							valueArray.add(dataObj);
