@@ -109,6 +109,8 @@ public class OneToOneMap {
 			JSONObject json = new JSONObject();
 			String updatedson = json.toJSONString(collectionObject);
 			FileUtils.writeStringToFile(collectionFile, updatedson);
+			
+			System.out.println("One to one map");
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -147,6 +149,11 @@ public class OneToOneMap {
 							} else {
 								dataObj.put("isReferencedBy", "NO");
 							}*/
+							dataReturn = dataObj;
+							break;
+						} else {
+							dataObj.clear();
+							dataObj.put(referencingCol, null);
 							dataReturn = dataObj;
 						}
 					}
