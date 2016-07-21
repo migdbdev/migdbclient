@@ -255,9 +255,7 @@
             <artifactId>scalacache-lrumap_2.11</artifactId>
             <version>0.8.1</version>
         </dependency>
-
-
-        <dependency>
+		<dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
@@ -280,6 +278,6 @@
             <artifactId>jersey-client</artifactId>
             <version>1.19.1</version>
         </dependency>
-
+		
     </dependencies>
 </project>

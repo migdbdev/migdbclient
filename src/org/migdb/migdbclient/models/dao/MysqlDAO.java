@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.migdb.migdbclient.controllers.dbconnector.MySQLDbConnManager;
 import org.migdb.migdbclient.models.dto.ColumnsDTO;
@@ -101,6 +103,29 @@ public class MysqlDAO {
 			dbConnManager.closeConnection(dbConn);
 		}
 		return count;
+	}
+	
+	public ArrayList<ColumnsDTO> getDataTypeCount(String host, int port, String database, String username, String password, String table) {
+		ArrayList<ColumnsDTO> dataType = null;
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection(host, port, database, username, password);
+			String query = "select DATA_TYPE,COUNT(DATA_TYPE) from information_schema.columns where table_schema = '"+database+"' and table_name='"+table+"' GROUP BY DATA_TYPE";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ResultSet rs = ps.executeQuery();
+			dataType = new ArrayList<ColumnsDTO>();
+			while (rs.next()) {
+				ColumnsDTO dto = new ColumnsDTO();
+				dto.setDATA_TYPE(rs.getString(1));
+				dto.setDATA_TYPE_COUNT(rs.getInt(2));
+				dataType.add(dto);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
+		return dataType;
 	}
 
 	public ArrayList<RelationshiptypeDTO> getRelationshipType(String host, int port, String database, String username,

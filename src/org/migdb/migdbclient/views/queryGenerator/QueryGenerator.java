@@ -20,6 +20,8 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
 
 /**
@@ -28,7 +30,9 @@ import javafx.scene.input.MouseEvent;
  */
 public class QueryGenerator implements Initializable {
 	
-	@FXML ComboBox<String> collectionListComboBox;
+	@FXML private ComboBox<String> collectionListComboBox;
+	@FXML private RadioButton findRadioButton;
+	@FXML private RadioButton findOneRadioButton;
 
 	/**
 	 * Initialize method Called to initialize a controller after its root
@@ -40,10 +44,16 @@ public class QueryGenerator implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
-		List<String> mongoCollections = getMongoCollections();
-		for(String collections : mongoCollections){
-			/*collectionListComboBox.geti*/
+		ArrayList<String> mongoCollections = (ArrayList<String>) getMongoCollections();
+		for(int i = 0; i < mongoCollections.size(); i++){
+			collectionListComboBox.getItems().add(mongoCollections.get(i));
 		}
+		collectionListComboBox.getSelectionModel().select(0);
+		
+		//Set toggle group to radio button
+		final ToggleGroup radioGroup = new ToggleGroup();
+		findRadioButton.setToggleGroup(radioGroup);
+		findOneRadioButton.setToggleGroup(radioGroup);
 
 	}
 
