@@ -13,6 +13,7 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.alter.Alter;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.insert.Insert;
@@ -38,6 +39,7 @@ public class QueryConverterController {
 	private void convert() {
 
 		String sqlQuery = sqlQueryTxt.getText().replace("\n", " ").replace("\t", " ");
+		System.out.println(sqlQuery);
 		
 		try {
 			Statement statement = CCJSqlParserUtil.parse(sqlQuery);
@@ -50,6 +52,9 @@ public class QueryConverterController {
 			} else if(statement instanceof CreateTable){
 				CreateTable createStatement = (CreateTable) statement;
 				mongoQuery = convertCreateTable(createStatement);
+			} else if(statement instanceof Alter) {
+				Alter alterStatement = (Alter) statement;
+				mongoQuery = convertAlterTable(alterStatement);
 			}
 
 			mongoQueryTxt.setText(mongoQuery);
@@ -104,7 +109,7 @@ public class QueryConverterController {
 					pairs.put(def.getColumnName(), "<Value"+(i+1)+">");
 				}
 			} else if(containsCaseInsensitive(dataType, dateTypes)) {
-				pairs.put(def.getColumnName(), "ISODate(\"<Value"+(i+1)+">\")");
+				pairs.put(def.getColumnName(), "new Date(\"<Value"+(i+1)+">\")");
 			} else {
 				pairs.put(def.getColumnName(), "\"<Value"+(i+1)+">\"");
 			}
@@ -118,6 +123,14 @@ public class QueryConverterController {
 		return mongoQuery;
 	}
 	
+	private String convertAlterTable(Alter alterStatement) {
+		String operation = alterStatement.getOperation();
+		System.out.println(operation);
+		if(operation.equalsIgnoreCase("add")) {
+		}
+		String mongoQuery = "";
+		return mongoQuery;
+	}
 	
 	public boolean containsCaseInsensitive(String str, List<String> list){
 	     for (String string : list){
