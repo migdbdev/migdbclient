@@ -16,6 +16,9 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.alter.Alter;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.create.table.ForeignKeyIndex;
+import net.sf.jsqlparser.statement.create.table.Index;
+import net.sf.jsqlparser.statement.create.table.NamedConstraint;
 import net.sf.jsqlparser.statement.insert.Insert;
 
 public class QueryConverterController {
@@ -94,6 +97,7 @@ public class QueryConverterController {
 		
 		Table table = createStatement.getTable();
 		List<ColumnDefinition> colDef = createStatement.getColumnDefinitions();
+		List<Index> indexes = createStatement.getIndexes();
 		
 		LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
 		
@@ -112,14 +116,25 @@ public class QueryConverterController {
 				pairs.put(def.getColumnName(), "new Date(\"<Value"+(i+1)+">\")");
 			} else {
 				pairs.put(def.getColumnName(), "\"<Value"+(i+1)+">\"");
-			}
-
-			System.out.println(def.getColDataType());
-			
+			}			
 		}
+		
+		for(int i=0; i<indexes.size();i++) {
+			Index index = indexes.get(i);
+			String keyType = index.getType();
+			if(keyType.equalsIgnoreCase("foreign key")) {
+				ForeignKeyIndex fk = (ForeignKeyIndex) index;
+				LinkedHashMap<String, Object> fkPairs = new LinkedHashMap<String, Object>();
+				fkPairs.put("$ref", fk.getTable().getName());
+				fkPairs.put("$id", "ObjectId(\"<Id_Value>\")");
+				pairs.put(fk.getColumnsNames().get(0), fkPairs);
+				System.out.println(fk.getReferencedColumnNames());
+			}
+		}
+		
 		String mongoQuery = "db.createCollection(\""+table.getName()+"\") \n\n OR \n\n"
-		+"db."+table.getName()+".insert("+pairs.toString().replace("=", ":").replace(",", ",\n\t")
-		.replace("{", "{\n\t").replace("}", "\n}").replace(" ", "")+")";
+		+"db."+table.getName()+".insert("+pairs.toString().replace("$", "\t$").replace("=", ":").replace(",", ",\n\t")
+		.replace("{", "{\n\t").replace("}", "\n}").replace("},", "\t},").replace(" ", "")+")";
 		return mongoQuery;
 	}
 	
