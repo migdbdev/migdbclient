@@ -5,8 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.apache.commons.collections.map.HashedMap;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
@@ -17,13 +15,18 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.alter.Alter;
+import net.sf.jsqlparser.statement.create.index.CreateIndex;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.ForeignKeyIndex;
 import net.sf.jsqlparser.statement.create.table.Index;
-import net.sf.jsqlparser.statement.create.table.NamedConstraint;
+import net.sf.jsqlparser.statement.drop.Drop;
 import net.sf.jsqlparser.statement.insert.Insert;
 
+/**
+ * @author Malki
+ *
+ */
 public class QueryConverterController {
 
 	@FXML
@@ -61,6 +64,12 @@ public class QueryConverterController {
 			} else if(statement instanceof Alter) {
 				Alter alterStatement = (Alter) statement;
 				mongoQuery = convertAlterTable(alterStatement);
+			} else if(statement instanceof CreateIndex) {
+				CreateIndex indexStatement = (CreateIndex) statement;
+				mongoQuery = convertCreateIndex(indexStatement,sqlQuery);
+			} else if(statement instanceof Drop) {
+				Drop dropStatement = (Drop) statement;
+				mongoQuery = convertDropTable(dropStatement);
 			}
 
 			mongoQueryTxt.setText(mongoQuery);
@@ -70,6 +79,12 @@ public class QueryConverterController {
 		} 
 	}
 	
+	
+	/**
+	 * Converts a MySQL insert statement into MongoDB insert statement
+	 * @param insertStatement
+	 * @return
+	 */
 	private String convertInsert(Insert insertStatement) {
 		Table table = insertStatement.getTable();
 		List<Column> columnList = insertStatement.getColumns();
@@ -96,6 +111,10 @@ public class QueryConverterController {
 		return mongoQuery;
 	}
 	
+	/**
+	 * @param createStatement
+	 * @return
+	 */
 	private String convertCreateTable(CreateTable createStatement) {
 		
 		Table table = createStatement.getTable();
@@ -140,35 +159,94 @@ public class QueryConverterController {
 		return mongoQuery;
 	}
 	
+	/**
+	 * @param alterStatement
+	 * @return
+	 */
 	private String convertAlterTable(Alter alterStatement) {
 		
 		String mongoQuery = "";
 		
 		String operation = alterStatement.getOperation();
 		Table table = alterStatement.getTable();
+		
 		if(operation.equalsIgnoreCase("add")) {
-			Pair pair;
+			Pair<String, Object> pair;
 			String dataType = alterStatement.getDataType().toString();
 			if(containsCaseInsensitive(dataType, numberTypes)) {
 				if(dataType.equalsIgnoreCase("int")) {
-					pair = new Pair(alterStatement.getColumnName(),"NumberInt(\"<Value>\")");
+					pair = new Pair<String, Object>(alterStatement.getColumnName(),"NumberInt(\"<Value>\")");
 				} else if(dataType.equalsIgnoreCase("bigint")) {
-					pair = new Pair(alterStatement.getColumnName(),"NumberLong(\"<Value>\")");
+					pair = new Pair<String, Object>(alterStatement.getColumnName(),"NumberLong(\"<Value>\")");
 				} else {
-					pair = new Pair(alterStatement.getColumnName(),"<Value>");
+					pair = new Pair<String, Object>(alterStatement.getColumnName(),"<Value>");
 				}
 			} else if(containsCaseInsensitive(dataType, dateTypes)) {
-				pair = new Pair(alterStatement.getColumnName(),"new ISODate()");
+				pair = new Pair<String, Object>(alterStatement.getColumnName(),"new ISODate()");
 			} else {
-				pair = new Pair(alterStatement.getColumnName(),"\"<Value>\"");
-			}
+				pair = new Pair<String, Object>(alterStatement.getColumnName(),"\"<Value>\"");
+			}		
 			mongoQuery = "db."+table.getName()+".update( \n\t{ }, \n\t{ $set: { "+pair.toString()
 			.replace("=", ":")+" } }, \n\t{ multi: true } \n)";
+			
+		} else if (operation.equalsIgnoreCase("drop")) {
+			mongoQuery = "db."+table.getName()+".update( \n\t{ }, \n\t{ $unset: { "+alterStatement.getColumnName()
+			+": \"\" } }, \n\t{ multi: true } \n)";
 		}
 		
 		return mongoQuery;
 	}
 	
+	/**
+	 * @param indexStatement
+	 * @return
+	 */
+	private String convertCreateIndex(CreateIndex indexStatement, String sqlQuery) {
+
+		String[] indexFields = sqlQuery.substring(sqlQuery.indexOf("(")+1, sqlQuery.indexOf(")")).split(",");
+		
+		Table table = indexStatement.getTable();
+		Index index = indexStatement.getIndex();
+		String indexName = index.getName();
+		List<String> columns = index.getColumnsNames();
+		
+		LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+		
+		for(int i=0; i<columns.size(); i++) {
+			String column = columns.get(i);
+			int order = 1;
+			for(String col: indexFields) {
+				if(col.contains(column)) {
+					if(col.toLowerCase().endsWith("desc")) {
+						order = -1;
+					}
+				}
+			}
+			pairs.put(column, order);
+		}
+
+		String mongoQuery = "db."+table.getName()+".createIndex( \n\t"+pairs.toString().replace("=", ":")
+				.replace("{", "{ ").replace("}", " }")+", \n\t{ name:\""+indexName+"\" } \n)";
+		return mongoQuery;
+	}
+	
+	/**
+	 * @param dropStatement
+	 * @return
+	 */
+	private String convertDropTable(Drop dropStatement) {
+		
+		Table table = dropStatement.getName();
+		
+		String mongoQuery = "db."+table.getName()+".drop()";
+		return mongoQuery;
+	}
+	
+	/**
+	 * @param str
+	 * @param list
+	 * @return
+	 */
 	public boolean containsCaseInsensitive(String str, List<String> list){
 	     for (String string : list){
 	        if (string.equalsIgnoreCase(str)){
