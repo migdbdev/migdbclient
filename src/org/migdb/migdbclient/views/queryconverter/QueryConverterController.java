@@ -5,9 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.apache.commons.collections.map.HashedMap;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Pair;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
@@ -128,7 +131,6 @@ public class QueryConverterController {
 				fkPairs.put("$ref", fk.getTable().getName());
 				fkPairs.put("$id", "ObjectId(\"<Id_Value>\")");
 				pairs.put(fk.getColumnsNames().get(0), fkPairs);
-				System.out.println(fk.getReferencedColumnNames());
 			}
 		}
 		
@@ -139,11 +141,31 @@ public class QueryConverterController {
 	}
 	
 	private String convertAlterTable(Alter alterStatement) {
-		String operation = alterStatement.getOperation();
-		System.out.println(operation);
-		if(operation.equalsIgnoreCase("add")) {
-		}
+		
 		String mongoQuery = "";
+		
+		String operation = alterStatement.getOperation();
+		Table table = alterStatement.getTable();
+		if(operation.equalsIgnoreCase("add")) {
+			Pair pair;
+			String dataType = alterStatement.getDataType().toString();
+			if(containsCaseInsensitive(dataType, numberTypes)) {
+				if(dataType.equalsIgnoreCase("int")) {
+					pair = new Pair(alterStatement.getColumnName(),"NumberInt(\"<Value>\")");
+				} else if(dataType.equalsIgnoreCase("bigint")) {
+					pair = new Pair(alterStatement.getColumnName(),"NumberLong(\"<Value>\")");
+				} else {
+					pair = new Pair(alterStatement.getColumnName(),"<Value>");
+				}
+			} else if(containsCaseInsensitive(dataType, dateTypes)) {
+				pair = new Pair(alterStatement.getColumnName(),"new ISODate()");
+			} else {
+				pair = new Pair(alterStatement.getColumnName(),"\"<Value>\"");
+			}
+			mongoQuery = "db."+table.getName()+".update( \n\t{ }, \n\t{ $set: { "+pair.toString()
+			.replace("=", ":")+" } }, \n\t{ multi: true } \n)";
+		}
+		
 		return mongoQuery;
 	}
 	
