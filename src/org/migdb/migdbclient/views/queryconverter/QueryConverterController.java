@@ -5,8 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.apache.commons.collections.map.HashedMap;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
@@ -21,7 +19,6 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.ForeignKeyIndex;
 import net.sf.jsqlparser.statement.create.table.Index;
-import net.sf.jsqlparser.statement.create.table.NamedConstraint;
 import net.sf.jsqlparser.statement.insert.Insert;
 
 public class QueryConverterController {
@@ -146,24 +143,29 @@ public class QueryConverterController {
 		
 		String operation = alterStatement.getOperation();
 		Table table = alterStatement.getTable();
+		
 		if(operation.equalsIgnoreCase("add")) {
-			Pair pair;
+			Pair<String, Object> pair;
 			String dataType = alterStatement.getDataType().toString();
 			if(containsCaseInsensitive(dataType, numberTypes)) {
 				if(dataType.equalsIgnoreCase("int")) {
-					pair = new Pair(alterStatement.getColumnName(),"NumberInt(\"<Value>\")");
+					pair = new Pair<String, Object>(alterStatement.getColumnName(),"NumberInt(\"<Value>\")");
 				} else if(dataType.equalsIgnoreCase("bigint")) {
-					pair = new Pair(alterStatement.getColumnName(),"NumberLong(\"<Value>\")");
+					pair = new Pair<String, Object>(alterStatement.getColumnName(),"NumberLong(\"<Value>\")");
 				} else {
-					pair = new Pair(alterStatement.getColumnName(),"<Value>");
+					pair = new Pair<String, Object>(alterStatement.getColumnName(),"<Value>");
 				}
 			} else if(containsCaseInsensitive(dataType, dateTypes)) {
-				pair = new Pair(alterStatement.getColumnName(),"new ISODate()");
+				pair = new Pair<String, Object>(alterStatement.getColumnName(),"new ISODate()");
 			} else {
-				pair = new Pair(alterStatement.getColumnName(),"\"<Value>\"");
-			}
+				pair = new Pair<String, Object>(alterStatement.getColumnName(),"\"<Value>\"");
+			}		
 			mongoQuery = "db."+table.getName()+".update( \n\t{ }, \n\t{ $set: { "+pair.toString()
 			.replace("=", ":")+" } }, \n\t{ multi: true } \n)";
+			
+		} else if (operation.equalsIgnoreCase("drop")) {
+			mongoQuery = "db."+table.getName()+".update( \n\t{ }, \n\t{ $unset: { "+alterStatement.getColumnName()
+			+": \"\" } }, \n\t{ multi: true } \n)";
 		}
 		
 		return mongoQuery;
