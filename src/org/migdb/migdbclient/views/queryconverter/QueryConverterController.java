@@ -20,6 +20,7 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.ForeignKeyIndex;
 import net.sf.jsqlparser.statement.create.table.Index;
+import net.sf.jsqlparser.statement.drop.Drop;
 import net.sf.jsqlparser.statement.insert.Insert;
 
 /**
@@ -66,6 +67,9 @@ public class QueryConverterController {
 			} else if(statement instanceof CreateIndex) {
 				CreateIndex indexStatement = (CreateIndex) statement;
 				mongoQuery = convertCreateIndex(indexStatement,sqlQuery);
+			} else if(statement instanceof Drop) {
+				Drop dropStatement = (Drop) statement;
+				mongoQuery = convertDropTable(dropStatement);
 			}
 
 			mongoQueryTxt.setText(mongoQuery);
@@ -220,11 +224,21 @@ public class QueryConverterController {
 			}
 			pairs.put(column, order);
 		}
-		
-		System.out.println(pairs);
 
 		String mongoQuery = "db."+table.getName()+".createIndex( \n\t"+pairs.toString().replace("=", ":")
 				.replace("{", "{ ").replace("}", " }")+", \n\t{ name:\""+indexName+"\" } \n)";
+		return mongoQuery;
+	}
+	
+	/**
+	 * @param dropStatement
+	 * @return
+	 */
+	private String convertDropTable(Drop dropStatement) {
+		
+		Table table = dropStatement.getName();
+		
+		String mongoQuery = "db."+table.getName()+".drop()";
 		return mongoQuery;
 	}
 	
