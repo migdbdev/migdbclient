@@ -15,12 +15,17 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.alter.Alter;
+import net.sf.jsqlparser.statement.create.index.CreateIndex;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.ForeignKeyIndex;
 import net.sf.jsqlparser.statement.create.table.Index;
 import net.sf.jsqlparser.statement.insert.Insert;
 
+/**
+ * @author Malki
+ *
+ */
 public class QueryConverterController {
 
 	@FXML
@@ -58,6 +63,9 @@ public class QueryConverterController {
 			} else if(statement instanceof Alter) {
 				Alter alterStatement = (Alter) statement;
 				mongoQuery = convertAlterTable(alterStatement);
+			} else if(statement instanceof CreateIndex) {
+				CreateIndex indexStatement = (CreateIndex) statement;
+				mongoQuery = convertCreateIndex(indexStatement,sqlQuery);
 			}
 
 			mongoQueryTxt.setText(mongoQuery);
@@ -67,6 +75,12 @@ public class QueryConverterController {
 		} 
 	}
 	
+	
+	/**
+	 * Converts a MySQL insert statement into MongoDB insert statement
+	 * @param insertStatement
+	 * @return
+	 */
 	private String convertInsert(Insert insertStatement) {
 		Table table = insertStatement.getTable();
 		List<Column> columnList = insertStatement.getColumns();
@@ -93,6 +107,10 @@ public class QueryConverterController {
 		return mongoQuery;
 	}
 	
+	/**
+	 * @param createStatement
+	 * @return
+	 */
 	private String convertCreateTable(CreateTable createStatement) {
 		
 		Table table = createStatement.getTable();
@@ -137,6 +155,10 @@ public class QueryConverterController {
 		return mongoQuery;
 	}
 	
+	/**
+	 * @param alterStatement
+	 * @return
+	 */
 	private String convertAlterTable(Alter alterStatement) {
 		
 		String mongoQuery = "";
@@ -171,6 +193,46 @@ public class QueryConverterController {
 		return mongoQuery;
 	}
 	
+	/**
+	 * @param indexStatement
+	 * @return
+	 */
+	private String convertCreateIndex(CreateIndex indexStatement, String sqlQuery) {
+
+		String[] indexFields = sqlQuery.substring(sqlQuery.indexOf("(")+1, sqlQuery.indexOf(")")).split(",");
+		
+		Table table = indexStatement.getTable();
+		Index index = indexStatement.getIndex();
+		String indexName = index.getName();
+		List<String> columns = index.getColumnsNames();
+		
+		LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+		
+		for(int i=0; i<columns.size(); i++) {
+			String column = columns.get(i);
+			int order = 1;
+			for(String col: indexFields) {
+				if(col.contains(column)) {
+					if(col.toLowerCase().endsWith("desc")) {
+						order = -1;
+					}
+				}
+			}
+			pairs.put(column, order);
+		}
+		
+		System.out.println(pairs);
+
+		String mongoQuery = "db."+table.getName()+".createIndex( \n\t"+pairs.toString().replace("=", ":")
+				.replace("{", "{ ").replace("}", " }")+", \n\t{ name:\""+indexName+"\" } \n)";
+		return mongoQuery;
+	}
+	
+	/**
+	 * @param str
+	 * @param list
+	 * @return
+	 */
 	public boolean containsCaseInsensitive(String str, List<String> list){
 	     for (String string : list){
 	        if (string.equalsIgnoreCase(str)){
