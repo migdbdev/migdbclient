@@ -10,6 +10,9 @@ import org.migdb.migdbclient.models.dto.ConnectorDTO;
 import org.migdb.migdbclient.models.dto.ReferenceDTO;
 import org.migdb.migdbclient.models.dto.RelationshiCardinalityDTO;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 public class SqliteDAO {
 
 	SqliteDbConnManager dbConnManager = null;
@@ -39,6 +42,13 @@ public class SqliteDAO {
 			dbConnManager.closeConnection(dbConn);
 		}
 	}
+	
+	// Query operators table designing code
+	/*CREATE TABLE `QUERY_OPERATORS` (
+			`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+			`Operation`	TEXT NOT NULL,
+			`Symbol`	TEXT NOT NULL
+		);*/
 
 	/**
 	 * Insert connection informations into database
@@ -180,6 +190,26 @@ public class SqliteDAO {
 			dbConnManager.closeConnection(dbConn);
 		}
 		return references;
+	}
+	
+	public ObservableList<String> getQueryOperators(){
+		ObservableList<String> operators = FXCollections.observableArrayList();
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection();
+			String query = "SELECT * FROM QUERY_OPERATORS";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()){
+				operators.add(rs.getString(3));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
+		return operators;
+		
 	}
 
 }
