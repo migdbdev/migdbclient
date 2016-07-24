@@ -4,12 +4,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.controlsfx.control.CheckTreeView;
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -21,7 +24,6 @@ import org.migdb.migdbclient.controllers.mapping.onetomany.OneToManyMapper;
 import org.migdb.migdbclient.controllers.mapping.onetoone.OneToOneMap;
 import org.migdb.migdbclient.models.modificationevaluator.TableReference;
 import org.migdb.migdbclient.resources.CenterLayout;
-import org.migdb.migdbclient.resources.LayoutInstance;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -32,12 +34,15 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.CheckBoxTreeCell;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
+import javafx.scene.shape.Line;  
+import javafx.scene.image.Image;  
+import javafx.scene.image.ImageView;  
 
 public class ModificationEvaluator {
 
@@ -69,6 +74,7 @@ public class ModificationEvaluator {
 		}
 
 		generateTreeView();
+		addRelationships();
 		
 		nextButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
@@ -96,35 +102,25 @@ public class ModificationEvaluator {
 				ArrayList<String> removedColArr = new ArrayList<String>();
 				CheckBoxTreeItem<String> item = (CheckBoxTreeItem<String>) e.getSource();
 				CheckBoxTreeItem<String> parent = (CheckBoxTreeItem<String>) item.getParent();
-				System.out.println(parent.isSelected());
 				if ((!parent.isSelected()) && (!removedTbls.contains(parent.getValue()))) {
-					System.out.println("table deleted " + parent.getValue());
 					removedTbls.add(parent.getValue());
 				} else if (parent.isSelected()) {
 					if (removedTbls.contains(parent.getValue())) {
 						removedTbls.remove(parent.getValue());
-						System.out.println("table added back " + parent.getValue());
 					}
 					if ((!item.isSelected()) && (item.isLeaf())) {
 						if (removedCols.isEmpty()) {
-							System.out.println("removed col object added " + item.getValue());
 							removedColArr.add(item.getValue());
 							removedCols.put(item.getParent().getValue(), removedColArr);
-							System.out.println("Removed col " + removedCols.toString());
 						} else {
 							if (removedCols.keySet().contains(parent.getValue())) {
-								System.out.println("removed col added " + item.getValue());
 								removedCols.get(parent.getValue()).add(item.getValue());
-								System.out.println(parent.getValue() + " " + removedCols.get(parent.getValue()));
 							} else {
-								System.out.println("removed col obj added " + item.getValue());
 								removedColArr.add(item.getValue());
 								removedCols.put(item.getParent().getValue(), removedColArr);
-								System.out.println("Removed col " + removedCols.toString());
 							}
 						}
 					} else if ((item.isSelected()) && (item.isLeaf())) {
-						System.out.println("removed col added back " + item.getValue());
 						for (String colKey : removedCols.keySet()) {
 							if (colKey.equals(item.getParent().getValue())) {
 								removedCols.get(colKey).remove(item.getValue());
@@ -139,6 +135,11 @@ public class ModificationEvaluator {
 	private void generateTreeView() {
 
 		try {
+			
+			List<String> numberTypes = Arrays.asList("tinyint","smallint","mediumint","int","bigint","float"
+					,"double","decimal");
+			
+			List<String> dateTypes = Arrays.asList("date","datetime","timestamp","time","year");
 
 			tableList = (JSONArray) jsonObject.get("tables");
 
@@ -174,14 +175,31 @@ public class ModificationEvaluator {
 					}
 				}
 
+				String primaryKey = (String) tbl.get("primaryKey");
+				
 				while (cols.hasNext()) {
-					String colName = (String) cols.next().get("colName");
+					JSONObject col = cols.next();
+					String colName = (String) col.get("colName");
+					String dataType = (String) col.get("dataType");
 					CheckBoxTreeItem<String> column = new CheckBoxTreeItem<String>(colName);
+					
+					if(colName.equals(primaryKey)) {
+						Glyph pk = new Glyph("FontAwesome", FontAwesome.Glyph.KEY).color(Color.GOLD);
+						pk.setId("pk"+name);
+						column.setGraphic(pk);
+					} else if(containsCaseInsensitive(dataType,numberTypes)){
+						column.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.CALCULATOR));
+					} else if(containsCaseInsensitive(dataType,numberTypes)) {
+						column.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.CALENDAR_ALT));
+					} else {
+						column.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.FILE_TEXT_ALT));
+					}
+					
 					column.setSelected(true);
 					root.getChildren().add(column);
 					column.addEventHandler(column.checkBoxSelectionChangedEvent(), getCheckBoxSelectionHandler());
 				}
-
+				
 				CheckTreeView<String> treeView = new CheckTreeView<String>(root);
 				treeView.setEditable(true);
 				treeView.setCellFactory(CheckBoxTreeCell.forTreeView());
@@ -219,13 +237,11 @@ public class ModificationEvaluator {
 		for (TableReference ref : fkArr) {
 			String referencedTab = ref.getReferencedTab();
 			String referencingTab = ref.getReferencingTab();
-			System.out.println(referencedTab + " " + referencingTab);
 			Line line = new Line();
 
 			for (Node tbl : modificationEvalAnchor.getChildren()) {
 				TreeView<String> tree = (TreeView) tbl;
 				String tableName = tree.getRoot().getValue().toString();
-				System.out.println(tableName);
 				if (tableName.equals(referencedTab)) {
 					line.setStartX(tree.getLayoutX() + tree.getMaxWidth());
 					line.setStartY(tree.getLayoutY() + (tree.getMaxHeight() / 2));
@@ -244,6 +260,27 @@ public class ModificationEvaluator {
 
 		for (Line line : lines) {
 			modificationEvalAnchor.getChildren().add(line);
+		}
+	}
+	
+	private void addRelationships() {
+		
+		for (TableReference ref : fkArr) {
+			String referencingTab = ref.getReferencingTab();
+			String referencingCol = ref.getReferencingCol();
+			for (Node tbl : modificationEvalAnchor.getChildren()) {
+				TreeView<String> tree = (TreeView) tbl;
+				String tableName = tree.getRoot().getValue().toString();
+				if (tableName.equals(referencingTab)) {
+					for(TreeItem<String> item: tree.getRoot().getChildren()) {
+						if(item.getValue().equals(referencingCol)) {
+							if(item.getGraphic().getId() == null) {
+								item.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.KEY).color(Color.SILVER));
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -275,8 +312,7 @@ public class ModificationEvaluator {
 					for (String colKey : removedCols.keySet()) {
 						if (colKey.equals(name)) {
 							int removedColCount = removedCols.get(colKey).size();
-							// if all columns are deleted, add to tables to be
-							// removed
+							// if all columns are deleted, add to tables to be removed
 							if (removedColCount == colCount) {
 								removedTbls.add(name);
 							} else {
@@ -290,68 +326,44 @@ public class ModificationEvaluator {
 								for (int k = 0; k < colCount; k++) {
 									JSONObject column = (JSONObject) cols.get(k);
 									String colName = (String) column.get("colName");
-									System.out.println("Colllll " + colName);
 									// check current column is to be removed
 									if (removedCols.get(colKey).contains(colName)) {
-										// remove column if the current table
-										// object does not have references
+										// remove column if the current table object does not have references
 										if (referenceByList.isEmpty()) {
-											System.out.println("Adding col index " + k + " because list is empty");
 											colIndex.add(k);
 											removedColList.add(cols.get(k));
-											System.out.println("size " + colIndex.size());
 										} else {
 											List<String> colReferencingTbls = new ArrayList<String>();
-											// loop through the reference
-											// objects
+											// loop through the reference objects
 											for (int l = 0; l < referenceByList.size(); l++) {
 												JSONObject ref = (JSONObject) referenceByList.get(l);
 												String refCol = (String) ref.get("referencedCol");
-												// check whether current column
-												// is referenced
+												// check whether current column is referenced
 												if (refCol.equals(colName)) {
 													String refByTbl = (String) ref.get("referencingTab");
-													// if referencing table is
-													// not removed, check for
-													// referencing column
-													// removal
+													// if referencing table is not removed, check for referencing column removal
 													if (!removedTbls.contains(refByTbl)) {
-														System.out.println("table not deleted");
 														String refByCol = (String) ref.get("referencingCol");
 														if (removedCols.keySet().contains(refByTbl)) {
 															for (String c : removedCols.keySet()) {
-																System.out.println(c);
 																if (c.equals(refByTbl)) {
-																	System.out.println(
-																			"referencing table found " + refByTbl);
-																	System.out.println(
-																			"referencing deleted columns found "
-																					+ refByTbl);
 																	// if referencing column in not removed, add constraint error
 																	if (!removedCols.get(c).contains(refByCol)) {
-																		System.out.println("column not deleted");
 																		colReferencingTbls.add(refByTbl);
 																	} else {
 																		// add ref object
 																		removedRefByList.add(referenceByList.get(l));
-																		System.out.println("removed RefBy 1 "
-																				+ removedRefByList.toJSONString());
-																		System.out.println("refByIndex "+refByIndex.toString());
 																		if(!refByIndex.contains(l)) {
-																			System.out.println("not existing "+l);
 																			refByIndex.add(l);
-																		} else {
-																			System.out.println("existing "+l);
-																		}
-																	}																	}
+																		} 
+																	}	
+																}
 															}
 														} else {
 															colReferencingTbls.add(refByTbl);
 														}
 
 														if (colReferencingTbls.isEmpty()) {
-															System.out.println("Adding col index " + k
-																	+ " because there are no references");
 															if (!colIndex.contains(k)) {
 																colIndex.add(k);
 																removedColList.add(cols.get(k));
@@ -359,8 +371,6 @@ public class ModificationEvaluator {
 														} else {
 															// add ref object
 															removedRefByList.add(referenceByList.get(l));
-															System.out.println("removed RefBy 2 "
-																	+ removedRefByList.toJSONString());
 															if(!refByIndex.contains(l)) {
 																refByIndex.add(l);
 															}
@@ -368,8 +378,6 @@ public class ModificationEvaluator {
 													}
 												} else {
 													if (!colIndex.contains(k)) {
-														System.out.println("Adding col index " + k
-																+ " because table index exists");
 														colIndex.add(k);
 														removedColList.add(cols.get(k));
 													}
@@ -391,11 +399,11 @@ public class ModificationEvaluator {
 									for (int x = 0; x < referenceFromList.size(); x++) {
 										JSONObject ref = (JSONObject) referenceFromList.get(x);
 										String refCol = (String) ref.get("referencingCol");
-										System.out.println("refCol " + refCol);
+
 										for (int y = 0; y < colIndex.size(); y++) {
 											JSONObject col = (JSONObject) cols.get(colIndex.get(y));
 											String colName = (String) col.get("colName");
-											System.out.println("Col index col " + colName);
+
 											if (refCol.equals(colName)) {
 												System.out.println("is equal");
 												removedRefFromList.add(ref);
@@ -406,28 +414,18 @@ public class ModificationEvaluator {
 										}
 									}
 									removedColIndex.put(i, colIndex);
-									System.out.println("refByIndex "+refByIndex.size());
+
 									if(!refByIndex.isEmpty()) {
-										System.out.println("adding "+i+" "+refByIndex);
 										removedRefByIndex.put(i, refByIndex);
 									}
 									if(!refFromIndex.isEmpty()) {
 										removedRefFromIndex.put(i, refFromIndex);
 									}
-									System.out.println("removedRefByIndex "+removedRefByIndex);
-									System.out.println("removedColIndex : " + removedColIndex.toString());
+
 									putJsonArray(name,removedColList,"columns");
 									putJsonArray(name,removedRefByList,"referencedBy");
 									putJsonArray(name,removedRefFromList,"referencingFrom");
-									/*JSONObject delColObject = new JSONObject();
-									delColObject.put("name", name);
-									delColObject.put("columns", removedColList);
-									delColObject.put("referencedBy", removedRefByList);*/
-									System.out.println("removedRefByList " + removedRefByList);
-									/*delColObject.put("referencingFrom", removedRefFromList);*/
-									System.out.println("removedRefFromList " + removedRefFromList);
-									//deletedItems.add(delColObject);
-									System.out.println("Deleted Items : " + deletedItems.toJSONString());
+
 								}
 							}
 						}
@@ -449,19 +447,14 @@ public class ModificationEvaluator {
 										String refByCol = (String) ref.get("referencingCol");
 										if (removedCols.keySet().contains(refByTbl)) {
 											for (String c : removedCols.keySet()) {
-												System.out.println("inside else" + c);
 												if (c.equals(refByTbl)) {
 													if (removedCols.get(c).contains(refByCol)) {
 														// add ref object
 														removedRefByList.add(referenceByList.get(l));
-														System.out.println("else i "+i);
-														System.out.println("else removedRefByIndex "+removedRefByIndex.containsKey(i));
 														if(!removedRefByIndex.containsKey(i)) {
-															System.out.println("else adding refByIndex "+l);
 															refByIndex.add(l);
 														} else {
 															if(!removedRefByIndex.get(i).contains(l)) {
-																System.out.println("else adding "+i+ " "+l);
 																removedRefByIndex.get(i).add(l);
 															}
 														}
@@ -476,11 +469,7 @@ public class ModificationEvaluator {
 								if(!refByIndex.isEmpty()) {
 									removedRefByIndex.put(i, refByIndex);
 								}
-								/*JSONObject delColObject = new JSONObject();
-								delColObject.put("name", name);
-								delColObject.put("referencedBy", removedRefByList);*/
-								System.out.println("else "+removedRefByIndex);
-							/*	deletedItems.add(delColObject);*/
+
 								putJsonArray(name,removedRefByList,"referencedBy");
 							}
 						}
@@ -526,7 +515,6 @@ public class ModificationEvaluator {
 				boolean isFirst = true;
 				for (int tableIndex : removedTblIndex) {
 					if (isFirst) {
-						System.out.println("Removed" + tableList.get(tableIndex));
 						tableList.remove(tableIndex);
 						isFirst = false;
 					} else {
@@ -541,7 +529,6 @@ public class ModificationEvaluator {
 					String primaryKey = (String) table.get("primaryKey");
 					boolean isFirstCol = true;
 					for (int colIndex : removedColIndex.get(colKeyIndex)) {
-						System.out.println("Removed" + cols.get(colIndex));
 						JSONObject column = (JSONObject) cols.get(colIndex);
 						if (primaryKey.equals(column.get("colName"))) {
 							table.remove("primaryKey");
@@ -557,9 +544,6 @@ public class ModificationEvaluator {
 					table.remove("colCount");
 					table.put("colCount", colCount);
 				}
-				
-				System.out.println("deleting refBy "+removedRefByIndex);
-				System.out.println("deleting ref from "+removedRefFromIndex);
 				
 				for (int refKeyIndex : removedRefByIndex.keySet()) {
 					JSONObject table = (JSONObject) tableList.get(refKeyIndex);
@@ -626,7 +610,7 @@ public class ModificationEvaluator {
 	
 	
 	private void putJsonField(String name, String value, String keyName) {
-		System.out.println("inside putJsonField "+deletedItems.size());
+
 		if(deletedItems.isEmpty()) {
 			JSONObject newObject = new JSONObject();
 			newObject.put("name", name);
@@ -648,34 +632,24 @@ public class ModificationEvaluator {
 	}
 	
 	private void putJsonArray(String name, JSONArray object, String keyName) {
-		System.out.println("inside putJsonArray "+deletedItems.size());
+
 		int delItemsSize = deletedItems.size();
 		if(deletedItems.isEmpty()) {
-			System.out.println("empty");
 			JSONObject newObject = new JSONObject();
 			newObject.put("name", name);
 			newObject.put(keyName, object);
 			deletedItems.add(newObject);
-			System.out.println("adding new object "+newObject);
-			System.out.println("inside deletedItems "+deletedItems);
 		} else {
-			System.out.println("not empty "+deletedItems);
 			boolean isFound = false;
 			for(int i =0; i < delItemsSize; i++) {
-				System.out.println("i "+i);
-				System.out.println("deletedItems "+deletedItems);
 				JSONObject obj = (JSONObject) deletedItems.get(i);
 				String tableName = (String) obj.get("name");
 				if(tableName.equals(name)) {
 					isFound = true;
-					System.out.println("is equal "+name+" "+tableName);
 					JSONArray objArr = (JSONArray) obj.get(keyName);
-					System.out.println("objArr "+objArr);
 					if((objArr == null) || (objArr.isEmpty())) {
-						System.out.println("arr empty");
 						obj.put(keyName, object);
 					} else {
-						System.out.println("object size "+object.size()+ " object "+object);
 						for(int k=0; k<object.size(); k++) {
 							objArr.add(object.get(k));
 						}
@@ -686,11 +660,17 @@ public class ModificationEvaluator {
 				JSONObject newObject = new JSONObject();
 				newObject.put("name", name);
 				newObject.put(keyName, object);
-				deletedItems.add(newObject);
-				System.out.println("adding new object else "+newObject);
 			}
-			System.out.println("inside deletedItems "+deletedItems);
 		}
 	}
+	
+	public boolean containsCaseInsensitive(String str, List<String> list){
+	     for (String string : list){
+	        if (string.equalsIgnoreCase(str)){
+	            return true;
+	         }
+	     }
+	    return false;
+	  }
 
 }

@@ -3,7 +3,7 @@ package org.migdb.migdbclient.config;
 public enum TreeviewSize {
 
 	TREEVIEWHEIGHT(200),
-	TREEVIEWIDTH(150),
+	TREEVIEWIDTH(155),
 	XSTART(10),
 	YSTART(10),
 	XSPACE(40),
