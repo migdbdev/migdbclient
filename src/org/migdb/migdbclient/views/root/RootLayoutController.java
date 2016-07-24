@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.migdb.migdbclient.config.FxmlPath;
+import org.migdb.migdbclient.config.ImagePath;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
@@ -27,6 +28,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
@@ -62,6 +64,14 @@ public class RootLayoutController implements Initializable {
 
 		CenterLayout.INSTANCE.setRoot(rootContainerAncpane);
 		LayoutInstance.INSTANCE.setSidebar(sideBarAnchorpane);
+		
+		connectionManagerLabel.setGraphic(new ImageView(ImagePath.TABDBCONNECTION.getPath()));
+		modificationEvaluatorLabel.setGraphic(new ImageView(ImagePath.TABMIGRATION.getPath()));
+		queryConverterLabel.setGraphic(new ImageView(ImagePath.TABCONVERTER.getPath()));
+		queryGeneratorLabel.setGraphic(new ImageView(ImagePath.TABGENERATOR.getPath()));
+		datamanagerLabel.setGraphic(new ImageView(ImagePath.TABDATAMANAGER.getPath()));
+		
+		
 		showConnectionManager();
 
 //		ObservableList<String> list;
