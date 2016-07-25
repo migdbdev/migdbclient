@@ -122,9 +122,9 @@ public class MySQLParser {
 										&& dtoColumn.getCOLUMN_NAME().equals(dtoReference.getColumnName())) {
 									/*jw.beginObject();*/
 									JSONObject referencingFromObj = new JSONObject();
-									referencingFromObj.put(JsonConstants.REFERENCEDCOLUMN.getJsonContant(), dtoColumn.getCOLUMN_NAME());
+									referencingFromObj.put(JsonConstants.REFERENCEDCOLUMN.getJsonContant(), dtoReference.getReferencedColumnName());
 									referencingFromObj.put(JsonConstants.REFERENCEDTABLE.getJsonContant(), dtoReference.getReferencedTableName());
-									referencingFromObj.put(JsonConstants.REFERENCINGCOLUMN.getJsonContant(), dtoReference.getReferencedColumnName());
+									referencingFromObj.put(JsonConstants.REFERENCINGCOLUMN.getJsonContant(), dtoReference.getColumnName());
 									
 									for(RelationshiCardinalityDTO rDto : dto){
 										if(dtoReference.getReferencedTableName().equals(rDto.getREFERENCED_TABLE_NAME()) && dtoReference.getReferencedColumnName().equals(rDto.getREFERENCED_COLUMN_NAME()) && dtoTable.getTableName().equals(rDto.getTABLE_NAME()) && dtoColumn.getCOLUMN_NAME().equals(rDto.getCOLUMN_NAME())){
