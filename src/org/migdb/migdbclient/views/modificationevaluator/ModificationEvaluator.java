@@ -23,26 +23,34 @@ import org.migdb.migdbclient.controllers.mapping.manytomany.ManyToMany;
 import org.migdb.migdbclient.controllers.mapping.onetomany.OneToManyMapper;
 import org.migdb.migdbclient.controllers.mapping.onetoone.OneToOneMap;
 import org.migdb.migdbclient.models.modificationevaluator.TableReference;
+import org.migdb.migdbclient.models.modificationevaluator.ForeignKeyReference;
 import org.migdb.migdbclient.resources.CenterLayout;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBoxTreeItem;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.CheckBoxTreeCell;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;  
-import javafx.scene.image.Image;  
-import javafx.scene.image.ImageView;  
+import javafx.scene.shape.Line;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class ModificationEvaluator {
 
@@ -74,7 +82,7 @@ public class ModificationEvaluator {
 		}
 
 		generateTreeView();
-		addRelationships();
+		//addRelationships();
 		
 		nextButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
@@ -94,6 +102,7 @@ public class ModificationEvaluator {
 		});
 
 	}
+	
 
 	EventHandler getCheckBoxSelectionHandler() {
 		return new EventHandler() {
@@ -176,6 +185,26 @@ public class ModificationEvaluator {
 				}
 
 				String primaryKey = (String) tbl.get("primaryKey");
+				JSONArray refFromList = (JSONArray) tbl.get("referencingFrom");
+				
+				List<String> fkColList = new ArrayList<String>();
+				List<ForeignKeyReference> fkList = new ArrayList<ForeignKeyReference>();
+				
+				if (!refFromList.isEmpty()) {
+					Iterator<JSONObject> refFromCols = refFromList.iterator();
+					
+					while (refFromCols.hasNext()) {
+						JSONObject ref = (JSONObject) refFromCols.next();
+						String referencingCol = (String) ref.get("referencingCol");
+						String referencedCol = (String) ref.get("referencedCol");
+						String referencedTbl = (String) ref.get("referencedTab");
+						String relationship = (String) ref.get("relationshipType");
+						
+						ForeignKeyReference fkRef = new ForeignKeyReference(name, referencingCol, referencedTbl, referencedCol, relationship);
+						fkList.add(fkRef);
+						fkColList.add(referencingCol);
+					}
+				}
 				
 				while (cols.hasNext()) {
 					JSONObject col = cols.next();
@@ -183,10 +212,32 @@ public class ModificationEvaluator {
 					String dataType = (String) col.get("dataType");
 					CheckBoxTreeItem<String> column = new CheckBoxTreeItem<String>(colName);
 					
-					if(colName.equals(primaryKey)) {
-						Glyph pk = new Glyph("FontAwesome", FontAwesome.Glyph.KEY).color(Color.GOLD);
-						pk.setId("pk"+name);
-						column.setGraphic(pk);
+					if(colName.equals(primaryKey) && fkColList.contains(colName)) {
+						Glyph bothKeys = new Glyph("FontAwesome", FontAwesome.Glyph.KEY).color(Color.GOLD).useGradientEffect();
+						for(ForeignKeyReference fkRef : fkList) {
+							if(fkRef.getReferencingCol().equals(colName)) {
+								String tooltip = "References "+fkRef.getReferencedCol()+" of "+fkRef.getReferencedTab()+" : "+fkRef.getRelationshipType();
+								Tooltip t = new Tooltip(tooltip);
+						        Tooltip.install(bothKeys,t);
+							}
+						}
+						bothKeys.setId("fk"+name+"-"+colName);
+						column.setGraphic(bothKeys);
+
+					} else if(colName.equals(primaryKey)) {
+						column.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.KEY).color(Color.GOLD));
+					}
+					else if(fkColList.contains(colName)) {
+						Glyph fk = new Glyph("FontAwesome", FontAwesome.Glyph.KEY).color(Color.SILVER);	  
+						for(ForeignKeyReference fkRef : fkList) {
+							if(fkRef.getReferencingCol().equals(colName)) {
+								String tooltip = "References "+fkRef.getReferencedCol()+" of "+fkRef.getReferencedTab()+" : "+fkRef.getRelationshipType();
+								Tooltip t = new Tooltip(tooltip);
+						        Tooltip.install(fk, t);
+							}
+						}
+						fk.setId("fk"+name+"-"+colName);
+						column.setGraphic(fk);						
 					} else if(containsCaseInsensitive(dataType,numberTypes)){
 						column.setGraphic(new Glyph("FontAwesome", FontAwesome.Glyph.CALCULATOR));
 					} else if(containsCaseInsensitive(dataType,numberTypes)) {
@@ -208,6 +259,53 @@ public class ModificationEvaluator {
 				treeView.setMaxWidth(TreeviewSize.TREEVIEWIDTH.getSize());
 				treeView.setLayoutX(x);
 				treeView.setLayoutY(y);
+				
+				treeView.setOnMouseClicked(new EventHandler<MouseEvent>()
+				{
+				    @Override
+				    public void handle(MouseEvent mouseEvent)
+				    {            
+				        if(mouseEvent.getClickCount() == 2 && (treeView.getSelectionModel().getSelectedItem().getGraphic().getId() != null))
+				        {
+				        	TreeItem<String> root = treeView.getRoot();
+				            TreeItem<String> item = treeView.getSelectionModel().getSelectedItem();
+
+				            final Stage dialog = new Stage();
+			                dialog.initModality(Modality.APPLICATION_MODAL);
+			                //dialog.initOwner(primaryStage);
+			                HBox dialogHbox = new HBox(30);
+			                dialogHbox.setPadding(new Insets(20, 0, 20, 20));
+			                
+			                //dialogVbox.getChildren().add(new Text("This is a Dialog "+item.getValue()));
+			                for(ForeignKeyReference fkRef : fkList) {
+								if(fkRef.getReferencingTab().equals(root.getValue()) && fkRef.getReferencingCol().equals(item.getValue())) {
+									VBox fieldsVbox = new VBox(20);
+									fieldsVbox.getChildren().addAll(new Label("Referencing Table"),new Label("Referncing Column"),
+											new Label("Referenced Table"),new Label("Refernced Column"),new Label("Relationship Type"));
+									
+									VBox valuesVbox = new VBox(20);
+									ComboBox<String> cmb = new ComboBox<String>();
+									cmb.getItems().addAll("One to One", "One to Many", "Many to Many");
+									if(fkRef.getRelationshipType().equals("OneToOne")) {
+										cmb.setValue("One to One");
+									} else if(fkRef.getRelationshipType().equals("OneToMany")) {
+										cmb.setValue("One to Many");
+									} else {
+										cmb.setValue("Many to Many");
+									}
+									valuesVbox.getChildren().addAll( new Label(fkRef.getReferencingTab()),new Label(fkRef.getReferencingCol()),
+											new Label(fkRef.getReferencedTab()), new Label(fkRef.getReferencedCol()), cmb);
+									
+									dialogHbox.getChildren().addAll(fieldsVbox,valuesVbox);
+								}
+							}
+			                
+			                Scene dialogScene = new Scene(dialogHbox, 300, 200);
+			                dialog.setScene(dialogScene);
+			                dialog.show();
+				        }
+				    }
+				});
 
 				modificationEvalAnchor.getChildren().add(treeView);
 
