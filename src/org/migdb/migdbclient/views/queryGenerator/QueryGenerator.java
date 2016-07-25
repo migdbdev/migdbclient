@@ -13,6 +13,7 @@ import java.util.Set;
 import org.bson.Document;
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
+import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.resources.ConnectionParameters;
 import org.migdb.migdbclient.resources.MongoDBResource;
 
@@ -44,6 +45,8 @@ public class QueryGenerator implements Initializable {
 	@FXML
 	private ComboBox<String> fieldListComboBox;
 	@FXML
+	private ComboBox<String> operatorsComboBox;
+	@FXML
 	private RadioButton findRadioButton;
 	@FXML
 	private RadioButton findOneRadioButton;
@@ -53,6 +56,8 @@ public class QueryGenerator implements Initializable {
 	private MongoDatabase db;
 	private String collectionFElementHolder;
 	private int counter;
+	
+	private SqliteDAO dao;
 
 	/**
 	 * Initialize method Called to initialize a controller after its root
@@ -132,6 +137,9 @@ public class QueryGenerator implements Initializable {
 
 			}
 		});
+		
+		dao = new SqliteDAO();
+		operatorsComboBox.getItems().addAll(dao.getQueryOperators());
 
 		// Set toggle group to radio button
 		final ToggleGroup radioGroup = new ToggleGroup();

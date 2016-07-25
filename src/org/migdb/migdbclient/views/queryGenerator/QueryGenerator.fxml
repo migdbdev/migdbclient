@@ -26,7 +26,7 @@
                                     <Separator layoutX="695.0" layoutY="14.0" orientation="VERTICAL" prefHeight="42.0" prefWidth="4.0" />
                                     <RadioButton fx:id="findOneRadioButton" layoutX="727.0" layoutY="27.0" mnemonicParsing="false" text="findOne" />
                                     <ComboBox fx:id="fieldListComboBox" layoutX="32.0" layoutY="94.0" prefWidth="150.0" promptText="Document's fields" />
-                                    <ComboBox layoutX="205.0" layoutY="94.0" prefWidth="150.0" promptText="Operators" />
+                                    <ComboBox fx:id="operatorsComboBox" layoutX="205.0" layoutY="94.0" prefWidth="150.0" promptText="Operators" />
                                     <TextField layoutX="376.0" layoutY="94.0" promptText="Value" />
                                     <RadioButton layoutX="557.0" layoutY="98.0" mnemonicParsing="false" text="AND" />
                                     <RadioButton layoutX="658.0" layoutY="98.0" mnemonicParsing="false" text="OR" />
