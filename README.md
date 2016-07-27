@@ -10,4 +10,4 @@ Ex : As a example if you need database structure json file you can follow this w
 <p><a href="http://migdbdev.github.io/migdbclient/">http://migdbdev.github.io/migdbclient/</a></p>
 
 <h1> JavaFX Dialogue Box </h1>
-<p>Refer link provided <a href = "http://code.makery.ch/blog/javafx-8-dialogs/">Click here</a> for adding JavaFX dialogue boxes</p>
+<p>Refer link provided <a href = "http://code.makery.ch/blog/javafx-dialogs-official/">Click here</a> for adding JavaFX dialogue boxes</p>
