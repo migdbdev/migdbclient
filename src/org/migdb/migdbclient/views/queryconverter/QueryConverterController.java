@@ -155,7 +155,7 @@ public class QueryConverterController {
 		
 		String mongoQuery = "db.createCollection(\""+table.getName()+"\") \n\n OR \n\n"
 		+"db."+table.getName()+".insert("+pairs.toString().replace("$", "\t$").replace("=", ":").replace(",", ",\n\t")
-		.replace("{", "{\n\t").replace("}", "\n}").replace("},", "\t},").replace(" ", "")+")";
+		.replace("{", "{\n\t").replace("}", "\n}").replace("},", "\t},")+")";
 		return mongoQuery;
 	}
 	
