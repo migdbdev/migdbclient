@@ -41,9 +41,10 @@
                                     <Label layoutX="309.0" layoutY="356.0" text="Skip" />
                                     <TextField fx:id="querySkipTextField" layoutX="376.0" layoutY="354.0" />
                                     <Label layoutX="590.0" layoutY="358.0" text="Sort" />
-                                    <TextField fx:id="querySortTextField" layoutX="666.0" layoutY="356.0" />
-                                    <Button fx:id="queryBuildButton" layoutX="237.0" layoutY="396.0" mnemonicParsing="false" text="Show query" />
-                                    <Button fx:id="queryExecuteButton" layoutX="430.0" layoutY="396.0" mnemonicParsing="false" text="Execute query" />
+                                    <ComboBox fx:id="querySortColumnComboBox" layoutX="652.0" layoutY="356.0" prefWidth="150.0" promptText="Select field" />
+                                    <ComboBox fx:id="querySortOrderComboBox" layoutX="805.0" layoutY="356.0" prefHeight="25.0" prefWidth="121.0" />
+                                    <Button fx:id="queryBuildButton" layoutX="237.0" layoutY="396.0" mnemonicParsing="false" styleClass="dark-blue" text="Show query" />
+                                    <Button fx:id="queryExecuteButton" layoutX="430.0" layoutY="396.0" mnemonicParsing="false" styleClass="dark-blue" text="Execute query" />
                                  </children></AnchorPane>
                         </content>
                       </Tab>
@@ -53,11 +54,6 @@
                         </content>
                       </Tab>
                         <Tab text="Text Search">
-                          <content>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                          </content>
-                        </Tab>
-                        <Tab text="DBRef">
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                           </content>
