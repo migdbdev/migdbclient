@@ -80,7 +80,9 @@ public class QueryGenerator implements Initializable {
 	@FXML
 	private TextField querySkipTextField;
 	@FXML
-	private TextField querySortTextField;
+	private ComboBox<String> querySortColumnComboBox;
+	@FXML
+	private ComboBox<String> querySortOrderComboBox;
 	@FXML
 	private TextArea outputQuery;
 	@FXML
@@ -164,10 +166,16 @@ public class QueryGenerator implements Initializable {
 			queryCollectionListComboBox.getSelectionModel().select(0);
 		});
 
+		// Fill queryFieldListComboBox and querySortColumnComboBox Combo boxe's when document combo box change
 		if (!selectedDocument.isEmpty()) {
 			queryFieldListComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 			queryFieldListComboBox.getSelectionModel().select(0);
+			querySortColumnComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 		}
+		
+		// Fill querySortOrderComboBox Combo box when ui loaded
+		querySortOrderComboBox.getItems().addAll("Ascending","Descending");
+		querySortOrderComboBox.getSelectionModel().select(0);
 
 		/**
 		 * collectionListComboBox's value changing event action
@@ -180,9 +188,11 @@ public class QueryGenerator implements Initializable {
 				counter++;
 				selectedDocument = collectionDocument.find().into(new ArrayList<Document>());
 				queryFieldListComboBox.getItems().clear();
+				querySortColumnComboBox.getItems().clear();
 				if (!selectedDocument.isEmpty()) {
 					queryFieldListComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 					queryFieldListComboBox.getSelectionModel().select(0);
+					querySortColumnComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 				}
 
 			}
@@ -222,20 +232,34 @@ public class QueryGenerator implements Initializable {
 			String dbName = queryDatabaseListComboBox.getSelectionModel().getSelectedItem();
 			String collection = queryCollectionListComboBox.getSelectionModel().getSelectedItem();
 			RadioButton queryType = (RadioButton) radioGroup.selectedToggleProperty().get().getToggleGroup().getSelectedToggle();
-			String method = queryType.getText().equals("find") ? "."+queryType.getText()+"().pretty()" : "."+queryType.getText()+"()" ;
 			ObservableList<QueryDocumentDTO> param = (ObservableList<QueryDocumentDTO>) queryParametersTableView.getItems();
+			String query = "";
+			
+			for(QueryDocumentDTO dto : param) {
+				dao = new SqliteDAO();
+				System.out.println(dto.getOperators().toString());
+				String operator = dao.getQueryOperatorsKeyword(dto.getOperators().toString());
+				System.out.println("Operstro : "+operator);
+				System.out.println(operator.equals("") ? "empty" : "Not empty");
+				if(dto.getCondition() == null || dto.getCondition().equals("AND")){
+					operator = (operator.equals("")) ? "{"+dto.getField()+":"+dto.getValues()+"}" : "{"+dto.getField()+":{"+operator+":"+dto.getValues()+"}}";
+					System.out.println(operator);
+					query = operator;
+				}
+				
+			}
+			
+			String method = queryType.getText().equals("find") ? "."+queryType.getText()+"("+query+").pretty()" : "."+queryType.getText()+"("+query+")" ;
 			String limit = (!queryLimitTextField.getText().isEmpty()) ? ".limit("+queryLimitTextField.getText()+")" : "";
 			String skip = (!querySkipTextField.getText().isEmpty()) ? ".skip("+querySkipTextField.getText()+")" : "";
-			String sort = (!querySortTextField.getText().isEmpty()) ? ".sort({"+querySortTextField.getText()+"})" : "";
+			String sortOrder = (querySortOrderComboBox.getSelectionModel().getSelectedItem()).equals("Ascending") ? "1" : "-1";
+			String sort = (querySortColumnComboBox.getSelectionModel().getSelectedItem() != null) ? ".sort({"+querySortColumnComboBox.getSelectionModel().getSelectedItem()+":"+sortOrder+"})" : "" ;
 			
 			
-			String Structure = "db."+collection+method+limit+skip+sort;
+			String Structure = "db."+collection+method+limit+sort+skip;
 
 			outputQuery.clear();
 			outputQuery.appendText(Structure);
-			/*for(QueryDocumentDTO dt : param) {
-				outputQuery.appendText("\t\t"+dt.getField()+" -- "+dt.getOperators()+" -- "+dt.getValues()+" -- "+dt.getCondition()+"\n");
-			}*/
 			
 		} catch (Exception e) {
 			e.printStackTrace();
