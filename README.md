@@ -1,6 +1,16 @@
 <h1> NOTIFICATION HANDLING </h1>
 <p> There is a java class called MigDBNotifier under the utils package. And there is a two constructors available each for custom notification and defined notification. This notification class referes Tray Tester.jar. The jar was added into the project. The referencing link is <a href"https://github.com/PlusHaze/TrayNotification">https://github.com/PlusHaze/TrayNotification</a> .</p>
+
 <p> Sample code is in client application under the SetupNewDBConnectionController.java in line #188 </p>
+
+<p>String title = "Attention";
+			String message = "Successfully created!";
+			AnimationType animationType = AnimationType.FADE;
+			NotificationType notificationType = NotificationType.SUCCESS;
+			int showTime = 6;
+			
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			notification.createDefinedNotification();</p>
 
 <h1> JavaFX Dialogue Box </h1>
 <p>Refer link provided <a href = "http://code.makery.ch/blog/javafx-dialogs-official/">Click here</a> for adding JavaFX dialogue boxes</p>
