@@ -9,6 +9,7 @@ import org.migdb.migdbclient.config.ConnectionManager;
 import org.migdb.migdbclient.controllers.dbconnector.MySQLDbConnManager;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
+import org.migdb.migdbclient.resources.util.MigDBNotifier;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -21,6 +22,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import tray.animations.AnimationType;
+import tray.notification.NotificationType;
 
 public class SetupNewDBConnectionController implements Initializable {
 
@@ -181,10 +184,24 @@ public class SetupNewDBConnectionController implements Initializable {
 		if (result == true) {
 			Stage stage = (Stage) submitButton.getScene().getWindow();
 			stage.close();
-			Notifications.create().title("Attention").text("Succesfully inserted").darkStyle().showInformation();
+			
+			String title = "Attention";
+			String message = "Successfully created!";
+			AnimationType animationType = AnimationType.FADE;
+			NotificationType notificationType = NotificationType.SUCCESS;
+			int showTime = 6;
+			
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			notification.createDefinedNotification();
 		} else {
-			Notifications.create().title("Attention").text("It seems to be error. Please check again").darkStyle()
-					.showError();
+			String title = "Attention";
+			String message = "It seems to be error. Please check again!";
+			AnimationType animationType = AnimationType.FADE;
+			NotificationType notificationType = NotificationType.ERROR;
+			int showTime = 6;
+			
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			notification.createDefinedNotification();
 		}
 	}
 
@@ -199,13 +216,26 @@ public class SetupNewDBConnectionController implements Initializable {
 		int port = Integer.parseInt(mysqlPortTextField.getText());
 		dbConn = dao.getConnection(host, port, database, username, password);
 		if (dbConn != null) {
-			Notifications.create().darkStyle().title("MySQL Connection Status")
-					.text("A successful MySQL connection was made with" + "\n"
-							+ " the parameters defined for this connection")
-					.showInformation();
+			
+			String title = "MySQL Connection Status";
+			String message = "A successful MySQL connection was made with" + "\n"
+							+ " the parameters defined for this connection!";
+			AnimationType animationType = AnimationType.FADE;
+			NotificationType notificationType = NotificationType.SUCCESS;
+			int showTime = 6;
+			
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			notification.createDefinedNotification();
+			
 		} else {
-			Notifications.create().darkStyle().title("MySQL Connection Status")
-					.text("Can't connect to MySQL server with defined parameters").showError();
+			String title = "MySQL Connection Status";
+			String message = "Can't connect to MySQL server with defined parameters!";
+			AnimationType animationType = AnimationType.FADE;
+			NotificationType notificationType = NotificationType.ERROR;
+			int showTime = 6;
+			
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			notification.createDefinedNotification();
 		}
 		dao.closeConnection(dbConn);
 	}
