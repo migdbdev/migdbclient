@@ -3,14 +3,14 @@
 
 <p> Sample code is in client application under the SetupNewDBConnectionController.java in line #188 </p>
 
-<p>String title = "Attention";
-			String message = "Successfully created!";
-			AnimationType animationType = AnimationType.FADE;
-			NotificationType notificationType = NotificationType.SUCCESS;
-			int showTime = 6;
-			
-			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
-			notification.createDefinedNotification();</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;String title = "Attention";</br>
+   &nbsp;&nbsp;&nbsp;&nbsp;String message = "Successfully created!";</br>
+   &nbsp;&nbsp;&nbsp;&nbsp;AnimationType animationType = AnimationType.FADE;</br>
+   &nbsp;&nbsp;&nbsp;&nbsp;NotificationType notificationType = NotificationType.SUCCESS;</br>
+   &nbsp;&nbsp;&nbsp;&nbsp;int showTime = 6;</br>
+			</br>
+   &nbsp;&nbsp;&nbsp;&nbsp;MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);</br>
+   &nbsp;&nbsp;&nbsp;&nbsp;notification.createDefinedNotification();</p></br>
 
 <h1> JavaFX Dialogue Box </h1>
 <p>Refer link provided <a href = "http://code.makery.ch/blog/javafx-dialogs-official/">Click here</a> for adding JavaFX dialogue boxes</p>
