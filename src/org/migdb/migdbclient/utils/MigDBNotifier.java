@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.migdb.migdbclient.resources.util;
+package org.migdb.migdbclient.utils;
 
 import javafx.scene.image.Image;
 import javafx.scene.paint.Paint;

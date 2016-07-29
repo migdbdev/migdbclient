@@ -9,7 +9,7 @@ import org.migdb.migdbclient.config.ConnectionManager;
 import org.migdb.migdbclient.controllers.dbconnector.MySQLDbConnManager;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
-import org.migdb.migdbclient.resources.util.MigDBNotifier;
+import org.migdb.migdbclient.utils.MigDBNotifier;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
