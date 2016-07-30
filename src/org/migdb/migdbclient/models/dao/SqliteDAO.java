@@ -211,5 +211,25 @@ public class SqliteDAO {
 		return operators;
 		
 	}
+	
+	public String getQueryOperatorsKeyword(String keyword){
+		String keywords = null;
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection();
+			String query = "SELECT keyword FROM QUERY_OPERATORS WHERE Symbol = '"+keyword+"'";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ResultSet rs = ps.executeQuery();
+			if(rs.next()){
+				keywords = rs.getString(1);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
+		return keywords;
+		
+	}
 
 }

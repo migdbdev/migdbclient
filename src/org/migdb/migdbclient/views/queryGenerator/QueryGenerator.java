@@ -37,17 +37,15 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.util.Callback;
-import javafx.util.converter.DefaultStringConverter;
 
 /**
  * @author KANI
@@ -80,7 +78,9 @@ public class QueryGenerator implements Initializable {
 	@FXML
 	private TextField querySkipTextField;
 	@FXML
-	private TextField querySortTextField;
+	private ComboBox<String> querySortColumnComboBox;
+	@FXML
+	private ComboBox<String> querySortOrderComboBox;
 	@FXML
 	private TextArea outputQuery;
 	@FXML
@@ -105,7 +105,7 @@ public class QueryGenerator implements Initializable {
 	private SqliteDAO dao;
 
 	private ObservableList<QueryDocumentDTO> queryParams = FXCollections.observableArrayList();
-	private final ObservableList<String> conditionList = FXCollections.observableArrayList("AND","OR");
+	private final ObservableList<String> conditionList = FXCollections.observableArrayList("AND", "OR");
 
 	/**
 	 * Initialize method Called to initialize a controller after its root
@@ -116,7 +116,7 @@ public class QueryGenerator implements Initializable {
 	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		
+
 		queryParametersTableView.setEditable(true);
 
 		// Set database name list to the databaseListComboBox
@@ -134,7 +134,8 @@ public class QueryGenerator implements Initializable {
 		// Set values to variable when initializing a UI
 		MongoDBResource.INSTANCE.setDB(queryDatabaseListComboBox.getSelectionModel().getSelectedItem().toString());
 		db = MongoDBResource.INSTANCE.getDatabase();
-		collectionDocument = db.getCollection(queryCollectionListComboBox.getSelectionModel().getSelectedItem().toString());
+		collectionDocument = db
+				.getCollection(queryCollectionListComboBox.getSelectionModel().getSelectedItem().toString());
 		selectedDocument = collectionDocument.find().into(new ArrayList<Document>());
 
 		/**
@@ -146,9 +147,10 @@ public class QueryGenerator implements Initializable {
 			@Override
 			public void changed(ObservableValue ov, String t, String t1) {
 				counter = 0;
-				collectionFElementHolder = getCollectionOf(queryDatabaseListComboBox.getSelectionModel().getSelectedItem())
-						.get(0).toString();
-				MongoDBResource.INSTANCE.setDB(queryDatabaseListComboBox.getSelectionModel().getSelectedItem().toString());
+				collectionFElementHolder = getCollectionOf(
+						queryDatabaseListComboBox.getSelectionModel().getSelectedItem()).get(0).toString();
+				MongoDBResource.INSTANCE
+						.setDB(queryDatabaseListComboBox.getSelectionModel().getSelectedItem().toString());
 				db = MongoDBResource.INSTANCE.getDatabase();
 				collectionDocument = db
 						.getCollection(queryCollectionListComboBox.getSelectionModel().getSelectedItem().toString());
@@ -164,10 +166,17 @@ public class QueryGenerator implements Initializable {
 			queryCollectionListComboBox.getSelectionModel().select(0);
 		});
 
+		// Fill queryFieldListComboBox and querySortColumnComboBox Combo boxe's
+		// when document combo box change
 		if (!selectedDocument.isEmpty()) {
 			queryFieldListComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 			queryFieldListComboBox.getSelectionModel().select(0);
+			querySortColumnComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 		}
+
+		// Fill querySortOrderComboBox Combo box when ui loaded
+		querySortOrderComboBox.getItems().addAll("Ascending", "Descending");
+		querySortOrderComboBox.getSelectionModel().select(0);
 
 		/**
 		 * collectionListComboBox's value changing event action
@@ -180,9 +189,11 @@ public class QueryGenerator implements Initializable {
 				counter++;
 				selectedDocument = collectionDocument.find().into(new ArrayList<Document>());
 				queryFieldListComboBox.getItems().clear();
+				querySortColumnComboBox.getItems().clear();
 				if (!selectedDocument.isEmpty()) {
 					queryFieldListComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 					queryFieldListComboBox.getSelectionModel().select(0);
+					querySortColumnComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 				}
 
 			}
@@ -198,45 +209,68 @@ public class QueryGenerator implements Initializable {
 
 		// addQueryParamButton button click event
 		addQueryParamButton.addEventHandler(ActionEvent.ACTION, event -> addQueryParam());
-		
+
 		// queryBuildButton button click event
 		queryBuildButton.addEventHandler(ActionEvent.ACTION, event -> queryBuild());
-		
+
 		// Initialize queryParameters table view
 		fieldTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("Field"));
 		operatorsTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("Operators"));
 		valuesTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("Values"));
 		conditionTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("condition"));
 		conditionTableColumn.setCellFactory(ComboBoxTableCell.forTableColumn(conditionList));
-		conditionTableColumn.setOnEditCommit(new EventHandler<CellEditEvent<QueryDocumentDTO,String>>() {
+		conditionTableColumn.setOnEditCommit(new EventHandler<CellEditEvent<QueryDocumentDTO, String>>() {
 			@Override
 			public void handle(CellEditEvent<QueryDocumentDTO, String> t) {
-				((QueryDocumentDTO)t.getTableView().getItems().get(t.getTablePosition().getRow())).setCondition(t.getNewValue());
+				((QueryDocumentDTO) t.getTableView().getItems().get(t.getTablePosition().getRow()))
+						.setCondition(t.getNewValue());
 			};
 		});
-		
+
 	}
 
 	public void queryBuild() {
 		try {
 			String dbName = queryDatabaseListComboBox.getSelectionModel().getSelectedItem();
 			String collection = queryCollectionListComboBox.getSelectionModel().getSelectedItem();
-			RadioButton queryType = (RadioButton) radioGroup.selectedToggleProperty().get().getToggleGroup().getSelectedToggle();
-			String method = queryType.getText().equals("find") ? "."+queryType.getText()+"().pretty()" : "."+queryType.getText()+"()" ;
-			ObservableList<QueryDocumentDTO> param = (ObservableList<QueryDocumentDTO>) queryParametersTableView.getItems();
-			String limit = (!queryLimitTextField.getText().isEmpty()) ? ".limit("+queryLimitTextField.getText()+")" : "";
-			String skip = (!querySkipTextField.getText().isEmpty()) ? ".skip("+querySkipTextField.getText()+")" : "";
-			String sort = (!querySortTextField.getText().isEmpty()) ? ".sort({"+querySortTextField.getText()+"})" : "";
-			
-			
-			String Structure = "db."+collection+method+limit+skip+sort;
+			RadioButton queryType = (RadioButton) radioGroup.selectedToggleProperty().get().getToggleGroup()
+					.getSelectedToggle();
+			ObservableList<QueryDocumentDTO> param = (ObservableList<QueryDocumentDTO>) queryParametersTableView
+					.getItems();
+			String query = "";
+
+			for (QueryDocumentDTO dto : param) {
+				dao = new SqliteDAO();
+				System.out.println(dto.getOperators().toString());
+				String operator = dao.getQueryOperatorsKeyword(dto.getOperators().toString());
+				System.out.println("Operstro : " + operator);
+				System.out.println(operator.equals("") ? "empty" : "Not empty");
+				if (dto.getCondition() == null || dto.getCondition().equals("AND")) {
+					operator = (operator.equals("")) ? "{" + dto.getField() + ":" + dto.getValues() + "}"
+							: "{" + dto.getField() + ":{" + operator + ":" + dto.getValues() + "}}";
+					System.out.println(operator);
+					query = operator;
+				}
+
+			}
+
+			String method = queryType.getText().equals("find") ? "." + queryType.getText() + "(" + query + ").pretty()"
+					: "." + queryType.getText() + "(" + query + ")";
+			String limit = (!queryLimitTextField.getText().isEmpty()) ? ".limit(" + queryLimitTextField.getText() + ")"
+					: "";
+			String skip = (!querySkipTextField.getText().isEmpty()) ? ".skip(" + querySkipTextField.getText() + ")"
+					: "";
+			String sortOrder = (querySortOrderComboBox.getSelectionModel().getSelectedItem()).equals("Ascending") ? "1"
+					: "-1";
+			String sort = (querySortColumnComboBox.getSelectionModel().getSelectedItem() != null)
+					? ".sort({" + querySortColumnComboBox.getSelectionModel().getSelectedItem() + ":" + sortOrder + "})"
+					: "";
+
+			String Structure = "db." + collection + method + limit + sort + skip;
 
 			outputQuery.clear();
 			outputQuery.appendText(Structure);
-			/*for(QueryDocumentDTO dt : param) {
-				outputQuery.appendText("\t\t"+dt.getField()+" -- "+dt.getOperators()+" -- "+dt.getValues()+" -- "+dt.getCondition()+"\n");
-			}*/
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -364,80 +398,81 @@ public class QueryGenerator implements Initializable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Inner class for create custom combo box in table cell
+	 * 
 	 * @author KANI
 	 *
 	 */
 	class ComboBoxCell extends TableCell<QueryDocumentDTO, String> {
 
-	    private ComboBox<String> comboBox;
-	    private final ObservableList<String> typData
-        = FXCollections.observableArrayList("AND","OR");
+		private ComboBox<String> comboBox;
+		private final ObservableList<String> typData = FXCollections.observableArrayList("AND", "OR");
 
-	    public ComboBoxCell() {
-	    }
+		public ComboBoxCell() {
+		}
 
-	    @Override
-	    public void startEdit() {
-	        super.startEdit();
+		@Override
+		public void startEdit() {
+			super.startEdit();
 
-	        if (comboBox == null) {
-	            createComboBox();
-	        }
+			if (comboBox == null) {
+				createComboBox();
+			}
 
-	        setGraphic(comboBox);
-	        setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-	    }
+			setGraphic(comboBox);
+			setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+		}
 
-	    @Override
-	    public void cancelEdit() {
-	        super.cancelEdit();
+		@Override
+		public void cancelEdit() {
+			super.cancelEdit();
 
-	        setText(String.valueOf(getItem()));
-	        setContentDisplay(ContentDisplay.TEXT_ONLY);
-	    }
+			setText(String.valueOf(getItem()));
+			setContentDisplay(ContentDisplay.TEXT_ONLY);
+		}
 
-	    public void updateItem(String item, boolean empty) {
-	        super.updateItem(item, empty);
+		public void updateItem(String item, boolean empty) {
+			super.updateItem(item, empty);
 
-	        if (empty) {
-	            setText(null);
-	            setGraphic(null);
-	        } else {
-	            if (isEditing()) {
-	                if (comboBox != null) {
-	                    comboBox.setValue(getString());
-	                }
-	                setGraphic(comboBox);
-	                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-	            } else {
-	                setText(getString());
-	                setContentDisplay(ContentDisplay.TEXT_ONLY);
-	            }
-	        }
-	    }
+			if (empty) {
+				setText(null);
+				setGraphic(null);
+			} else {
+				if (isEditing()) {
+					if (comboBox != null) {
+						comboBox.setValue(getString());
+					}
+					setGraphic(comboBox);
+					setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+				} else {
+					setText(getString());
+					setContentDisplay(ContentDisplay.TEXT_ONLY);
+				}
+			}
+		}
 
-	    private void createComboBox() {
-	        // ClassesController.getLevelChoice() is the observable list of String
-	        comboBox = new ComboBox<>(typData);
-	        comboBox.setMinWidth(this.getWidth() - this.getGraphicTextGap()*2);
-	        comboBox.setOnKeyPressed(new EventHandler<KeyEvent>() {
-	            @Override
-	            public void handle(KeyEvent t) {
-	                if (t.getCode() == KeyCode.ENTER) {
-	                    commitEdit(comboBox.getSelectionModel().getSelectedItem());
-	                } else if (t.getCode() == KeyCode.ESCAPE) {
-	                    cancelEdit();
-	                }
-	            }
-	        });
-	    }
+		private void createComboBox() {
+			// ClassesController.getLevelChoice() is the observable list of
+			// String
+			comboBox = new ComboBox<>(typData);
+			comboBox.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
+			comboBox.setOnKeyPressed(new EventHandler<KeyEvent>() {
+				@Override
+				public void handle(KeyEvent t) {
+					if (t.getCode() == KeyCode.ENTER) {
+						commitEdit(comboBox.getSelectionModel().getSelectedItem());
+					} else if (t.getCode() == KeyCode.ESCAPE) {
+						cancelEdit();
+					}
+				}
+			});
+		}
 
-	    private String getString() {
-	        return getItem() == null ? "" : getItem().toString();
-	    }
+		private String getString() {
+			return getItem() == null ? "" : getItem().toString();
+		}
 	}
 
 }
