@@ -1,6 +1,8 @@
 <h1> NOTIFICATION HANDLING </h1>
 <p> There is a java class called MigDBNotifier under the utils package. And there is a two constructors available each for custom notification and defined notification. This notification class referes Tray Tester.jar. The jar was added into the project. The referencing link is <a href"https://github.com/PlusHaze/TrayNotification">https://github.com/PlusHaze/TrayNotification</a> .</p>
 
+<p><span style="color:red"> Note </span> : Add tray tester.jar into your classpath</p>
+
 <p> Sample code is in client application under the SetupNewDBConnectionController.java in line #188 </p>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp;String title = "Attention";</br>
