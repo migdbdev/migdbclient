@@ -54,6 +54,11 @@ import javafx.scene.shape.Line;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/**
+ * @author Malki
+ *
+ */
+
 public class ModificationEvaluator {
 
 	@FXML
@@ -84,7 +89,6 @@ public class ModificationEvaluator {
 		}
 
 		generateTreeView();
-		//addRelationships();
 		
 		nextButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
@@ -106,6 +110,10 @@ public class ModificationEvaluator {
 	}
 	
 
+	/**
+	 * CheckBoxTreeItem uncheck event
+	 * @return
+	 */
 	EventHandler getCheckBoxSelectionHandler() {
 		return new EventHandler() {
 			@Override
@@ -143,6 +151,9 @@ public class ModificationEvaluator {
 		};
 	}
 
+	/**
+	 * Method to dynamically generate table structure tree view
+	 */
 	private void generateTreeView() {
 
 		try {
@@ -325,6 +336,12 @@ public class ModificationEvaluator {
 		}
 	}
 	
+	/**
+	 * Method to show foreign key relationship details
+	 * @param mouseEvent
+	 * @param treeView
+	 * @param fkList
+	 */
 	private void showFkDetails(MouseEvent mouseEvent, CheckTreeView<String> treeView, List<ForeignKeyReference> fkList) {
 		
 		if(mouseEvent.getClickCount() == 2 && (treeView.getSelectionModel().getSelectedItem().getGraphic().getId() != null)) {
@@ -342,7 +359,7 @@ public class ModificationEvaluator {
              
 			HBox detailHbox = new HBox(30);
 			ComboBox<String> cmb = new ComboBox<String>();
-			cmb.getItems().addAll("One to One", "One to Many", "Many to Many");
+			cmb.getItems().addAll("One To One", "One To Many", "Many To Many");
 			int index = -1;
 
 			for(ForeignKeyReference fkRef : fkList) {
@@ -352,13 +369,13 @@ public class ModificationEvaluator {
 								new Label("Referenced Table"),new Label("Refernced Column"),new Label("Relationship Type"));
 						
 					VBox valuesVbox = new VBox(20);
-					
+
 					if(fkRef.getRelationshipType().equals("OneToOne")) {
-						cmb.setValue("One to One");
+						cmb.setValue("One To One");
 					} else if(fkRef.getRelationshipType().equals("OneToMany")) {
-						cmb.setValue("One to Many");
+						cmb.setValue("One To Many");
 					} else {
-						cmb.setValue("Many to Many");
+						cmb.setValue("Many To Many");
 					}
 					
 					valuesVbox.getChildren().addAll( new Label(fkRef.getReferencingTab()),new Label(fkRef.getReferencingCol()),
@@ -377,18 +394,7 @@ public class ModificationEvaluator {
                     -> {
                         String newValue = cmb.getValue();
                         changeRelationship(fkList.get(fkIndex),newValue);
-                      /*  String jsonExp = "$.tables[?(@.name=='dependant')]";
-                        net.minidev.json.JSONArray objj = JsonPath.read(jsonObject, jsonExp);
-                        String j = objj.toJSONString();
-                        JSONArray a;
-						try {
-							a = (JSONArray) parser.parse(j);
-							 System.out.println(a);
-						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}*/
-                       
+                        dialog.close();
                     }
             );
              
@@ -400,11 +406,51 @@ public class ModificationEvaluator {
 		}
 	}
 	
+	/**
+	 * Method to change relationship type
+	 * @param fkRef
+	 * @param newValue
+	 */
 	private void changeRelationship(ForeignKeyReference fkRef, String newValue) {
-		System.out.println("Old relationship : "+fkRef.getRelationshipType());
-		System.out.println("new relationship : "+newValue);
+
+		for (int i = 0; i < tableList.size(); i++) {
+			JSONObject table = (JSONObject) tableList.get(i);
+			String name = (String) table.get("name");
+			if(fkRef.getReferencingTab().equals(name)) {
+				JSONArray refFromList = (JSONArray) table.get("referencingFrom");
+				for(int k = 0; k < refFromList.size(); k++) {
+					JSONObject refFrom = (JSONObject) refFromList.get(k);
+					if(refFrom.get("referencingCol").equals(fkRef.getReferencingCol())) {
+						refFrom.put("relationshipType", newValue.replace(" ", ""));
+					}
+				}
+			} else if(fkRef.getReferencedTab().equals(name)) {
+				JSONArray refByList = (JSONArray) table.get("referencedBy");
+				for(int k = 0; k < refByList.size(); k++) {
+					JSONObject refBy = (JSONObject) refByList.get(k); 
+					if( refBy.get("referencingCol").equals(fkRef.getReferencingCol()) && refBy.get("referencingTab").equals(fkRef.getReferencingTab())
+							&& refBy.get("referencedCol").equals(fkRef.getReferencedCol()) ) {
+						refBy.put("relationshipType", newValue.replace(" ", ""));
+					}
+				}
+			}
+		}
+
+		JSONObject json = new JSONObject();
+		String updatedson = json.toJSONString(jsonObject);
+		try {
+			FileUtils.writeStringToFile(file, updatedson);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		generateTreeView();
 	}
 
+	/**
+	 * Method to evaluate user selection/removal of tables/columns
+	 */
 	@FXML
 	private void evaluate() {
 		try {
@@ -526,7 +572,6 @@ public class ModificationEvaluator {
 											String colName = (String) col.get("colName");
 
 											if (refCol.equals(colName)) {
-												System.out.println("is equal");
 												removedRefFromList.add(ref);
 												if(!refFromIndex.contains(x)) {
 													refFromIndex.add(x);
@@ -715,6 +760,15 @@ public class ModificationEvaluator {
 		}
 	}
 
+	
+	/**
+	 * Method to generate user error message
+	 * @param message
+	 * @param itemName
+	 * @param itemType
+	 * @param tblArray
+	 * @return
+	 */
 	private String setMessage(String message, String itemName, String itemType, List<String> tblArray) {
 		message += "Cannot remove " + itemType + " " + itemName + " due to foreign key reference(s) on " + "table(s) ";
 		boolean isFirst = true;
@@ -730,6 +784,12 @@ public class ModificationEvaluator {
 	}
 	
 	
+	/**
+	 * Method to add json key value pair into objects of deleted json file
+	 * @param name
+	 * @param value
+	 * @param keyName
+	 */
 	private void putJsonField(String name, String value, String keyName) {
 
 		if(deletedItems.isEmpty()) {
@@ -752,6 +812,12 @@ public class ModificationEvaluator {
 		}
 	}
 	
+	/**
+	 * Method to add json objects into json arrays of deleted json file
+	 * @param name
+	 * @param object
+	 * @param keyName
+	 */
 	private void putJsonArray(String name, JSONArray object, String keyName) {
 
 		int delItemsSize = deletedItems.size();
@@ -785,6 +851,13 @@ public class ModificationEvaluator {
 		}
 	}
 	
+	
+	/**
+	 * Method for case insensitive arrayList.contains
+	 * @param str
+	 * @param list
+	 * @return
+	 */
 	public boolean containsCaseInsensitive(String str, List<String> list){
 	     for (String string : list){
 	        if (string.equalsIgnoreCase(str)){
