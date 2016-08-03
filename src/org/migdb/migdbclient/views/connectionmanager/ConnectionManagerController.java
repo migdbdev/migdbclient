@@ -45,12 +45,14 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class ConnectionManagerController implements Initializable {
@@ -89,18 +91,19 @@ public class ConnectionManagerController implements Initializable {
 	public void createNewConnectionPopup() {
 
 		try {
-			Stage newConnectionStage = new Stage();
+			final Stage dialog = new Stage();
+			AnchorPane popup = new AnchorPane();
+			dialog.initModality(Modality.APPLICATION_MODAL);
+			dialog.setTitle("Create a new connection");
+			dialog.setResizable(false);
+			dialog.centerOnScreen();
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(MainApp.class.getResource(FxmlPath.NEWDBCONNECTION.getPath()));
-			rootLayoutAnchorpane = loader.load();
-			newConnectionStage.setTitle("Create a new connection");
-			newConnectionStage.setAlwaysOnTop(true);
-			newConnectionStage.setResizable(false);
-			newConnectionStage.centerOnScreen();
-			Scene scene = new Scene(rootLayoutAnchorpane);
-			newConnectionStage.setScene(scene);
-			newConnectionStage.show();
-		} catch (IOException e) {
+			popup = loader.load();
+			Scene scene = new Scene(popup);
+			dialog.setScene(scene);
+			dialog.show();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -170,15 +173,17 @@ public class ConnectionManagerController implements Initializable {
 		// Mouse clicked event
 		vbox.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
-				ConnectionParameters.SESSION.setConnectionName(connName);
-				ConnectionParameters.SESSION.setUserName(uName);
-				ConnectionParameters.SESSION.setMysqlHostName(mysqlHost);
-				ConnectionParameters.SESSION.setMongoHostName(mongoHost);
-				ConnectionParameters.SESSION.setMysqlPort(mysqlPort);
-				ConnectionParameters.SESSION.setMongoPort(mongoPort);
-				ConnectionParameters.SESSION.setSchemaName(schema);
-				rootLayoutAnchorpane.getChildren().clear();
-				setSideBarDatabases();
+				if(mouseevent.getButton().equals(MouseButton.PRIMARY)){
+					ConnectionParameters.SESSION.setConnectionName(connName);
+					ConnectionParameters.SESSION.setUserName(uName);
+					ConnectionParameters.SESSION.setMysqlHostName(mysqlHost);
+					ConnectionParameters.SESSION.setMongoHostName(mongoHost);
+					ConnectionParameters.SESSION.setMysqlPort(mysqlPort);
+					ConnectionParameters.SESSION.setMongoPort(mongoPort);
+					ConnectionParameters.SESSION.setSchemaName(schema);
+					rootLayoutAnchorpane.getChildren().clear();
+					setSideBarDatabases();
+				}
 			}
 		});
 
