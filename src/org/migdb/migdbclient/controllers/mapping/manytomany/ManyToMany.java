@@ -147,8 +147,8 @@ public class ManyToMany {
 			}
 		}
 		ServiceAccessor accessor = new ServiceAccessor();
-		JSONObject table1Response = accessor.getMappingModel();
-		JSONObject table2Response = accessor.getMappingModel();
+		JSONObject table1Response = accessor.getMappingModel("ClientId", "requestId","5","0","5","0");
+		JSONObject table2Response = accessor.getMappingModel("ClientId", "requestId","3","1","2","0");
 		JSONObject summary = new JSONObject();
 		System.out.println("mapping request : " + table1Response + "\n" + table2Response);
 		if (Double.parseDouble(table1Response.get("complexity").toString()) > Double
