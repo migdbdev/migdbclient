@@ -11,14 +11,14 @@ public class MainManyToMany {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		System.out.println("mapping module started...");
-		ManyToMany many = new ManyToMany();
-		many.identifyM2M();
-		System.out.println("mapping module stopped...");
 //		System.out.println("mapping module started...");
-//		MongoWriter mongoWriter = new MongoWriter();
-//		mongoWriter.write();
+//		ManyToMany many = new ManyToMany();
+//		many.identifyM2M();
 //		System.out.println("mapping module stopped...");
+		System.out.println("mapping module started...");
+		MongoWriter mongoWriter = new MongoWriter();
+		mongoWriter.write();
+		System.out.println("mapping module stopped...");
 		
 //		ServiceAccessor accessor = new ServiceAccessor();
 //		JSONObject jsonObject = accessor.getMappingModel();

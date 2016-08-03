@@ -20,6 +20,7 @@ import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.tablegen.CustomCellFactory;
 import org.migdb.migdbclient.tablegen.TableBean;
+import org.migdb.migdbclient.utils.MigDBNotifier;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -40,6 +41,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
+import tray.animations.AnimationType;
+import tray.notification.NotificationType;
 
 public class CollectionManager implements Initializable {
 
@@ -77,13 +80,25 @@ public class CollectionManager implements Initializable {
 
 		List<Document> foundDocument = collection.find().into(new ArrayList<Document>());
 
-		Document document = collection.find().first();
+		// Document document = collection.find().first();
 		// System.out.println(document.toJson());
-		JSONObject jsonObject = new JSONObject(document);
+		// JSONObject jsonObject = new JSONObject(document);
 
 		// System.out.println("aaaaaaaaaaa" + jsonObject);
 		// System.out.println(document.keySet().toString());
-		setTable(foundDocument, getCommonColumns(foundDocument));
+		if (!foundDocument.isEmpty()) {
+			setTable(foundDocument, getCommonColumns(foundDocument));
+		}
+		else{
+			String title = "Attention";
+		    String message = "The Collection you selected is Empty";
+		    AnimationType animationType = AnimationType.FADE;
+		    NotificationType notificationType = NotificationType.WARNING;
+		    int showTime = 6;
+
+		    MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);
+		    notification.createDefinedNotification();
+		}
 
 	}
 
