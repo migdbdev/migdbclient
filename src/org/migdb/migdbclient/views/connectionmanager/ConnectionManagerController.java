@@ -11,7 +11,6 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.ImagePath;
-import org.migdb.migdbclient.controllers.DumpGenerator;
 import org.migdb.migdbclient.controllers.MigrationProcess;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
@@ -20,14 +19,15 @@ import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ConnectionParameters;
-import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.resources.LayoutInstance;
+import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.resources.Session;
 import org.migdb.migdbclient.resources.widgets.Confirmation;
 import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -39,10 +39,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ContextMenuBuilder;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.MenuItemBuilder;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
@@ -273,6 +271,9 @@ public class ConnectionManagerController implements Initializable {
 						Optional<ButtonType> result = confirmation.showAndWait();
 						if (result.get() == ButtonType.OK){
 						    System.out.println("Ok");
+						    MongoDBResource.INSTANCE.setDB(dbName);
+						    MongoDatabase database = MongoDBResource.INSTANCE.getDatabase();
+						    database.drop();
 						} else {
 						    System.out.println("cancel");
 						}

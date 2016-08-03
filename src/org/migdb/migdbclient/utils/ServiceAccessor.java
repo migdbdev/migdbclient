@@ -12,8 +12,9 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 
 public class ServiceAccessor {
 
-	public JSONObject getMappingModel(){
-		MappingRequestMessage messageBody = new MappingRequestMessage("clientId", "requestId", "9", "2", "3", "4");
+	public JSONObject getMappingModel(String clientId, String requestId, String columnCount, String numericCount, String stringCount,
+			String calenderCount){
+		MappingRequestMessage messageBody = new MappingRequestMessage(clientId, requestId, columnCount, numericCount,stringCount, calenderCount);
 		JSONObject body = messageBody.getMessageBody();
 		Client client = Client.create();
 

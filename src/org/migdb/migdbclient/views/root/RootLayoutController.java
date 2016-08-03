@@ -86,6 +86,7 @@ public class RootLayoutController implements Initializable {
 		// Data manager navigation label click event
 		datamanagerLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
+				MongoDBResource.INSTANCE.setDB(ConnectionParameters.SESSION.getSchemaName());
 				showDataManager();
 			}
 		});
@@ -100,6 +101,7 @@ public class RootLayoutController implements Initializable {
 		// Connection manager navigation label click event
 		modificationEvaluatorLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
+				
 				showModificationEvaluator();
 			}
 		});
@@ -161,16 +163,22 @@ public class RootLayoutController implements Initializable {
 	 * Method for add data manager layout to the root container anchor pane
 	 */
 	public void showDataManager() {
+		AnchorPane root;
+		root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.DATAMANAGER.getPath()));
+		AnchorPane mongoDataManagerAncPane;
 		try {
-			AnchorPane root;
-			root = CenterLayout.INSTANCE.getRootContainer();
-			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MainApp.class.getResource(FxmlPath.DATAMANAGER.getPath()));
-			AnchorPane dataManager = loader.load();
+			mongoDataManagerAncPane = loader.load();
+			MongoDataManager dataManager = (MongoDataManager) loader.getController();
+			dataManager.setDatabase(MongoDBResource.INSTANCE.getDatabaseName());
 			root.getChildren().clear();
-			root.getChildren().add(dataManager);
-
+			root.getChildren().add(mongoDataManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

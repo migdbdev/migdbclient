@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.bson.Document;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -12,7 +13,10 @@ import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.resources.MongoDBResource;
 
+import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.util.JSON;
 
 public class MongoWriter {
 
@@ -38,6 +42,12 @@ public class MongoWriter {
 	}
 
 	public void write() {
+		try {
+			MongoConnManager.INSTANCE.connect("localhost", 27017);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println(mappedJson);
 		JSONArray collections = (JSONArray) mappedJson.get("collections");
 		System.out.println(collections);
@@ -45,7 +55,15 @@ public class MongoWriter {
 		MongoDBResource.INSTANCE.setDB("testMongo");
 		MongoDatabase database = MongoDBResource.INSTANCE.getDatabase();
 		for (int i = 0; i < collections.size(); i++) {
-			database.createCollection("collectionName");
+			JSONObject collection = (JSONObject) collections.get(i);
+			database.createCollection(collection.get("collectionName").toString());
+			JSONArray documents = (JSONArray) collection.get("values");
+			for (int j = 0; j < documents.size(); j++) {
+				DBObject dbObject = (DBObject) JSON.parse(documents.get(j).toString());
+				MongoCollection<Document> mongoCollection = database.getCollection(collection.get("collectionName").toString());
+				mongoCollection.insertOne((Document) dbObject);
+			}
+			System.out.println(collections.get(i));
 		}
 		
 
