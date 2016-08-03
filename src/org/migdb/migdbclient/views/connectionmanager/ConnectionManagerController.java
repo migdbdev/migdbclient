@@ -109,7 +109,7 @@ public class ConnectionManagerController implements Initializable {
 	}
 
 	public void connectionInfoSet() {
-		String connName, uName, mysqlHost, mongoHost = null;
+		String connName, uName, mysqlHost, mongoHost, schema = null;
 		int mysqlPort, mongoPort = 0;
 		Double x = 10.0;
 		Double y = 10.0;
@@ -125,9 +125,10 @@ public class ConnectionManagerController implements Initializable {
 				mongoHost = dto.getMongoHostName();
 				mysqlPort = dto.getMysqlPort();
 				mongoPort = dto.getMongoPort();
+				schema = dto.getSchemaName();
 
 				connectionAnchorpane.getChildren()
-						.add(displayConnectionInfo(x, y, connName, uName, mysqlHost, mongoHost, mysqlPort, mongoPort));
+						.add(displayConnectionInfo(x, y, connName, uName, mysqlHost, mongoHost, mysqlPort, mongoPort, schema));
 
 				if (x > 800) {
 					x = 10.0;
@@ -145,7 +146,7 @@ public class ConnectionManagerController implements Initializable {
 	}
 
 	public VBox displayConnectionInfo(Double x, Double y, String connName, String uName, String mysqlHost,
-			String mongoHost, int mysqlPort, int mongoPort) {
+			String mongoHost, int mysqlPort, int mongoPort, String schema) {
 		VBox vbox = new VBox();
 		vbox.setPadding(new Insets(10));
 		vbox.setSpacing(8);
@@ -177,6 +178,7 @@ public class ConnectionManagerController implements Initializable {
 				ConnectionParameters.SESSION.setMongoHostName(mongoHost);
 				ConnectionParameters.SESSION.setMysqlPort(mysqlPort);
 				ConnectionParameters.SESSION.setMongoPort(mongoPort);
+				ConnectionParameters.SESSION.setSchemaName(schema);
 				rootLayoutAnchorpane.getChildren().clear();
 				setSideBarDatabases();
 			}
