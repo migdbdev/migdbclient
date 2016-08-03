@@ -26,6 +26,11 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -375,21 +380,34 @@ public class QueryConverterController {
 			}
 		}
 		
-		if(whereExpression instanceof GreaterThan) {
-			System.out.println("gt");
-		}
 		if(whereExpression instanceof AndExpression) {
 			System.out.println("and");
 		}
-		if(whereExpression instanceof OrExpression) {
+		else if(whereExpression instanceof OrExpression) {
 			System.out.println("or");
 		}
-		if(whereExpression instanceof Addition) {
-			System.out.println("add");
+		else if(whereExpression instanceof NotEqualsTo) {
+			System.out.println("not eq");
 		}
-		if(whereExpression instanceof EqualsTo) {
+		else if(whereExpression instanceof EqualsTo) {
 			System.out.println("euqal");
 		}
+		else if(whereExpression instanceof GreaterThan) {
+			System.out.println("gt");
+		}
+		else if(whereExpression instanceof MinorThan) {
+			System.out.println("lt");
+		}
+		else if(whereExpression instanceof GreaterThanEquals) {
+			System.out.println("gte");
+		} 
+		else if(whereExpression instanceof MinorThanEquals) {
+			System.out.println("lte");
+		}
+		else if(whereExpression instanceof InExpression) {
+			System.out.println("in");
+		}
+		
 		
 		
 		
