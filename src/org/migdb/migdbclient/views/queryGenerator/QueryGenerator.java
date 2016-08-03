@@ -18,34 +18,34 @@ import org.migdb.migdbclient.models.dto.QueryDocumentDTO;
 import org.migdb.migdbclient.resources.ConnectionParameters;
 import org.migdb.migdbclient.resources.MongoDBResource;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.Block;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 
 /**
  * @author KANI
@@ -67,8 +67,6 @@ public class QueryGenerator implements Initializable {
 	private RadioButton queryFindOneRadioButton;
 	@FXML
 	private Button queryBuildButton;
-	@FXML
-	private Button queryExecuteButton;
 	@FXML
 	private Button addQueryParamButton;
 	@FXML
@@ -93,7 +91,10 @@ public class QueryGenerator implements Initializable {
 	@FXML
 	private TableColumn<QueryDocumentDTO, String> valuesTableColumn;
 	@FXML
-	private TableColumn<QueryDocumentDTO, String> conditionTableColumn;
+	private TableColumn<QueryDocumentDTO, QueryDocumentDTO> removeTableColumn;
+	/*
+	 * @FXML private TableColumn<QueryDocumentDTO, String> conditionTableColumn;
+	 */
 
 	MongoCollection<Document> collectionDocument;
 	List<Document> selectedDocument;
@@ -217,14 +218,54 @@ public class QueryGenerator implements Initializable {
 		fieldTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("Field"));
 		operatorsTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("Operators"));
 		valuesTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("Values"));
-		conditionTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("condition"));
-		conditionTableColumn.setCellFactory(ComboBoxTableCell.forTableColumn(conditionList));
-		conditionTableColumn.setOnEditCommit(new EventHandler<CellEditEvent<QueryDocumentDTO, String>>() {
+		removeTableColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+		removeTableColumn.setCellFactory(param -> new TableCell<QueryDocumentDTO, QueryDocumentDTO>() {
+			private final Button deleteButton = new Button("Remove");
+
 			@Override
-			public void handle(CellEditEvent<QueryDocumentDTO, String> t) {
-				((QueryDocumentDTO) t.getTableView().getItems().get(t.getTablePosition().getRow()))
-						.setCondition(t.getNewValue());
-			};
+			protected void updateItem(QueryDocumentDTO dtoItem, boolean empty) {
+				super.updateItem(dtoItem, empty);
+
+				if (dtoItem == null) {
+					setGraphic(null);
+					return;
+				}
+
+				setGraphic(deleteButton);
+				deleteButton.setOnAction(event -> queryParams.remove(dtoItem));
+			}
+		});
+		/*
+		 * conditionTableColumn.setCellValueFactory(new
+		 * PropertyValueFactory<QueryDocumentDTO, String>("condition"));
+		 * conditionTableColumn.setCellFactory(ComboBoxTableCell.forTableColumn(
+		 * conditionList)); conditionTableColumn.setOnEditCommit(new
+		 * EventHandler<CellEditEvent<QueryDocumentDTO, String>>() {
+		 * 
+		 * @Override public void handle(CellEditEvent<QueryDocumentDTO, String>
+		 * t) { ((QueryDocumentDTO)
+		 * t.getTableView().getItems().get(t.getTablePosition().getRow()))
+		 * .setCondition(t.getNewValue()); }; });
+		 */
+
+		// force the queryLimitTextField Text field to be numeric only
+		queryLimitTextField.textProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				if (!newValue.matches("\\d*")) {
+					queryLimitTextField.setText(newValue.replaceAll("[^\\d]", ""));
+				}
+			}
+		});
+
+		// force the querySkipTextField Text field to be numeric only
+		querySkipTextField.textProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				if (!newValue.matches("\\d*")) {
+					querySkipTextField.setText(newValue.replaceAll("[^\\d]", ""));
+				}
+			}
 		});
 
 	}
@@ -237,22 +278,28 @@ public class QueryGenerator implements Initializable {
 					.getSelectedToggle();
 			ObservableList<QueryDocumentDTO> param = (ObservableList<QueryDocumentDTO>) queryParametersTableView
 					.getItems();
-			String query = "";
+			
+			int limit = (!queryLimitTextField.getText().isEmpty()) ? Integer.parseInt(queryLimitTextField.getText()) : 0 ;
+			int skip = (!querySkipTextField.getText().isEmpty()) ? Integer.parseInt(querySkipTextField.getText()) : 0 ;
+			String sortField = (querySortColumnComboBox.getSelectionModel().getSelectedItem() != null) ? querySortColumnComboBox.getSelectionModel().getSelectedItem().toString() : "" ;
+			int sortOrder = (querySortOrderComboBox.getSelectionModel().getSelectedItem()).equals("Ascending") ? 1 : -1 ;
+			
+			outputQuery.clear();
+			outputQuery.setEditable(false);
+			
+			/*String query = "";
 
+			int tableRouteCount = 0;
 			for (QueryDocumentDTO dto : param) {
 				dao = new SqliteDAO();
-				System.out.println(dto.getOperators().toString());
 				String operator = dao.getQueryOperatorsKeyword(dto.getOperators().toString());
-				System.out.println("Operstro : " + operator);
-				System.out.println(operator.equals("") ? "empty" : "Not empty");
-				if (dto.getCondition() == null || dto.getCondition().equals("AND")) {
-					operator = (operator.equals("")) ? "{" + dto.getField() + ":" + dto.getValues() + "}"
-							: "{" + dto.getField() + ":{" + operator + ":" + dto.getValues() + "}}";
-					System.out.println(operator);
-					query = operator;
-				}
-
+				String field = (tableRouteCount > 0) ? "," + dto.getField() : dto.getField();
+				operator = (operator.equals("")) ? field + ":" + dto.getValues()
+						: field + ":{$" + operator + ":" + dto.getValues() + "}";
+				query = query.concat(operator);
+				tableRouteCount++;
 			}
+			query = "{" + query + "}";
 
 			String method = queryType.getText().equals("find") ? "." + queryType.getText() + "(" + query + ").pretty()"
 					: "." + queryType.getText() + "(" + query + ")";
@@ -269,7 +316,94 @@ public class QueryGenerator implements Initializable {
 			String Structure = "db." + collection + method + limit + sort + skip;
 
 			outputQuery.clear();
-			outputQuery.appendText(Structure);
+			outputQuery.appendText(Structure);*/
+
+			MongoDatabase db = MongoConnManager.INSTANCE.connectToDatabase(dbName);
+			BasicDBObject javaQuery = new BasicDBObject();
+			List<BasicDBObject> obj = new ArrayList<BasicDBObject>();
+
+			if (param.size() >= 1) {
+				for (QueryDocumentDTO dto : param) {
+					dao = new SqliteDAO();
+					String operator = dao.getQueryOperatorsKeyword(dto.getOperators().toString());
+
+					if (dao.getQueryOperatorsKeyword(dto.getOperators().toString()).equals("")) {
+						obj.add(new BasicDBObject(dto.getField(), Integer.parseInt(dto.getValues())));
+					} else {
+						obj.add(new BasicDBObject(dto.getField(),
+								new BasicDBObject(operator, Integer.parseInt(dto.getValues()))));
+					}
+
+				}
+
+				javaQuery.put("$and", obj);
+			}
+
+			FindIterable<Document> iterable = null;
+			BasicDBObject sortObj = new BasicDBObject(sortField, sortOrder);
+			
+			if(limit == 0 && skip == 0 && sortField.isEmpty()){
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery);
+				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty()\n");
+			} else if(limit != 0 && skip == 0 && sortField.isEmpty()) {
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit);
+				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().limit("+limit+")\n");
+			} else if(limit == 0 && skip != 0 && sortField.isEmpty()) {
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).skip(skip);
+				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().skip("+skip+")\n");
+			} else if(limit == 0 && skip == 0 && !sortField.isEmpty()) {
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).sort(sortObj);
+				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().sort({'"+sortField+"':"+sortOrder+"})\n");
+			} else if(limit != 0 && skip != 0 && sortField.isEmpty()) {
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit).skip(skip);
+				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().limit("+limit+").skip("+skip+")\n");
+			} else if(limit != 0 && skip == 0 && !sortField.isEmpty()){
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit).sort(sortObj);
+				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().limit("+limit+").sort({'"+sortField+"':"+sortOrder+"})\n");
+			} else if(limit == 0 && skip != 0 && !sortField.isEmpty()){
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).skip(skip).sort(sortObj);
+				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().skip("+skip+").sort({'"+sortField+"':"+sortOrder+"})\n");
+			} else {
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit).skip(skip).sort(sortObj);
+				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().limit("+limit+").skip("+skip+").sort({'"+sortField+"':"+sortOrder+"})\n");
+			}
+
+			outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------     Executed Result       ------------------------------\n\n");
+			iterable.forEach(new Block<Document>() {
+				@Override
+				public void apply(final Document document) {
+					outputQuery.appendText(document.toString()+"\n");
+				}
+			});
+
+			/*
+			 * Document javaQuery = null; int tableRouteCountJava = 0; for
+			 * (QueryDocumentDTO dto : param) { dao = new SqliteDAO(); String
+			 * operator =
+			 * dao.getQueryOperatorsKeyword(dto.getOperators().toString());
+			 * String field = (tableRouteCountJava > 0) ? ((operator.equals(""))
+			 * ? "eq(" + dto.getField() : operator + "(" + dto.getField()) :
+			 * ((operator.equals("")) ? "eq(" + dto.getField() : operator + "("
+			 * + dto.getField()); javaQuery = (tableRouteCountJava > 0) ?
+			 * javaQuery.append(field, dto.getValues()) : new Document(field,
+			 * dto.getValues()); tableRouteCountJava++; } query = "and(" + query
+			 * + ")"; System.out.println("Query =--- " + javaQuery);
+			 * 
+			 * FindIterable<Document> iterable = (FindIterable<Document>)
+			 * db.getCollection(collection).find(); iterable.forEach(new
+			 * Block<Document>() {
+			 * 
+			 * @Override public void apply(final Document document) {
+			 * System.out.println("Result"); System.out.println(document); } });
+			 */
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -405,74 +539,46 @@ public class QueryGenerator implements Initializable {
 	 * @author KANI
 	 *
 	 */
-	class ComboBoxCell extends TableCell<QueryDocumentDTO, String> {
-
-		private ComboBox<String> comboBox;
-		private final ObservableList<String> typData = FXCollections.observableArrayList("AND", "OR");
-
-		public ComboBoxCell() {
-		}
-
-		@Override
-		public void startEdit() {
-			super.startEdit();
-
-			if (comboBox == null) {
-				createComboBox();
-			}
-
-			setGraphic(comboBox);
-			setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-		}
-
-		@Override
-		public void cancelEdit() {
-			super.cancelEdit();
-
-			setText(String.valueOf(getItem()));
-			setContentDisplay(ContentDisplay.TEXT_ONLY);
-		}
-
-		public void updateItem(String item, boolean empty) {
-			super.updateItem(item, empty);
-
-			if (empty) {
-				setText(null);
-				setGraphic(null);
-			} else {
-				if (isEditing()) {
-					if (comboBox != null) {
-						comboBox.setValue(getString());
-					}
-					setGraphic(comboBox);
-					setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-				} else {
-					setText(getString());
-					setContentDisplay(ContentDisplay.TEXT_ONLY);
-				}
-			}
-		}
-
-		private void createComboBox() {
-			// ClassesController.getLevelChoice() is the observable list of
-			// String
-			comboBox = new ComboBox<>(typData);
-			comboBox.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
-			comboBox.setOnKeyPressed(new EventHandler<KeyEvent>() {
-				@Override
-				public void handle(KeyEvent t) {
-					if (t.getCode() == KeyCode.ENTER) {
-						commitEdit(comboBox.getSelectionModel().getSelectedItem());
-					} else if (t.getCode() == KeyCode.ESCAPE) {
-						cancelEdit();
-					}
-				}
-			});
-		}
-
-		private String getString() {
-			return getItem() == null ? "" : getItem().toString();
-		}
-	}
+	/*
+	 * class ComboBoxCell extends TableCell<QueryDocumentDTO, String> {
+	 * 
+	 * private ComboBox<String> comboBox; private final ObservableList<String>
+	 * typData = FXCollections.observableArrayList("AND", "OR");
+	 * 
+	 * public ComboBoxCell() { }
+	 * 
+	 * @Override public void startEdit() { super.startEdit();
+	 * 
+	 * if (comboBox == null) { createComboBox(); }
+	 * 
+	 * setGraphic(comboBox); setContentDisplay(ContentDisplay.GRAPHIC_ONLY); }
+	 * 
+	 * @Override public void cancelEdit() { super.cancelEdit();
+	 * 
+	 * setText(String.valueOf(getItem()));
+	 * setContentDisplay(ContentDisplay.TEXT_ONLY); }
+	 * 
+	 * public void updateItem(String item, boolean empty) {
+	 * super.updateItem(item, empty);
+	 * 
+	 * if (empty) { setText(null); setGraphic(null); } else { if (isEditing()) {
+	 * if (comboBox != null) { comboBox.setValue(getString()); }
+	 * setGraphic(comboBox); setContentDisplay(ContentDisplay.GRAPHIC_ONLY); }
+	 * else { setText(getString()); setContentDisplay(ContentDisplay.TEXT_ONLY);
+	 * } } }
+	 * 
+	 * private void createComboBox() { // ClassesController.getLevelChoice() is
+	 * the observable list of // String comboBox = new ComboBox<>(typData);
+	 * comboBox.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
+	 * comboBox.setOnKeyPressed(new EventHandler<KeyEvent>() {
+	 * 
+	 * @Override public void handle(KeyEvent t) { if (t.getCode() ==
+	 * KeyCode.ENTER) {
+	 * commitEdit(comboBox.getSelectionModel().getSelectedItem()); } else if
+	 * (t.getCode() == KeyCode.ESCAPE) { cancelEdit(); } } }); }
+	 * 
+	 * private String getString() { return getItem() == null ? "" :
+	 * getItem().toString(); } }
+	 */
 
 }
