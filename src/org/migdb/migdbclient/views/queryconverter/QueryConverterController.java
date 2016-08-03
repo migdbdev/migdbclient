@@ -11,8 +11,13 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Pair;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.AnyType;
+import net.sf.jsqlparser.expression.DateValue;
+import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.TimestampValue;
 import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
 import net.sf.jsqlparser.expression.operators.arithmetic.Division;
 import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
@@ -324,10 +329,50 @@ public class QueryConverterController {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(op.getLeftExpression(), "1/"+op.getRightExpression());
 				}
-			} else if(expression instanceof StringValue) {
-				
+			} else if(expression instanceof LongValue) {
+				LongValue exp = (LongValue) expression;
+				Object obj = pairs.get("$set");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(column.getColumnName(), "NumberLong(\""+exp.getValue()+"\")");
+					pairs.put("$set", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(column.getColumnName(), "NumberLong(\""+exp.getValue()+"\")");
+				}
+			} else if(expression instanceof DoubleValue) {
+				DoubleValue exp = (DoubleValue) expression;
+				Object obj = pairs.get("$set");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(column.getColumnName(), exp.getValue());
+					pairs.put("$set", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(column.getColumnName(), exp.getValue());
+				}
+			} else if(expression instanceof DateValue || expression instanceof TimestampValue) {
+				DateValue exp = (DateValue) expression;
+				Object obj = pairs.get("$set");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(column.getColumnName(), "new Date(\""+exp.getValue()+"\")");
+					pairs.put("$set", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(column.getColumnName(), "new Date(\""+exp.getValue()+"\")");
+				}
+			} else {
+				Object obj = pairs.get("$set");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(column.getColumnName(), expression);
+					pairs.put("$set", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(column.getColumnName(), expression);
+				}
 			}
-			System.out.println(pairs);
 		}
 		
 		if(whereExpression instanceof GreaterThan) {
