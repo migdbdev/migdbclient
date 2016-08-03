@@ -1,6 +1,7 @@
 package org.migdb.migdbclient.views.queryconverter;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -10,6 +11,16 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Pair;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
+import net.sf.jsqlparser.expression.operators.arithmetic.Division;
+import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
+import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -22,6 +33,7 @@ import net.sf.jsqlparser.statement.create.table.ForeignKeyIndex;
 import net.sf.jsqlparser.statement.create.table.Index;
 import net.sf.jsqlparser.statement.drop.Drop;
 import net.sf.jsqlparser.statement.insert.Insert;
+import net.sf.jsqlparser.statement.update.Update;
 
 /**
  * @author Malki
@@ -57,7 +69,7 @@ public class QueryConverterController {
 			
 			if(statement instanceof Insert) {
 				Insert insertStatement = (Insert) statement;
-				mongoQuery = convertInsert(insertStatement);
+				mongoQuery = convertInsertRecord(insertStatement);
 			} else if(statement instanceof CreateTable){
 				CreateTable createStatement = (CreateTable) statement;
 				mongoQuery = convertCreateTable(createStatement);
@@ -70,6 +82,9 @@ public class QueryConverterController {
 			} else if(statement instanceof Drop) {
 				Drop dropStatement = (Drop) statement;
 				mongoQuery = convertDropTable(dropStatement);
+			} else if(statement instanceof Update) {
+				Update updateStatement = (Update) statement;
+				mongoQuery = convertUpdateRecord(updateStatement);
 			}
 
 			mongoQueryTxt.setText(mongoQuery);
@@ -80,36 +95,6 @@ public class QueryConverterController {
 	}
 	
 	
-	/**
-	 * Converts a MySQL insert statement into MongoDB insert statement
-	 * @param insertStatement
-	 * @return
-	 */
-	private String convertInsert(Insert insertStatement) {
-		Table table = insertStatement.getTable();
-		List<Column> columnList = insertStatement.getColumns();
-		String values = insertStatement.getItemsList().toString().replace("(", "")
-				.replace(")", "").replace(" ", "");
-		
-		LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
-
-		StringTokenizer st = new StringTokenizer(values, ",");
-		int count = 0;
-		while (st.hasMoreElements()) {
-			Object value = st.nextElement();
-			
-			if(columnList == null) {
-				pairs.put("<Key"+(count+1)+">", value);
-			} else {
-				pairs.put(columnList.get(count).getColumnName(), value);
-			}
-			count++;
-		}
-		
-		String mongoQuery = "db."+table.getName()+".insert("+pairs.toString().replace("=", ":")
-				.replace(",", ",\n\t").replace("{", "{\n\t").replace("}", "\n}").replace(" ", "")+")";
-		return mongoQuery;
-	}
 	
 	/**
 	 * @param createStatement
@@ -242,6 +227,131 @@ public class QueryConverterController {
 		return mongoQuery;
 	}
 	
+
+	/**
+	 * Converts a MySQL insert statement into MongoDB insert statement
+	 * @param insertStatement
+	 * @return
+	 */
+	private String convertInsertRecord(Insert insertStatement) {
+		Table table = insertStatement.getTable();
+		List<Column> columnList = insertStatement.getColumns();
+		String values = insertStatement.getItemsList().toString().replace("(", "")
+				.replace(")", "").replace(" ", "");
+		
+		LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+
+		StringTokenizer st = new StringTokenizer(values, ",");
+		int count = 0;
+		while (st.hasMoreElements()) {
+			Object value = st.nextElement();
+			
+			if(columnList == null) {
+				pairs.put("<Key"+(count+1)+">", value);
+			} else {
+				pairs.put(columnList.get(count).getColumnName(), value);
+			}
+			count++;
+		}
+		
+		String mongoQuery = "db."+table.getName()+".insert("+pairs.toString().replace("=", ":")
+				.replace(",", ",\n\t").replace("{", "{\n\t").replace("}", "\n}").replace(" ", "")+")";
+		return mongoQuery;
+	}
+	
+	private String convertUpdateRecord(Update updateStatement) {
+		String mongoQuery = "";
+		
+		Table table = updateStatement.getTables().get(0);
+		List<Column> columnList = updateStatement.getColumns();
+		List<Expression> expressionList =  updateStatement.getExpressions();
+		Expression whereExpression = updateStatement.getWhere();
+		
+		LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+		
+		for(int i=0; i<columnList.size(); i++) {
+			Column column = columnList.get(i);
+			Expression expression = expressionList.get(i);
+
+			if(expression instanceof Addition) {
+				Addition op = (Addition) expression;		
+				Object obj = pairs.get("$inc");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(op.getLeftExpression(), op.getRightExpression());
+					pairs.put("$inc", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(op.getLeftExpression(), op.getRightExpression());
+				}	
+			} else if(expression instanceof Subtraction) {
+				Subtraction op = (Subtraction) expression;
+				boolean isDbl = isDouble(op.getRightExpression().toString());
+				Object rightValue = "";
+				if(isDbl) {
+					rightValue = Double.parseDouble(op.getRightExpression().toString()) * -1;
+				} else {
+					rightValue = Long.parseLong(op.getRightExpression().toString()) * -1;
+				}
+				Object obj = pairs.get("$inc");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(op.getLeftExpression(), "-"+op.getRightExpression());
+					pairs.put("$inc", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(op.getLeftExpression(), "-"+op.getRightExpression());
+				}
+			} else if(expression instanceof Multiplication) {
+				Multiplication op = (Multiplication) expression;
+				Object obj = pairs.get("$mul");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(op.getLeftExpression(), op.getRightExpression());
+					pairs.put("$mul", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(op.getLeftExpression(), op.getRightExpression());
+				}
+			} else if(expression instanceof Division) {
+				Division op = (Division) expression;
+				Object obj = pairs.get("$mul");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(op.getLeftExpression(), "1/"+op.getRightExpression());
+					pairs.put("$inc", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(op.getLeftExpression(), "1/"+op.getRightExpression());
+				}
+			} else if(expression instanceof StringValue) {
+				
+			}
+			System.out.println(pairs);
+		}
+		
+		if(whereExpression instanceof GreaterThan) {
+			System.out.println("gt");
+		}
+		if(whereExpression instanceof AndExpression) {
+			System.out.println("and");
+		}
+		if(whereExpression instanceof OrExpression) {
+			System.out.println("or");
+		}
+		if(whereExpression instanceof Addition) {
+			System.out.println("add");
+		}
+		if(whereExpression instanceof EqualsTo) {
+			System.out.println("euqal");
+		}
+		
+		
+		
+		return mongoQuery;
+	}
+	
+	
 	/**
 	 * @param str
 	 * @param list
@@ -258,10 +368,10 @@ public class QueryConverterController {
 
 	/*public static boolean isNumeric(String str) {
 		return str.matches("[+-]?\\d*(\\.\\d+)?");
-	}
+	}*/
 	
 	public static boolean isDouble(String str) {
 		return str.matches("[-+]?[0-9]*\\.{1}[0-9]*");
-	}*/
+	}
 
 }
