@@ -12,27 +12,37 @@ import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.MongoDBResource;
+import org.migdb.migdbclient.utils.MigDBNotifier;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.ListCollectionsIterable;
+import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoIterable;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import tray.animations.AnimationType;
+import tray.notification.NotificationType;
 
 public class MongoDataManager implements Initializable {
 	@FXML
-	private Button btnTest;
+	private Button btnAddCollection;
 	@FXML
 	private ListView<String> collectionList;
 	@FXML
@@ -43,7 +53,7 @@ public class MongoDataManager implements Initializable {
 	private Label databaseNameLabel;
 
 	private MongoDatabase db;
-	private String databaseName;
+	// private String databaseName;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -132,6 +142,64 @@ public class MongoDataManager implements Initializable {
 			e.printStackTrace();
 		}
 
+	}
+
+	@FXML
+	public void showNewCollection() {
+		final Stage dialog = new Stage();
+		dialog.initModality(Modality.APPLICATION_MODAL);
+		dialog.setTitle("Add New Collection");
+
+		VBox dialogVbox = new VBox(20);
+		dialogVbox.setPadding(new Insets(20, 0, 20, 20));
+		dialogVbox.setStyle("-fx-background-color : white");
+		dialogVbox.setAlignment(Pos.CENTER);
+
+		Label label = new Label("Collection Name ");
+		TextField txtCollectionName = new TextField();
+
+		HBox detailHbox = new HBox(30);
+
+		detailHbox.getChildren().addAll(label, txtCollectionName);
+		Button btn = new Button("Add");
+		btn.setPrefWidth(100);
+		btn.setOnAction((ActionEvent e) -> {
+			String collectionname = txtCollectionName.getText();
+			System.out.println(collectionname);
+			 addNewCollection(collectionname);
+			dialog.close();
+		});
+		
+		dialogVbox.getChildren().addAll(detailHbox, btn);
+
+		Scene dialogScene = new Scene(dialogVbox, 350, 150);
+		dialog.setScene(dialogScene);
+		dialog.show();
+	}
+	
+	private void addNewCollection(String name){
+		MongoDatabase db = MongoDBResource.INSTANCE.getDatabase();
+		try{
+		db.createCollection(name);
+		String title = "Attention";
+	    String message = "Successfully created!";
+	    AnimationType animationType = AnimationType.FADE;
+	    NotificationType notificationType = NotificationType.SUCCESS;
+	    int showTime = 6;
+
+	    MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);
+	    notification.createDefinedNotification();
+		} catch (MongoCommandException ex){
+			ex.printStackTrace();
+			String title = "Attention";
+		    String message = "Collection Already Exsist";
+		    AnimationType animationType = AnimationType.FADE;
+		    NotificationType notificationType = NotificationType.ERROR;
+		    int showTime = 6;
+
+		    MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);
+		    notification.createDefinedNotification();
+		}
 	}
 
 	private ObservableList<String> getCollectionsOf(String dbName) throws Exception {

@@ -11,7 +11,6 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.ImagePath;
-import org.migdb.migdbclient.controllers.DumpGenerator;
 import org.migdb.migdbclient.controllers.MigrationProcess;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
@@ -20,14 +19,15 @@ import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ConnectionParameters;
-import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.resources.LayoutInstance;
+import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.resources.Session;
 import org.migdb.migdbclient.resources.widgets.Confirmation;
 import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -39,10 +39,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ContextMenuBuilder;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.MenuItemBuilder;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
@@ -109,7 +107,7 @@ public class ConnectionManagerController implements Initializable {
 	}
 
 	public void connectionInfoSet() {
-		String connName, uName, mysqlHost, mongoHost = null;
+		String connName, uName, mysqlHost, mongoHost, schema = null;
 		int mysqlPort, mongoPort = 0;
 		Double x = 10.0;
 		Double y = 10.0;
@@ -125,9 +123,10 @@ public class ConnectionManagerController implements Initializable {
 				mongoHost = dto.getMongoHostName();
 				mysqlPort = dto.getMysqlPort();
 				mongoPort = dto.getMongoPort();
+				schema = dto.getSchemaName();
 
 				connectionAnchorpane.getChildren()
-						.add(displayConnectionInfo(x, y, connName, uName, mysqlHost, mongoHost, mysqlPort, mongoPort));
+						.add(displayConnectionInfo(x, y, connName, uName, mysqlHost, mongoHost, mysqlPort, mongoPort, schema));
 
 				if (x > 800) {
 					x = 10.0;
@@ -145,7 +144,7 @@ public class ConnectionManagerController implements Initializable {
 	}
 
 	public VBox displayConnectionInfo(Double x, Double y, String connName, String uName, String mysqlHost,
-			String mongoHost, int mysqlPort, int mongoPort) {
+			String mongoHost, int mysqlPort, int mongoPort, String schema) {
 		VBox vbox = new VBox();
 		vbox.setPadding(new Insets(10));
 		vbox.setSpacing(8);
@@ -177,6 +176,7 @@ public class ConnectionManagerController implements Initializable {
 				ConnectionParameters.SESSION.setMongoHostName(mongoHost);
 				ConnectionParameters.SESSION.setMysqlPort(mysqlPort);
 				ConnectionParameters.SESSION.setMongoPort(mongoPort);
+				ConnectionParameters.SESSION.setSchemaName(schema);
 				rootLayoutAnchorpane.getChildren().clear();
 				setSideBarDatabases();
 			}
@@ -271,6 +271,9 @@ public class ConnectionManagerController implements Initializable {
 						Optional<ButtonType> result = confirmation.showAndWait();
 						if (result.get() == ButtonType.OK){
 						    System.out.println("Ok");
+						    MongoDBResource.INSTANCE.setDB(dbName);
+						    MongoDatabase database = MongoDBResource.INSTANCE.getDatabase();
+						    database.drop();
 						} else {
 						    System.out.println("cancel");
 						}
