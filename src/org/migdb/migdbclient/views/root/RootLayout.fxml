@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.root.RootLayoutController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" stylesheets="@../../resources/css/custom.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.root.RootLayoutController">
          <top>
             <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="87.0" prefWidth="1200.0" BorderPane.alignment="CENTER">
                <children>
@@ -71,5 +71,5 @@
          </children></AnchorPane>
          </left>
          <center>
-            <AnchorPane fx:id="rootContainerAncpane" />
+            <AnchorPane fx:id="rootContainerAncpane" styleClass="background" />
          </center></BorderPane>
