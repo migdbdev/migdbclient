@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import org.bson.Document;
@@ -18,6 +19,7 @@ import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -28,10 +30,13 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -161,44 +166,97 @@ public class MongoDataManager implements Initializable {
 		HBox detailHbox = new HBox(30);
 
 		detailHbox.getChildren().addAll(label, txtCollectionName);
-		Button btn = new Button("Add");
-		btn.setPrefWidth(100);
-		btn.setOnAction((ActionEvent e) -> {
+		HBox btnHbox = new HBox(30);
+		btnHbox.setAlignment(Pos.CENTER);
+		Button btnAdd = new Button("Create");
+		btnAdd.setPrefWidth(100);
+		btnAdd.setOnAction((ActionEvent e) -> {
 			String collectionname = txtCollectionName.getText();
 			System.out.println(collectionname);
-			 addNewCollection(collectionname);
+			if (!collectionname.equals("")) {
+				addNewCollection(collectionname);
+				dialog.close();
+			}
+			else{
+				String title = "Attention";
+				String message = "Please Enter a name to create collection";
+				AnimationType animationType = AnimationType.POPUP;
+				NotificationType notificationType = NotificationType.ERROR;
+				int showTime = 6;
+
+				MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+				notification.createDefinedNotification();
+			}
+
+		});
+		Button btnCancel = new Button("Cancel");
+		btnCancel.setPrefWidth(100);
+		btnCancel.setOnAction((ActionEvent e) -> {
 			dialog.close();
 		});
-		
-		dialogVbox.getChildren().addAll(detailHbox, btn);
+		btnHbox.getChildren().addAll(btnCancel, btnAdd);
+		dialogVbox.getChildren().addAll(detailHbox, btnHbox);
 
 		Scene dialogScene = new Scene(dialogVbox, 350, 150);
 		dialog.setScene(dialogScene);
 		dialog.show();
 	}
-	
-	private void addNewCollection(String name){
-		MongoDatabase db = MongoDBResource.INSTANCE.getDatabase();
-		try{
-		db.createCollection(name);
-		String title = "Attention";
-	    String message = "Successfully created!";
-	    AnimationType animationType = AnimationType.FADE;
-	    NotificationType notificationType = NotificationType.SUCCESS;
-	    int showTime = 6;
 
-	    MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);
-	    notification.createDefinedNotification();
-		} catch (MongoCommandException ex){
+	@FXML
+	public void deleteCollection() {
+		String name = collectionList.getSelectionModel().getSelectedItem().toString().split(" ", 2)[0];
+		MongoDatabase db = MongoDBResource.INSTANCE.getDatabase();
+
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Confirmation");
+		alert.setHeaderText("Delete Collection");
+		alert.setContentText("Command = db." + name + ".drop() \n Are you sure?");
+
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.get() == ButtonType.OK) {
+			// ... user chose OK
+			MongoCollection<Document> collection = db.getCollection(name);
+			collection.drop();
+			String title = "Attention";
+			String message = "Successfully Deleted!";
+			AnimationType animationType = AnimationType.POPUP;
+			NotificationType notificationType = NotificationType.SUCCESS;
+			int showTime = 6;
+
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			notification.createDefinedNotification();
+			System.out.println(name);
+			refreshDataManager();
+			// System.out.println(MongoResult.toString());
+		} else {
+			// ... user chose CANCEL or closed the dialog
+		}
+
+	}
+
+	private void addNewCollection(String name) {
+		MongoDatabase db = MongoDBResource.INSTANCE.getDatabase();
+		try {
+			db.createCollection(name);
+			refreshDataManager();
+			String title = "Attention";
+			String message = "Successfully created!";
+			AnimationType animationType = AnimationType.POPUP;
+			NotificationType notificationType = NotificationType.SUCCESS;
+			int showTime = 6;
+
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			notification.createDefinedNotification();
+		} catch (MongoCommandException ex) {
 			ex.printStackTrace();
 			String title = "Attention";
-		    String message = "Collection Already Exsist";
-		    AnimationType animationType = AnimationType.FADE;
-		    NotificationType notificationType = NotificationType.ERROR;
-		    int showTime = 6;
+			String message = "Collection Already Exsist";
+			AnimationType animationType = AnimationType.POPUP;
+			NotificationType notificationType = NotificationType.ERROR;
+			int showTime = 6;
 
-		    MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);
-		    notification.createDefinedNotification();
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			notification.createDefinedNotification();
 		}
 	}
 
@@ -228,6 +286,27 @@ public class MongoDataManager implements Initializable {
 		}
 		System.out.println(databaseName);
 
+	}
+
+	public void refreshDataManager() {
+		AnchorPane root;
+		root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.DATAMANAGER.getPath()));
+		AnchorPane mongoDataManagerAncPane;
+		try {
+			mongoDataManagerAncPane = loader.load();
+			MongoDataManager dataManager = (MongoDataManager) loader.getController();
+			dataManager.setDatabase(MongoDBResource.INSTANCE.getDatabaseName());
+			root.getChildren().clear();
+			root.getChildren().add(mongoDataManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

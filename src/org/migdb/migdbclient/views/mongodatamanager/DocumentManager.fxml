@@ -13,6 +13,6 @@
       <Label layoutX="22.0" layoutY="64.0" text="Object ID" />
       <Label fx:id="objectIdLabel" layoutX="165.0" layoutY="64.0" text="Label" />
       <TreeView fx:id="documentTreeView" layoutX="22.0" layoutY="97.0" prefHeight="422.0" prefWidth="350.0" />
-      <Button fx:id="backButton" layoutX="21.0" layoutY="540.0" mnemonicParsing="false" onAction="#showCollectionManger" text="&lt;&lt; Back" />
+      <Button fx:id="backButton" layoutX="21.0" layoutY="540.0" mnemonicParsing="false" onAction="#showCollectionManger" styleClass="dark-blue" stylesheets="@../../resources/css/custom.css" text="&lt;&lt; Back" />
    </children>
 </AnchorPane>
