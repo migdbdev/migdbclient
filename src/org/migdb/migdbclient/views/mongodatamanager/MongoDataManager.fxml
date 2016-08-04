@@ -13,6 +13,7 @@
             <ContextMenu>
               <items>
                 <MenuItem mnemonicParsing="false" onAction="#showCollectionManger" text="View" />
+                  <MenuItem mnemonicParsing="false" onAction="#deleteCollection" text="Delete" />
               </items>
             </ContextMenu>
          </contextMenu></ListView>
