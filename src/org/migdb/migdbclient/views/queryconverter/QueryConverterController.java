@@ -31,6 +31,7 @@ import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.ItemsList;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
@@ -558,7 +559,22 @@ public class QueryConverterController {
 				andList.add(pair);
 			}
 			else if(leftExp instanceof InExpression) {
-				System.out.println("in");
+				InExpression exp = (InExpression) leftExp;
+				ItemsList items = exp.getRightItemsList();
+
+				List<Object> itemList = new ArrayList<Object>();	
+				String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+				StringTokenizer st = new StringTokenizer(values, ",");
+				while (st.hasMoreElements()) {
+					Object value = st.nextElement();
+					itemList.add(value);
+				}
+				
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$in", itemList);
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
 			}
 
 			if(rightExp instanceof EqualsTo) {
@@ -610,7 +626,22 @@ public class QueryConverterController {
 				andList.add(pair);
 			}
 			else if(rightExp instanceof InExpression) {
-				System.out.println("in");
+				InExpression exp = (InExpression) rightExp;
+				ItemsList items = exp.getRightItemsList();
+
+				List<Object> itemList = new ArrayList<Object>();	
+				String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+				StringTokenizer st = new StringTokenizer(values, ",");
+				while (st.hasMoreElements()) {
+					Object value = st.nextElement();
+					itemList.add(value);
+				}
+				
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$in", itemList);
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
 			}
 			
 			conditionPair.put("$or", andList);
@@ -661,6 +692,19 @@ public class QueryConverterController {
 		
 		else if(whereExpression instanceof InExpression) {
 			InExpression whereExp = (InExpression) whereExpression;
+			ItemsList items = whereExp.getRightItemsList();
+
+			List<Object> itemList = new ArrayList<Object>();	
+			String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+			StringTokenizer st = new StringTokenizer(values, ",");
+			while (st.hasMoreElements()) {
+				Object value = st.nextElement();
+				itemList.add(value);
+			}
+			
+			HashMap<String, Object> innerPair = new HashMap<String,Object>();
+			innerPair.put("$in", itemList);
+			conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
 			
 		}
 		
