@@ -161,6 +161,9 @@ public class ManyToMany {
 			summary.put("method", table2Response.get("mappingModel"));
 
 		}
+//		JSONObject summary = new JSONObject();
+//		summary.put("method", "EMBEDDING");
+//		summary.put("parent", "employee");
 		return summary;
 	}
 
@@ -237,10 +240,15 @@ public class ManyToMany {
 		JSONObject table2MappingInfo = ManyToManyResource.INSTANCE.getTable2Info();
 		String referencingCol = table2MappingInfo.get("referencingCol").toString();
 		String referencedCol = table2MappingInfo.get("referencedCol").toString();
-		String referencedValue = mappingObject.get(referencedCol).toString();
+//		System.out.println("*************"+mappingObject+"##############");
+//		System.out.println(ManyToManyResource.INSTANCE.getMappingTable());
+//		System.out.println(ManyToManyResource.INSTANCE.getTable1());
+//		System.out.println(ManyToManyResource.INSTANCE.getTable2());
+//		System.out.println(referencedCol+" "+referencingCol);
+		String referencedValue = mappingObject.get(referencingCol).toString();
 		for (Object object : table2Data) {
 			JSONObject table2DataObject = (JSONObject) object;
-			String table2Value = table2DataObject.get(referencingCol).toString();
+			String table2Value = table2DataObject.get(referencedCol).toString();
 			if (referencedValue.equals(table2Value)) {
 				return table2DataObject;
 			}
@@ -342,10 +350,10 @@ public class ManyToMany {
 		JSONObject table2MappingInfo = ManyToManyResource.INSTANCE.getTable2Info();
 		String referencingCol = table2MappingInfo.get("referencingCol").toString();
 		String referencedCol = table2MappingInfo.get("referencedCol").toString();
-		String referencedValue = mappingObject.get(referencedCol).toString();
+		String referencedValue = mappingObject.get(referencingCol).toString();
 		for (Object object : table2Data) {
 			JSONObject table2DataObject = (JSONObject) object;
-			String table2Value = table2DataObject.get(referencingCol).toString();
+			String table2Value = table2DataObject.get(referencedCol).toString();
 			if (referencedValue.equals(table2Value)) {
 				JSONObject referencedObjectId = new JSONObject();
 				referencedObjectId.put("_id", table2DataObject.get("_id"));
@@ -440,7 +448,7 @@ public class ManyToMany {
 		newCollection.put("collectionName", table.get("name"));
 		JSONArray collectionData = new JSONArray();
 		collectionData = (JSONArray) table.get("data");
-		newCollection.put("values", collectionData);
+		newCollection.put("data", collectionData);
 		JSONArray array = (JSONArray) mapped.get("collections");
 		array.add(newCollection);
 		// ManyToManyResource.INSTANCE.setTable1(newCollection);
