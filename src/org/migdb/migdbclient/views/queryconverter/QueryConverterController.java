@@ -13,13 +13,10 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Pair;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.AnyType;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.TimestampValue;
 import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
 import net.sf.jsqlparser.expression.operators.arithmetic.Division;
@@ -274,7 +271,6 @@ public class QueryConverterController {
 	}
 	
 	private String convertUpdateRecord(Update updateStatement) {
-		String mongoQuery = "";
 		
 		Table table = updateStatement.getTables().get(0);
 		List<Column> columnList = updateStatement.getColumns();
@@ -708,8 +704,9 @@ public class QueryConverterController {
 			
 		}
 		
-		System.out.println(conditionPair);
-		
+		String mongoQuery = "db."+table.getName()+".update( \n\t"+conditionPair.toString().replace("=", ": ")
+				.replace("{", "{ ").replace("}", " }")+", \n\t"+updatePairs.toString().replace("=", ": ")
+				.replace("{", "{ ").replace("}", " }")+", \n\t{ multi: true } \n)";
 		
 		return mongoQuery;
 	}
