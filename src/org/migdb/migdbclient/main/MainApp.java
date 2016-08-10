@@ -94,8 +94,9 @@ public class MainApp extends Application {
 			}
 		};
 
-		showSplash(initStage, jarTask, () -> showMainStage());
-		new Thread(jarTask).start();
+		/*showSplash(initStage, jarTask, () -> showMainStage());
+		new Thread(jarTask).start();*/
+		showMainStage();
 	}
 
 	private void showMainStage() {
