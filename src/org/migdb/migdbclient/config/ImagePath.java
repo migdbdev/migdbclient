@@ -8,7 +8,8 @@ public enum ImagePath {
 	TABMIGRATION("/org/migdb/migdbclient/resources/images/Migrate.jpg"),
 	TABCONVERTER("/org/migdb/migdbclient/resources/images/Convert.jpeg"),
 	TABGENERATOR("/org/migdb/migdbclient/resources/images/Generator.png"),
-	TABDATAMANAGER("/org/migdb/migdbclient/resources/images/Manager.jpeg");
+	TABDATAMANAGER("/org/migdb/migdbclient/resources/images/Manager.jpeg"),
+	SPLASHIMAGE("/org/migdb/migdbclient/resources/images/Splash_Image.jpg");
 	
 	private String path;
 	

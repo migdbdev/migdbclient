@@ -56,12 +56,14 @@ public class MongoWriter {
 		MongoDatabase database = MongoDBResource.INSTANCE.getDatabase();
 		for (int i = 0; i < collections.size(); i++) {
 			JSONObject collection = (JSONObject) collections.get(i);
-			database.createCollection(collection.get("collectionName").toString());
+//			database.createCollection(collection.get("collectionName").toString());
 			JSONArray documents = (JSONArray) collection.get("values");
 			for (int j = 0; j < documents.size(); j++) {
-				DBObject dbObject = (DBObject) JSON.parse(documents.get(j).toString());
-				MongoCollection<Document> mongoCollection = database.getCollection(collection.get("collectionName").toString());
-				mongoCollection.insertOne((Document) dbObject);
+//				DBObject dbObject = (DBObject) JSON.parse(documents.get(j).toString());
+//				MongoCollection<Document> mongoCollection = database.getCollection(collection.get("collectionName").toString());
+//				mongoCollection.insertOne((Document) dbObject);
+				Document document = Document.parse(documents.get(j).toString());
+				database.getCollection(collection.get("collectionName").toString()).insertOne(document);
 			}
 			System.out.println(collections.get(i));
 		}

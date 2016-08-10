@@ -12,7 +12,7 @@
 			<items>
 				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
 					<children>
-						<TabPane layoutX="14.0" layoutY="26.0" prefHeight="467.0" prefWidth="971.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+						<TabPane fx:id="queryGeneratorTabPane" layoutX="14.0" layoutY="26.0" prefHeight="467.0" prefWidth="971.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 							<tabs>
 								<Tab text="Query">
 									<content>
@@ -58,7 +58,24 @@
 								</Tab>
 								<Tab text="Text Search">
 									<content>
-										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <Label layoutX="55.0" layoutY="42.0" text="Databse name" />
+                                    <ComboBox fx:id="textSearchDatabaseComboBox" layoutX="142.0" layoutY="38.0" prefWidth="150.0" />
+                                    <Label layoutX="326.0" layoutY="42.0" text="Collection" />
+                                    <ComboBox fx:id="textSearchCollectionComboBox" layoutX="388.0" layoutY="38.0" prefWidth="150.0" />
+                                    <Label layoutX="576.0" layoutY="42.0" text="Field" />
+                                    <ComboBox fx:id="textSearchFieldComboBox" layoutX="610.0" layoutY="38.0" prefWidth="150.0" />
+                                    <Label layoutX="55.0" layoutY="115.0" text="If you're mongo version is below 2.6, put a tick here" />
+                                    <CheckBox fx:id="textSearchOldVersionCheckBox" layoutX="388.0" layoutY="115.0" mnemonicParsing="false" />
+                                    <Label layoutX="55.0" layoutY="158.0" text="Create text index on" />
+                                    <Label fx:id="textSearchTextIndexLabel" layoutX="510.0" layoutY="158.0" text="Label" />
+                                    <Label layoutX="55.0" layoutY="198.0" text="Text search keyword" />
+                                    <TextField fx:id="textSearchKeywordTextField" layoutX="486.0" layoutY="194.0" />
+                                    <Button fx:id="textSearchCreateButton" layoutX="67.0" layoutY="287.0" mnemonicParsing="false" text="Generate Text Index" />
+                                    <Button fx:id="textSearchViewButton" layoutX="284.0" layoutY="287.0" mnemonicParsing="false" text="View Text Indexes" />
+                                    <Button fx:id="textSearchDropButton" layoutX="510.0" layoutY="287.0" mnemonicParsing="false" text="Delete Text Indexes" />
+                                 </children></AnchorPane>
 									</content>
 								</Tab>
 							</tabs>

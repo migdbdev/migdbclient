@@ -37,8 +37,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -83,6 +86,7 @@ public class QueryGenerator implements Initializable {
 	private TextArea outputQuery;
 	@FXML
 	private TableView<QueryDocumentDTO> queryParametersTableView;
+	@FXML private TabPane queryGeneratorTabPane;
 
 	@FXML
 	private TableColumn<QueryDocumentDTO, String> fieldTableColumn;
@@ -95,6 +99,20 @@ public class QueryGenerator implements Initializable {
 	/*
 	 * @FXML private TableColumn<QueryDocumentDTO, String> conditionTableColumn;
 	 */
+	
+	/**
+	 * Text Search Tab
+	 */
+	@FXML private ComboBox<String> textSearchDatabaseComboBox;
+	@FXML private ComboBox<String> textSearchCollectionComboBox;
+	@FXML private ComboBox<String> textSearchFieldComboBox;
+	@FXML private CheckBox textSearchOldVersionCheckBox;
+	@FXML private Label textSearchTextIndexLabel;
+	@FXML private TextField textSearchKeywordTextField;
+	@FXML private Button textSearchCreateButton;
+	@FXML private Button textSearchViewButton;
+	@FXML private Button textSearchDropButton;
+	/*********************************************/
 
 	MongoCollection<Document> collectionDocument;
 	List<Document> selectedDocument;
@@ -121,11 +139,13 @@ public class QueryGenerator implements Initializable {
 		queryParametersTableView.setEditable(true);
 
 		// Set database name list to the databaseListComboBox
-		ArrayList<String> mongoCollections = (ArrayList<String>) getMongoDatabases();
-		for (int i = 0; i < mongoCollections.size(); i++) {
-			queryDatabaseListComboBox.getItems().add(mongoCollections.get(i));
+		ArrayList<String> mongoDatabases = (ArrayList<String>) getMongoDatabases();
+		for (int i = 0; i < mongoDatabases.size(); i++) {
+			queryDatabaseListComboBox.getItems().add(mongoDatabases.get(i));
+			textSearchDatabaseComboBox.getItems().add(mongoDatabases.get(i));
 		}
 		queryDatabaseListComboBox.getSelectionModel().select(0);
+		textSearchDatabaseComboBox.getSelectionModel().select(0);
 
 		// Set collection list according to a selected databse when ui loaded
 		queryCollectionListComboBox.getItems()
@@ -138,6 +158,18 @@ public class QueryGenerator implements Initializable {
 		collectionDocument = db
 				.getCollection(queryCollectionListComboBox.getSelectionModel().getSelectedItem().toString());
 		selectedDocument = collectionDocument.find().into(new ArrayList<Document>());
+		
+		queryGeneratorTabPane.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+		    @Override
+		    public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
+		        if(newValue.toString().equals("2")){
+		        	// Set collection list to the textSearchCollectionComboBox
+		    		textSearchCollectionComboBox.getItems()
+		    		.addAll(getCollectionOf(textSearchDatabaseComboBox.getSelectionModel().getSelectedItem()));
+		    		textSearchCollectionComboBox.getSelectionModel().select(0);
+		        }
+		    }
+		}); 
 
 		/**
 		 * databaseListComboBox changed event When changing
@@ -270,6 +302,9 @@ public class QueryGenerator implements Initializable {
 
 	}
 
+	/**
+	 * Method for building query
+	 */
 	public void queryBuild() {
 		try {
 			String dbName = queryDatabaseListComboBox.getSelectionModel().getSelectedItem();
@@ -286,37 +321,6 @@ public class QueryGenerator implements Initializable {
 			
 			outputQuery.clear();
 			outputQuery.setEditable(false);
-			
-			/*String query = "";
-
-			int tableRouteCount = 0;
-			for (QueryDocumentDTO dto : param) {
-				dao = new SqliteDAO();
-				String operator = dao.getQueryOperatorsKeyword(dto.getOperators().toString());
-				String field = (tableRouteCount > 0) ? "," + dto.getField() : dto.getField();
-				operator = (operator.equals("")) ? field + ":" + dto.getValues()
-						: field + ":{$" + operator + ":" + dto.getValues() + "}";
-				query = query.concat(operator);
-				tableRouteCount++;
-			}
-			query = "{" + query + "}";
-
-			String method = queryType.getText().equals("find") ? "." + queryType.getText() + "(" + query + ").pretty()"
-					: "." + queryType.getText() + "(" + query + ")";
-			String limit = (!queryLimitTextField.getText().isEmpty()) ? ".limit(" + queryLimitTextField.getText() + ")"
-					: "";
-			String skip = (!querySkipTextField.getText().isEmpty()) ? ".skip(" + querySkipTextField.getText() + ")"
-					: "";
-			String sortOrder = (querySortOrderComboBox.getSelectionModel().getSelectedItem()).equals("Ascending") ? "1"
-					: "-1";
-			String sort = (querySortColumnComboBox.getSelectionModel().getSelectedItem() != null)
-					? ".sort({" + querySortColumnComboBox.getSelectionModel().getSelectedItem() + ":" + sortOrder + "})"
-					: "";
-
-			String Structure = "db." + collection + method + limit + sort + skip;
-
-			outputQuery.clear();
-			outputQuery.appendText(Structure);*/
 
 			MongoDatabase db = MongoConnManager.INSTANCE.connectToDatabase(dbName);
 			BasicDBObject javaQuery = new BasicDBObject();
@@ -380,34 +384,20 @@ public class QueryGenerator implements Initializable {
 			iterable.forEach(new Block<Document>() {
 				@Override
 				public void apply(final Document document) {
-					outputQuery.appendText(document.toString()+"\n");
+					outputQuery.appendText(document.toJson()+"\n");
 				}
 			});
-
-			/*
-			 * Document javaQuery = null; int tableRouteCountJava = 0; for
-			 * (QueryDocumentDTO dto : param) { dao = new SqliteDAO(); String
-			 * operator =
-			 * dao.getQueryOperatorsKeyword(dto.getOperators().toString());
-			 * String field = (tableRouteCountJava > 0) ? ((operator.equals(""))
-			 * ? "eq(" + dto.getField() : operator + "(" + dto.getField()) :
-			 * ((operator.equals("")) ? "eq(" + dto.getField() : operator + "("
-			 * + dto.getField()); javaQuery = (tableRouteCountJava > 0) ?
-			 * javaQuery.append(field, dto.getValues()) : new Document(field,
-			 * dto.getValues()); tableRouteCountJava++; } query = "and(" + query
-			 * + ")"; System.out.println("Query =--- " + javaQuery);
-			 * 
-			 * FindIterable<Document> iterable = (FindIterable<Document>)
-			 * db.getCollection(collection).find(); iterable.forEach(new
-			 * Block<Document>() {
-			 * 
-			 * @Override public void apply(final Document document) {
-			 * System.out.println("Result"); System.out.println(document); } });
-			 */
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Method for building text search queries
+	 */
+	private void textSearchBuild(){
+		
 	}
 
 	/**
