@@ -1,6 +1,8 @@
 package org.migdb.migdbclient.main;
 
 import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.config.FxmlPath;
@@ -48,7 +50,6 @@ public class MainApp extends Application {
 		ImageView splash = new ImageView(new Image(ImagePath.SPLASHIMAGE.getPath()));
 		loadProgress = new ProgressBar();
 		loadProgress.setPrefWidth(SPLASH_WIDTH - 20);
-		loadProgress.setStyle("-fx-accent: green;");
 		progressText = new Label("Will find friends for peanuts . . .");
 		progressText.setStyle("-fx-text-fill : white");
 		splashLayout = new VBox();
@@ -65,30 +66,36 @@ public class MainApp extends Application {
 
 	@Override
 	public void start(final Stage initStage) throws Exception {
-		final Task<ObservableList<String>> friendTask = new Task<ObservableList<String>>() {
+		final Task<ObservableList<String>> jarTask = new Task<ObservableList<String>>() {
 			@Override
 			protected ObservableList<String> call() throws InterruptedException {
-				ObservableList<String> foundFriends = FXCollections.<String> observableArrayList();
-				ObservableList<String> availableFriends = FXCollections.observableArrayList("java", "javafx", "server",
-						"j.lib", "gson", "json", "sql", "mongo", "rt.jar", "maven.lib", "apache", "neural", "request");
+				ObservableList<String> foundJars = FXCollections.<String> observableArrayList();
+				ObservableList<String> availableJars = FXCollections.observableArrayList();
 
-				updateMessage("Finding friends . . .");
-				for (int i = 0; i < availableFriends.size(); i++) {
+				ClassLoader loader = ClassLoader.getSystemClassLoader();
+				URL[] urls = ((URLClassLoader) loader).getURLs();
+				for (URL url : urls) {
+					String[] jars = (url.getFile()).split("/");
+					availableJars.add((jars[jars.length - 1]).toString());
+				}
+
+				updateMessage("Finding . . .");
+				for (int i = 0; i < availableJars.size(); i++) {
 					Thread.sleep(400);
-					updateProgress(i + 1, availableFriends.size());
-					String nextFriend = availableFriends.get(i);
-					foundFriends.add(nextFriend);
-					updateMessage("Loading . . . migdb " + nextFriend);
+					updateProgress(i + 1, availableJars.size());
+					String nextFriend = availableJars.get(i);
+					foundJars.add(nextFriend);
+					updateMessage("Loading . . . " + nextFriend);
 				}
 				Thread.sleep(400);
 				updateMessage("MigDB loaded.");
 
-				return foundFriends;
+				return foundJars;
 			}
 		};
 
-		showSplash(initStage, friendTask, () -> showMainStage());
-		new Thread(friendTask).start();
+		showSplash(initStage, jarTask, () -> showMainStage());
+		new Thread(jarTask).start();
 	}
 
 	private void showMainStage() {
@@ -137,7 +144,9 @@ public class MainApp extends Application {
 		});
 
 		Scene splashScene = new Scene(mainAnchorpane, Color.TRANSPARENT);
+		splashScene.getStylesheets().add(getClass().getResource("/org/migdb/migdbclient/resources/css/custom.css").toExternalForm());
 		initStage.setScene(splashScene);
+		initStage.getIcons().add(new Image(ImagePath.FAVICON.getPath()));
 		initStage.centerOnScreen();
 		/*
 		 * initStage.setX(bounds.getMinX() + bounds.getWidth() / 2 -
