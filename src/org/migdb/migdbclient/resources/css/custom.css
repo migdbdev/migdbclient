@@ -2,6 +2,12 @@
     -fx-background-color: #FFFFFF;
 }
 
+.progress-bar > .bar {
+    -fx-background-insets: 1 1 2 1;
+    -fx-padding: 0.20em;
+    -fx-accent: #336699;
+}
+
 /*
  .label {
 	-fx-font-size: 10pt;

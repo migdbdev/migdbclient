@@ -1,9 +1,11 @@
 package org.migdb.migdbclient.views.queryconverter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import javafx.fxml.FXML;
@@ -11,8 +13,14 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Pair;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.DateValue;
+import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.TimestampValue;
 import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
 import net.sf.jsqlparser.expression.operators.arithmetic.Division;
 import net.sf.jsqlparser.expression.operators.arithmetic.Multiplication;
@@ -20,7 +28,15 @@ import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.ItemsList;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -31,8 +47,19 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.ForeignKeyIndex;
 import net.sf.jsqlparser.statement.create.table.Index;
+import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.drop.Drop;
 import net.sf.jsqlparser.statement.insert.Insert;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.Distinct;
+import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.Limit;
+import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.update.Update;
 
 /**
@@ -85,6 +112,12 @@ public class QueryConverterController {
 			} else if(statement instanceof Update) {
 				Update updateStatement = (Update) statement;
 				mongoQuery = convertUpdateRecord(updateStatement);
+			} else if(statement instanceof Delete) {
+				Delete deleteStatement = (Delete) statement;
+				mongoQuery = convertDeleteRecord(deleteStatement);
+			} else if(statement instanceof Select) {
+				Select selectStatement = (Select) statement;
+				mongoQuery = convertSelectRecord(selectStatement);
 			}
 
 			mongoQueryTxt.setText(mongoQuery);
@@ -259,15 +292,18 @@ public class QueryConverterController {
 		return mongoQuery;
 	}
 	
+	/**
+	 * @param updateStatement
+	 * @return
+	 */
 	private String convertUpdateRecord(Update updateStatement) {
-		String mongoQuery = "";
 		
 		Table table = updateStatement.getTables().get(0);
 		List<Column> columnList = updateStatement.getColumns();
 		List<Expression> expressionList =  updateStatement.getExpressions();
 		Expression whereExpression = updateStatement.getWhere();
 		
-		LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+		LinkedHashMap<String, Object> updatePairs = new LinkedHashMap<String, Object>();
 		
 		for(int i=0; i<columnList.size(); i++) {
 			Column column = columnList.get(i);
@@ -275,11 +311,11 @@ public class QueryConverterController {
 
 			if(expression instanceof Addition) {
 				Addition op = (Addition) expression;		
-				Object obj = pairs.get("$inc");
+				Object obj = updatePairs.get("$inc");
 				if(obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object,Object>();
 					pair.put(op.getLeftExpression(), op.getRightExpression());
-					pairs.put("$inc", pair);
+					updatePairs.put("$inc", pair);
 				} else {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(op.getLeftExpression(), op.getRightExpression());
@@ -293,60 +329,1252 @@ public class QueryConverterController {
 				} else {
 					rightValue = Long.parseLong(op.getRightExpression().toString()) * -1;
 				}
-				Object obj = pairs.get("$inc");
+				Object obj = updatePairs.get("$inc");
 				if(obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object,Object>();
 					pair.put(op.getLeftExpression(), "-"+op.getRightExpression());
-					pairs.put("$inc", pair);
+					updatePairs.put("$inc", pair);
 				} else {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(op.getLeftExpression(), "-"+op.getRightExpression());
 				}
 			} else if(expression instanceof Multiplication) {
 				Multiplication op = (Multiplication) expression;
-				Object obj = pairs.get("$mul");
+				Object obj = updatePairs.get("$mul");
 				if(obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object,Object>();
 					pair.put(op.getLeftExpression(), op.getRightExpression());
-					pairs.put("$mul", pair);
+					updatePairs.put("$mul", pair);
 				} else {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(op.getLeftExpression(), op.getRightExpression());
 				}
 			} else if(expression instanceof Division) {
 				Division op = (Division) expression;
-				Object obj = pairs.get("$mul");
+				Object obj = updatePairs.get("$mul");
 				if(obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object,Object>();
 					pair.put(op.getLeftExpression(), "1/"+op.getRightExpression());
-					pairs.put("$inc", pair);
+					updatePairs.put("$inc", pair);
 				} else {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(op.getLeftExpression(), "1/"+op.getRightExpression());
 				}
-			} else if(expression instanceof StringValue) {
+			} else if(expression instanceof LongValue) {
+				LongValue exp = (LongValue) expression;
+				Object obj = updatePairs.get("$set");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(column.getColumnName(), "NumberLong(\""+exp.getValue()+"\")");
+					updatePairs.put("$set", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(column.getColumnName(), "NumberLong(\""+exp.getValue()+"\")");
+				}
+			} else if(expression instanceof DoubleValue) {
+				DoubleValue exp = (DoubleValue) expression;
+				Object obj = updatePairs.get("$set");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(column.getColumnName(), exp.getValue());
+					updatePairs.put("$set", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(column.getColumnName(), exp.getValue());
+				}
+			} else if(expression instanceof DateValue || expression instanceof TimestampValue) {
+				DateValue exp = (DateValue) expression;
+				Object obj = updatePairs.get("$set");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(column.getColumnName(), "new Date(\""+exp.getValue()+"\")");
+					updatePairs.put("$set", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(column.getColumnName(), "new Date(\""+exp.getValue()+"\")");
+				}
+			} else {
+				Object obj = updatePairs.get("$set");
+				if(obj == null) {
+					HashMap<Object, Object> pair = new HashMap<Object,Object>();
+					pair.put(column.getColumnName(), expression);
+					updatePairs.put("$set", pair);
+				} else {
+					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
+					pList.put(column.getColumnName(), expression);
+				}
+			}
+		}
+		
+		HashMap<String, Object> conditionPair = new HashMap<String, Object>();
+		
+		if(whereExpression instanceof AndExpression) {
+
+			AndExpression whereExp = (AndExpression) whereExpression;
+			Expression leftExp = whereExp.getLeftExpression();
+			Expression rightExp = whereExp.getRightExpression();
+			
+			List<Map<String, Object>> andList = new ArrayList<Map<String, Object>>();
+			
+			if(leftExp instanceof EqualsTo) {
+				EqualsTo exp = (EqualsTo) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$eq", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(leftExp instanceof NotEqualsTo) {
+				NotEqualsTo exp = (NotEqualsTo) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$ne", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(leftExp instanceof GreaterThan) {
+				GreaterThan exp = (GreaterThan) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$gt", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(leftExp instanceof MinorThan) {
+				MinorThan exp = (MinorThan) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$lt", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(leftExp instanceof GreaterThanEquals) {
+				GreaterThanEquals exp = (GreaterThanEquals) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$gte", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			} 
+			else if(leftExp instanceof MinorThanEquals) {
+				MinorThanEquals exp = (MinorThanEquals) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$lte", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(leftExp instanceof InExpression) {
+				InExpression exp = (InExpression) leftExp;
+				ItemsList items = exp.getRightItemsList();
+
+				List<Object> itemList = new ArrayList<Object>();	
+				String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+				StringTokenizer st = new StringTokenizer(values, ",");
+				while (st.hasMoreElements()) {
+					Object value = st.nextElement();
+					itemList.add(value);
+				}
+				
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$in", itemList);
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(leftExp instanceof LikeExpression) {
+				LikeExpression exp = (LikeExpression) leftExp;
+				//exp.g
 				
 			}
-			System.out.println(pairs);
+
+			if(rightExp instanceof EqualsTo) {
+				EqualsTo exp = (EqualsTo) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$eq", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(rightExp instanceof NotEqualsTo) {
+				NotEqualsTo exp = (NotEqualsTo) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$ne", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(rightExp instanceof GreaterThan) {
+				GreaterThan exp = (GreaterThan) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$gt", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(rightExp instanceof MinorThan) {
+				MinorThan exp = (MinorThan) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$lt", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(rightExp instanceof GreaterThanEquals) {
+				GreaterThanEquals exp = (GreaterThanEquals) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$gte", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			} 
+			else if(rightExp instanceof MinorThanEquals) {
+				MinorThanEquals exp = (MinorThanEquals) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$lte", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(rightExp instanceof InExpression) {
+				InExpression exp = (InExpression) rightExp;
+				ItemsList items = exp.getRightItemsList();
+
+				List<Object> itemList = new ArrayList<Object>();	
+				String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+				StringTokenizer st = new StringTokenizer(values, ",");
+				while (st.hasMoreElements()) {
+					Object value = st.nextElement();
+					itemList.add(value);
+				}
+				
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$in", itemList);
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			
+			
+			conditionPair.put("$and", andList);
 		}
 		
-		if(whereExpression instanceof GreaterThan) {
-			System.out.println("gt");
-		}
-		if(whereExpression instanceof AndExpression) {
-			System.out.println("and");
-		}
-		if(whereExpression instanceof OrExpression) {
-			System.out.println("or");
-		}
-		if(whereExpression instanceof Addition) {
-			System.out.println("add");
-		}
-		if(whereExpression instanceof EqualsTo) {
-			System.out.println("euqal");
+		else if(whereExpression instanceof OrExpression) {
+			OrExpression whereExp = (OrExpression) whereExpression;
+
+			Expression leftExp = whereExp.getLeftExpression();
+			Expression rightExp = whereExp.getRightExpression();
+			
+			List<Map<String, Object>> andList = new ArrayList<Map<String, Object>>();
+			
+			if(leftExp instanceof EqualsTo) {
+				EqualsTo exp = (EqualsTo) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$eq", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(leftExp instanceof NotEqualsTo) {
+				NotEqualsTo exp = (NotEqualsTo) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$ne", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(leftExp instanceof GreaterThan) {
+				GreaterThan exp = (GreaterThan) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$gt", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(leftExp instanceof MinorThan) {
+				MinorThan exp = (MinorThan) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$lt", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(leftExp instanceof GreaterThanEquals) {
+				GreaterThanEquals exp = (GreaterThanEquals) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$gte", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			} 
+			else if(leftExp instanceof MinorThanEquals) {
+				MinorThanEquals exp = (MinorThanEquals) leftExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$lte", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(leftExp instanceof InExpression) {
+				InExpression exp = (InExpression) leftExp;
+				ItemsList items = exp.getRightItemsList();
+
+				List<Object> itemList = new ArrayList<Object>();	
+				String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+				StringTokenizer st = new StringTokenizer(values, ",");
+				while (st.hasMoreElements()) {
+					Object value = st.nextElement();
+					itemList.add(value);
+				}
+				
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$in", itemList);
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+
+			if(rightExp instanceof EqualsTo) {
+				EqualsTo exp = (EqualsTo) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$eq", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(rightExp instanceof NotEqualsTo) {
+				NotEqualsTo exp = (NotEqualsTo) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$ne", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(rightExp instanceof GreaterThan) {
+				GreaterThan exp = (GreaterThan) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$gt", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(rightExp instanceof MinorThan) {
+				MinorThan exp = (MinorThan) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$lt", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(rightExp instanceof GreaterThanEquals) {
+				GreaterThanEquals exp = (GreaterThanEquals) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$gte", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			} 
+			else if(rightExp instanceof MinorThanEquals) {
+				MinorThanEquals exp = (MinorThanEquals) rightExp;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$lte", exp.getRightExpression());
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			else if(rightExp instanceof InExpression) {
+				InExpression exp = (InExpression) rightExp;
+				ItemsList items = exp.getRightItemsList();
+
+				List<Object> itemList = new ArrayList<Object>();	
+				String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+				StringTokenizer st = new StringTokenizer(values, ",");
+				while (st.hasMoreElements()) {
+					Object value = st.nextElement();
+					itemList.add(value);
+				}
+				
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$in", itemList);
+				HashMap<String, Object> pair = new HashMap<String,Object>();
+				pair.put(exp.getLeftExpression().toString(), innerPair);
+				andList.add(pair);
+			}
+			
+			conditionPair.put("$or", andList);			
 		}
 		
+		else if(whereExpression instanceof NotEqualsTo) {
+			NotEqualsTo whereExp = (NotEqualsTo) whereExpression;
+			HashMap<String, Object> innerPair = new HashMap<String,Object>();
+			innerPair.put("$ne", whereExp.getRightExpression());
+			conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);			
+		}
 		
+		else if(whereExpression instanceof EqualsTo) {
+			EqualsTo whereExp = (EqualsTo) whereExpression;
+			HashMap<String, Object> innerPair = new HashMap<String,Object>();
+			innerPair.put("$eq", whereExp.getRightExpression());
+			conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+		}
+		
+		else if(whereExpression instanceof GreaterThan) {
+			GreaterThan whereExp = (GreaterThan) whereExpression;
+			HashMap<String, Object> innerPair = new HashMap<String,Object>();
+			innerPair.put("$gt", whereExp.getRightExpression());
+			conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+		}
+		
+		else if(whereExpression instanceof MinorThan) {
+			MinorThan whereExp = (MinorThan) whereExpression;
+			HashMap<String, Object> innerPair = new HashMap<String,Object>();
+			innerPair.put("$lt", whereExp.getRightExpression());
+			conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+		}
+		
+		else if(whereExpression instanceof GreaterThanEquals) {
+			GreaterThanEquals whereExp = (GreaterThanEquals) whereExpression;
+			HashMap<String, Object> innerPair = new HashMap<String,Object>();
+			innerPair.put("$gte", whereExp.getRightExpression());
+			conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+		} 
+		
+		else if(whereExpression instanceof MinorThanEquals) {
+			MinorThanEquals whereExp = (MinorThanEquals) whereExpression;
+			HashMap<String, Object> innerPair = new HashMap<String,Object>();
+			innerPair.put("$lte", whereExp.getRightExpression());
+			conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+		}
+		
+		else if(whereExpression instanceof InExpression) {
+			InExpression whereExp = (InExpression) whereExpression;
+			ItemsList items = whereExp.getRightItemsList();
+
+			List<Object> itemList = new ArrayList<Object>();	
+			String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+			StringTokenizer st = new StringTokenizer(values, ",");
+			while (st.hasMoreElements()) {
+				Object value = st.nextElement();
+				itemList.add(value);
+			}
+			
+			HashMap<String, Object> innerPair = new HashMap<String,Object>();
+			innerPair.put("$in", itemList);
+			conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+			
+		}
+		
+		else if(whereExpression instanceof LikeExpression) {
+			LikeExpression exp = (LikeExpression) whereExpression;
+			System.out.println(exp.getEscape());
+			
+		}
+		
+		String mongoQuery = "db."+table.getName()+".update( \n\t"+conditionPair.toString().replace("=", ": ")
+				.replace("{", "{ ").replace("}", " }")+", \n\t"+updatePairs.toString().replace("=", ": ")
+				.replace("{", "{ ").replace("}", " }")+", \n\t{ multi: true } \n)";
+		
+		return mongoQuery;
+	}
+	
+	/**
+	 * @param deleteStatement
+	 * @return
+	 */
+	private String convertDeleteRecord(Delete deleteStatement) {
+		
+		Table table = deleteStatement.getTable();
+		Expression whereExpression = deleteStatement.getWhere();
+		String mongoQuery = "";
+		
+		if(whereExpression != null) {
+
+			HashMap<String, Object> conditionPair = new HashMap<String, Object>();
+			
+			if(whereExpression instanceof AndExpression) {
+
+				AndExpression whereExp = (AndExpression) whereExpression;
+				Expression leftExp = whereExp.getLeftExpression();
+				Expression rightExp = whereExp.getRightExpression();
+				
+				List<Map<String, Object>> andList = new ArrayList<Map<String, Object>>();
+				
+				if(leftExp instanceof EqualsTo) {
+					EqualsTo exp = (EqualsTo) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$eq", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(leftExp instanceof NotEqualsTo) {
+					NotEqualsTo exp = (NotEqualsTo) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$ne", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(leftExp instanceof GreaterThan) {
+					GreaterThan exp = (GreaterThan) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$gt", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(leftExp instanceof MinorThan) {
+					MinorThan exp = (MinorThan) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$lt", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(leftExp instanceof GreaterThanEquals) {
+					GreaterThanEquals exp = (GreaterThanEquals) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$gte", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				} 
+				else if(leftExp instanceof MinorThanEquals) {
+					MinorThanEquals exp = (MinorThanEquals) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$lte", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(leftExp instanceof InExpression) {
+					InExpression exp = (InExpression) leftExp;
+					ItemsList items = exp.getRightItemsList();
+
+					List<Object> itemList = new ArrayList<Object>();	
+					String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+					StringTokenizer st = new StringTokenizer(values, ",");
+					while (st.hasMoreElements()) {
+						Object value = st.nextElement();
+						itemList.add(value);
+					}
+					
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$in", itemList);
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+
+				if(rightExp instanceof EqualsTo) {
+					EqualsTo exp = (EqualsTo) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$eq", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(rightExp instanceof NotEqualsTo) {
+					NotEqualsTo exp = (NotEqualsTo) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$ne", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(rightExp instanceof GreaterThan) {
+					GreaterThan exp = (GreaterThan) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$gt", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(rightExp instanceof MinorThan) {
+					MinorThan exp = (MinorThan) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$lt", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(rightExp instanceof GreaterThanEquals) {
+					GreaterThanEquals exp = (GreaterThanEquals) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$gte", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				} 
+				else if(rightExp instanceof MinorThanEquals) {
+					MinorThanEquals exp = (MinorThanEquals) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$lte", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(rightExp instanceof InExpression) {
+					InExpression exp = (InExpression) rightExp;
+					ItemsList items = exp.getRightItemsList();
+
+					List<Object> itemList = new ArrayList<Object>();	
+					String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+					StringTokenizer st = new StringTokenizer(values, ",");
+					while (st.hasMoreElements()) {
+						Object value = st.nextElement();
+						itemList.add(value);
+					}
+					
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$in", itemList);
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				
+				conditionPair.put("$and", andList);
+
+			}
+			
+			else if(whereExpression instanceof OrExpression) {
+				OrExpression whereExp = (OrExpression) whereExpression;
+
+				Expression leftExp = whereExp.getLeftExpression();
+				Expression rightExp = whereExp.getRightExpression();
+				
+				List<Map<String, Object>> andList = new ArrayList<Map<String, Object>>();
+				
+				if(leftExp instanceof EqualsTo) {
+					EqualsTo exp = (EqualsTo) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$eq", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(leftExp instanceof NotEqualsTo) {
+					NotEqualsTo exp = (NotEqualsTo) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$ne", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(leftExp instanceof GreaterThan) {
+					GreaterThan exp = (GreaterThan) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$gt", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(leftExp instanceof MinorThan) {
+					MinorThan exp = (MinorThan) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$lt", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(leftExp instanceof GreaterThanEquals) {
+					GreaterThanEquals exp = (GreaterThanEquals) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$gte", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				} 
+				else if(leftExp instanceof MinorThanEquals) {
+					MinorThanEquals exp = (MinorThanEquals) leftExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$lte", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(leftExp instanceof InExpression) {
+					InExpression exp = (InExpression) leftExp;
+					ItemsList items = exp.getRightItemsList();
+
+					List<Object> itemList = new ArrayList<Object>();	
+					String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+					StringTokenizer st = new StringTokenizer(values, ",");
+					while (st.hasMoreElements()) {
+						Object value = st.nextElement();
+						itemList.add(value);
+					}
+					
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$in", itemList);
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+
+				if(rightExp instanceof EqualsTo) {
+					EqualsTo exp = (EqualsTo) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$eq", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(rightExp instanceof NotEqualsTo) {
+					NotEqualsTo exp = (NotEqualsTo) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$ne", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(rightExp instanceof GreaterThan) {
+					GreaterThan exp = (GreaterThan) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$gt", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(rightExp instanceof MinorThan) {
+					MinorThan exp = (MinorThan) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$lt", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(rightExp instanceof GreaterThanEquals) {
+					GreaterThanEquals exp = (GreaterThanEquals) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$gte", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				} 
+				else if(rightExp instanceof MinorThanEquals) {
+					MinorThanEquals exp = (MinorThanEquals) rightExp;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$lte", exp.getRightExpression());
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				else if(rightExp instanceof InExpression) {
+					InExpression exp = (InExpression) rightExp;
+					ItemsList items = exp.getRightItemsList();
+
+					List<Object> itemList = new ArrayList<Object>();	
+					String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+					StringTokenizer st = new StringTokenizer(values, ",");
+					while (st.hasMoreElements()) {
+						Object value = st.nextElement();
+						itemList.add(value);
+					}
+					
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$in", itemList);
+					HashMap<String, Object> pair = new HashMap<String,Object>();
+					pair.put(exp.getLeftExpression().toString(), innerPair);
+					andList.add(pair);
+				}
+				
+				conditionPair.put("$or", andList);	
+			}
+			
+			else if(whereExpression instanceof NotEqualsTo) {
+				NotEqualsTo whereExp = (NotEqualsTo) whereExpression;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$ne", whereExp.getRightExpression());
+				conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);			
+			}
+			
+			else if(whereExpression instanceof EqualsTo) {
+				EqualsTo whereExp = (EqualsTo) whereExpression;
+				conditionPair.put(whereExp.getLeftExpression().toString(), whereExp.getRightExpression());
+			}
+			
+			else if(whereExpression instanceof GreaterThan) {
+				GreaterThan whereExp = (GreaterThan) whereExpression;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$gt", whereExp.getRightExpression());
+				conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+			}
+			
+			else if(whereExpression instanceof MinorThan) {
+				MinorThan whereExp = (MinorThan) whereExpression;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$lt", whereExp.getRightExpression());
+				conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+			}
+			
+			else if(whereExpression instanceof GreaterThanEquals) {
+				GreaterThanEquals whereExp = (GreaterThanEquals) whereExpression;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$gte", whereExp.getRightExpression());
+				conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+			} 
+			
+			else if(whereExpression instanceof MinorThanEquals) {
+				MinorThanEquals whereExp = (MinorThanEquals) whereExpression;
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$lte", whereExp.getRightExpression());
+				conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+			}
+			
+			else if(whereExpression instanceof InExpression) {
+				InExpression whereExp = (InExpression) whereExpression;
+				ItemsList items = whereExp.getRightItemsList();
+
+				List<Object> itemList = new ArrayList<Object>();	
+				String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+				StringTokenizer st = new StringTokenizer(values, ",");
+				while (st.hasMoreElements()) {
+					Object value = st.nextElement();
+					itemList.add(value);
+				}
+				
+				HashMap<String, Object> innerPair = new HashMap<String,Object>();
+				innerPair.put("$in", itemList);
+				conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);				
+			}
+			
+			mongoQuery = "db."+table.getName()+".remove( \n\t"+conditionPair.toString().replace("=", ": ")
+					.replace("{", "{ ").replace("}", " }")+"\n)";
+			
+		} else {
+			mongoQuery = "db."+table.getName()+".remove({})";
+		}
+
+		return mongoQuery;
+	}
+	
+	private String convertSelectRecord(Select selectStatement) {
+		
+		String mongoQuery = "";
+		
+		SelectBody select = selectStatement.getSelectBody();	
+		
+		if(select instanceof PlainSelect) {
+			PlainSelect plainSelect = (PlainSelect) select;
+
+			/*TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
+			List<String> tableList = tablesNamesFinder.getTableList(selectStatement);*/
+
+			List<SelectItem> selectItems = plainSelect.getSelectItems();
+			Expression whereExpression =  plainSelect.getWhere();
+			Distinct distinct = plainSelect.getDistinct();
+			List<Join> joins = plainSelect.getJoins();
+			Limit limit = plainSelect.getLimit();
+			List<OrderByElement> orderByList = plainSelect.getOrderByElements();
+			
+			HashMap<String, Object> conditionPair = new HashMap<String, Object>();
+			
+			if(whereExpression != null) {
+				
+				if(whereExpression instanceof AndExpression) {
+
+					AndExpression whereExp = (AndExpression) whereExpression;
+					Expression leftExp = whereExp.getLeftExpression();
+					Expression rightExp = whereExp.getRightExpression();
+					
+					List<Map<String, Object>> andList = new ArrayList<Map<String, Object>>();
+					
+					if(leftExp instanceof EqualsTo) {
+						EqualsTo exp = (EqualsTo) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$eq", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(leftExp instanceof NotEqualsTo) {
+						NotEqualsTo exp = (NotEqualsTo) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$ne", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(leftExp instanceof GreaterThan) {
+						GreaterThan exp = (GreaterThan) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$gt", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(leftExp instanceof MinorThan) {
+						MinorThan exp = (MinorThan) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$lt", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(leftExp instanceof GreaterThanEquals) {
+						GreaterThanEquals exp = (GreaterThanEquals) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$gte", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					} 
+					else if(leftExp instanceof MinorThanEquals) {
+						MinorThanEquals exp = (MinorThanEquals) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$lte", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(leftExp instanceof InExpression) {
+						System.out.println("in");
+					}
+
+					if(rightExp instanceof EqualsTo) {
+						EqualsTo exp = (EqualsTo) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$eq", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(rightExp instanceof NotEqualsTo) {
+						NotEqualsTo exp = (NotEqualsTo) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$ne", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(rightExp instanceof GreaterThan) {
+						GreaterThan exp = (GreaterThan) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$gt", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(rightExp instanceof MinorThan) {
+						MinorThan exp = (MinorThan) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$lt", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(rightExp instanceof GreaterThanEquals) {
+						GreaterThanEquals exp = (GreaterThanEquals) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$gte", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					} 
+					else if(rightExp instanceof MinorThanEquals) {
+						MinorThanEquals exp = (MinorThanEquals) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$lte", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(rightExp instanceof InExpression) {
+						InExpression exp = (InExpression) rightExp;
+						ItemsList items = exp.getRightItemsList();
+
+						List<Object> itemList = new ArrayList<Object>();	
+						String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+						StringTokenizer st = new StringTokenizer(values, ",");
+						while (st.hasMoreElements()) {
+							Object value = st.nextElement();
+							itemList.add(value);
+						}
+						
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$in", itemList);
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					
+					conditionPair.put("$and", andList);
+				}
+				
+				else if(whereExpression instanceof OrExpression) {
+					OrExpression whereExp = (OrExpression) whereExpression;
+
+					Expression leftExp = whereExp.getLeftExpression();
+					Expression rightExp = whereExp.getRightExpression();
+					
+					List<Map<String, Object>> andList = new ArrayList<Map<String, Object>>();
+					
+					if(leftExp instanceof EqualsTo) {
+						EqualsTo exp = (EqualsTo) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$eq", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(leftExp instanceof NotEqualsTo) {
+						NotEqualsTo exp = (NotEqualsTo) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$ne", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(leftExp instanceof GreaterThan) {
+						GreaterThan exp = (GreaterThan) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$gt", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(leftExp instanceof MinorThan) {
+						MinorThan exp = (MinorThan) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$lt", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(leftExp instanceof GreaterThanEquals) {
+						GreaterThanEquals exp = (GreaterThanEquals) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$gte", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					} 
+					else if(leftExp instanceof MinorThanEquals) {
+						MinorThanEquals exp = (MinorThanEquals) leftExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$lte", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(leftExp instanceof InExpression) {
+						InExpression exp = (InExpression) leftExp;
+						ItemsList items = exp.getRightItemsList();
+
+						List<Object> itemList = new ArrayList<Object>();	
+						String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+						StringTokenizer st = new StringTokenizer(values, ",");
+						while (st.hasMoreElements()) {
+							Object value = st.nextElement();
+							itemList.add(value);
+						}
+						
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$in", itemList);
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+
+					if(rightExp instanceof EqualsTo) {
+						EqualsTo exp = (EqualsTo) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$eq", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(rightExp instanceof NotEqualsTo) {
+						NotEqualsTo exp = (NotEqualsTo) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$ne", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(rightExp instanceof GreaterThan) {
+						GreaterThan exp = (GreaterThan) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$gt", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(rightExp instanceof MinorThan) {
+						MinorThan exp = (MinorThan) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$lt", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(rightExp instanceof GreaterThanEquals) {
+						GreaterThanEquals exp = (GreaterThanEquals) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$gte", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					} 
+					else if(rightExp instanceof MinorThanEquals) {
+						MinorThanEquals exp = (MinorThanEquals) rightExp;
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$lte", exp.getRightExpression());
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					else if(rightExp instanceof InExpression) {
+						InExpression exp = (InExpression) rightExp;
+						ItemsList items = exp.getRightItemsList();
+
+						List<Object> itemList = new ArrayList<Object>();	
+						String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+						StringTokenizer st = new StringTokenizer(values, ",");
+						while (st.hasMoreElements()) {
+							Object value = st.nextElement();
+							itemList.add(value);
+						}
+						
+						HashMap<String, Object> innerPair = new HashMap<String,Object>();
+						innerPair.put("$in", itemList);
+						HashMap<String, Object> pair = new HashMap<String,Object>();
+						pair.put(exp.getLeftExpression().toString(), innerPair);
+						andList.add(pair);
+					}
+					
+					conditionPair.put("$or", andList);	
+				}
+				
+				else if(whereExpression instanceof NotEqualsTo) {
+					NotEqualsTo whereExp = (NotEqualsTo) whereExpression;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$ne", whereExp.getRightExpression());
+					conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);			
+				}
+				
+				else if(whereExpression instanceof EqualsTo) {
+					EqualsTo whereExp = (EqualsTo) whereExpression;
+					conditionPair.put(whereExp.getLeftExpression().toString(), whereExp.getRightExpression());
+				}
+				
+				else if(whereExpression instanceof GreaterThan) {
+					GreaterThan whereExp = (GreaterThan) whereExpression;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$gt", whereExp.getRightExpression());
+					conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+				}
+				
+				else if(whereExpression instanceof MinorThan) {
+					MinorThan whereExp = (MinorThan) whereExpression;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$lt", whereExp.getRightExpression());
+					conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+				}
+				
+				else if(whereExpression instanceof GreaterThanEquals) {
+					GreaterThanEquals whereExp = (GreaterThanEquals) whereExpression;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$gte", whereExp.getRightExpression());
+					conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+				} 
+				
+				else if(whereExpression instanceof MinorThanEquals) {
+					MinorThanEquals whereExp = (MinorThanEquals) whereExpression;
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$lte", whereExp.getRightExpression());
+					conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);
+				}
+				
+				else if(whereExpression instanceof InExpression) {
+					InExpression whereExp = (InExpression) whereExpression;
+					ItemsList items = whereExp.getRightItemsList();
+
+					List<Object> itemList = new ArrayList<Object>();	
+					String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+					StringTokenizer st = new StringTokenizer(values, ",");
+					while (st.hasMoreElements()) {
+						Object value = st.nextElement();
+						itemList.add(value);
+					}
+					
+					HashMap<String, Object> innerPair = new HashMap<String,Object>();
+					innerPair.put("$in", itemList);
+					conditionPair.put(whereExp.getLeftExpression().toString(), innerPair);				
+				}			
+			}
+			
+			HashMap<String, Object> selectPair = new HashMap<String, Object>();
+			String append = "";
+			
+			if( (selectItems.size()) == 1 && (selectItems.get(0) instanceof AllColumns)) {
+				if(whereExpression == null) {
+					mongoQuery = "db."+plainSelect.getFromItem()+".find()";
+				}
+				else {
+					mongoQuery = "db."+plainSelect.getFromItem()+".find(\n\t"+conditionPair.toString().replace("=", ": ")
+							.replace("{", "{ ").replace("}", " }")+"\n)";
+				}
+			}
+			else {
+				for(int i=0; i<selectItems.size(); i++) {
+					SelectItem item = selectItems.get(i);
+					if(item instanceof SelectExpressionItem) {
+						SelectExpressionItem expressionItem = (SelectExpressionItem) item;
+						Expression expression = expressionItem.getExpression();
+						if(expression instanceof Function) {
+							Function func = (Function) expression;
+							if(func.getName().equalsIgnoreCase("count")) {
+								if(func.getParameters() != null) {
+									List<Expression> exList = func.getParameters().getExpressions();
+									for(int k=0; k<exList.size(); k++) {
+										conditionPair.put(exList.get(k).toString(), "{ $exists: true }");
+									}
+								}
+								append+=".count()";
+							}
+						}
+						else if(expression instanceof Column) {
+							Column col = (Column) expression;
+							selectPair.put(col.getColumnName(), 1);
+						}
+					}
+		
+				}
+			}
+			
+
+			if(orderByList != null) {
+				HashMap<String, Object> orderPair = new HashMap<String, Object>();
+				for(int i=0; i<orderByList.size(); i++) {
+					OrderByElement orderBy = orderByList.get(i);
+					if(orderBy.isAsc()) {
+						orderPair.put(orderBy.getExpression().toString(), 1);
+					}
+					else if(orderBy.isAscDescPresent()) {
+						orderPair.put(orderBy.getExpression().toString(), -1);
+					}
+				}
+				append+= ".sort( "+orderPair.toString().replace("=", ": ").replace("{", "{ ").replace("}", " }")+" )";
+			}
+			
+			if(limit!= null) {
+				append+= ".limit("+limit.getOffset()+")";
+			}
+			
+			if(mongoQuery == "" && (!selectPair.isEmpty())) {
+				mongoQuery = "db."+plainSelect.getFromItem()+".find(\n\t"+conditionPair.toString().replace("=", ": ")
+						.replace("{", "{ ").replace("}", " }")+",\n\t"+selectPair.toString().replace("=", ": ")
+						.replace("{", "{ ").replace("}", " }")+"\n)";
+			} else if(mongoQuery == "" && (selectPair.isEmpty())) {
+				mongoQuery = "db."+plainSelect.getFromItem()+".find(\n\t"+conditionPair.toString().replace("=", ": ")
+						.replace("{", "{ ").replace("}", " }")+"\n)";
+			}
+			
+			mongoQuery+=append;
+			
+		}
 		
 		return mongoQuery;
 	}
