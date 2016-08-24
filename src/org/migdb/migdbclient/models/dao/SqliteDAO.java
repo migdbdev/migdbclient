@@ -231,5 +231,40 @@ public class SqliteDAO {
 		return keywords;
 		
 	}
+	
+	public boolean isPathExist(String type){
+		boolean isExist = false;
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection();
+			String query = "SELECT * FROM PATH WHERE type = '"+type+"'";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ResultSet rs = ps.executeQuery();
+			if(rs.next()){
+				isExist = true;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return isExist;
+	}
+	
+	public void insertMongoDbPath(String dbPath, int isDefault, String dbType){
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection();
+			String query = "INSERT INTO PATH(path, isDefault, type) VALUES(?,?,?)";
+			PreparedStatement ps =dbConn.prepareStatement(query);
+			ps.setString(1, dbPath);
+			ps.setInt(2, isDefault);
+			ps.setString(3, dbType);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
+	}
 
 }
