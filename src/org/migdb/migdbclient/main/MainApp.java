@@ -7,6 +7,9 @@ import java.net.URLClassLoader;
 import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.ImagePath;
+import org.migdb.migdbclient.models.dao.SqliteDAO;
+import org.migdb.migdbclient.resources.threads.CheckInternetConnectivity;
+import org.migdb.migdbclient.resources.threads.ConnectivityIsShowInstance;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
@@ -14,9 +17,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.effect.DropShadow;
@@ -28,6 +34,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 public class MainApp extends Application {
@@ -40,6 +47,11 @@ public class MainApp extends Application {
 	private Label progressText;
 	private Stage primaryStage;
 	private static final int SPLASH_WIDTH = 520;
+
+	CheckInternetConnectivity runner = new CheckInternetConnectivity();
+
+	@FXML
+	private Button internetConnectivityOkButton;
 
 	public static void main(String[] args) throws Exception {
 		launch(args);
@@ -62,6 +74,7 @@ public class MainApp extends Application {
 		progressTextLayout.setLayoutY(280);
 		mainAnchorpane.getChildren().addAll(splashLayout, progressTextLayout);
 		splashLayout.setEffect(new DropShadow());
+		ConnectivityIsShowInstance.INSTANCE.setShow(false);
 	}
 
 	@Override
@@ -94,13 +107,15 @@ public class MainApp extends Application {
 			}
 		};
 
-		/*showSplash(initStage, jarTask, () -> showMainStage());
-		new Thread(jarTask).start();*/
-		showMainStage();
+		showSplash(initStage, jarTask, () -> showDbPathChooserStage());
+		new Thread(jarTask).start();
+		/* showMainStage(); */
 	}
 
-	private void showMainStage() {
+	public void showMainStage() {
 		try {
+			runner.start();
+
 			// Create application folder in a user's document
 			File migDB = new File(FilePath.DOCUMENT.getPath());
 			if (!migDB.exists()) {
@@ -120,6 +135,13 @@ public class MainApp extends Application {
 			Scene scene = new Scene(rootLayout);
 			primaryStage.setScene(scene);
 			primaryStage.show();
+			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+
+				@Override
+				public void handle(WindowEvent event) {
+					runner.stop();
+				}
+			});
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -145,7 +167,8 @@ public class MainApp extends Application {
 		});
 
 		Scene splashScene = new Scene(mainAnchorpane, Color.TRANSPARENT);
-		splashScene.getStylesheets().add(getClass().getResource("/org/migdb/migdbclient/resources/css/custom.css").toExternalForm());
+		splashScene.getStylesheets()
+				.add(getClass().getResource("/org/migdb/migdbclient/resources/css/custom.css").toExternalForm());
 		initStage.setScene(splashScene);
 		initStage.getIcons().add(new Image(ImagePath.FAVICON.getPath()));
 		initStage.centerOnScreen();
@@ -162,4 +185,32 @@ public class MainApp extends Application {
 	public interface InitCompletionHandler {
 		void complete();
 	}
+
+	private void showDbPathChooserStage() {
+		try {
+			SqliteDAO dao = new SqliteDAO();
+			if (!dao.isPathExist("MongoDbPath")) {
+				FXMLLoader loader = new FXMLLoader();
+				loader.setLocation(MainApp.class.getResource(FxmlPath.MONGODBPATHBROWSE.getPath()));
+				rootLayout = loader.load();
+				Scene dbPathChooser = new Scene(rootLayout);
+				primaryStage = new Stage();
+				primaryStage.setScene(dbPathChooser);
+				primaryStage.setResizable(false);
+				primaryStage.show();
+			} else {
+				showMainStage();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@FXML
+	private void internetConnectivityOkButtonClickEvent() {
+		Stage stage = (Stage) internetConnectivityOkButton.getScene().getWindow();
+		stage.close();
+		ConnectivityIsShowInstance.INSTANCE.setShow(false);
+	}
+
 }
