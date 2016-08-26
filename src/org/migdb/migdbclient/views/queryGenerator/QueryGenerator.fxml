@@ -75,6 +75,7 @@
                                     <Button fx:id="textSearchCreateButton" layoutX="67.0" layoutY="287.0" mnemonicParsing="false" text="Generate Text Index" />
                                     <Button fx:id="textSearchViewButton" layoutX="284.0" layoutY="287.0" mnemonicParsing="false" text="View Text Indexes" />
                                     <Button fx:id="textSearchDropButton" layoutX="510.0" layoutY="287.0" mnemonicParsing="false" text="Delete Text Indexes" />
+                                    <Label layoutX="55.0" layoutY="228.0" text="* Input keywords with comma separated, If you need to find documents using multiple keywords" />
                                  </children></AnchorPane>
 									</content>
 								</Tab>
