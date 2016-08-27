@@ -52,7 +52,7 @@ public class MongoWriter {
 		JSONArray collections = (JSONArray) mappedJson.get("collections");
 		System.out.println(collections);
 
-		MongoDBResource.INSTANCE.setDB("testMongo");
+		MongoDBResource.INSTANCE.setDB("testMongo1");
 		MongoDatabase database = MongoDBResource.INSTANCE.getDatabase();
 		for (int i = 0; i < collections.size(); i++) {
 			JSONObject collection = (JSONObject) collections.get(i);

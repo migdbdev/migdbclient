@@ -5,14 +5,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import javax.management.openmbean.KeyAlreadyExistsException;
-
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.main.MainApp;
@@ -25,7 +23,6 @@ import org.migdb.migdbclient.utils.MigDBNotifier;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -134,6 +131,7 @@ public class CollectionManager implements Initializable {
 			System.out.println(arr[i]);
 		}
 		Document commonDoc = new Document();
+		commonDoc.put("_id", "1");
 		int commonCount = getMostPopularElement(arr);
 		Iterator<?> keyset = commonColumns.keySet().iterator();
 		while (keyset.hasNext()) {
@@ -145,7 +143,7 @@ public class CollectionManager implements Initializable {
 			}
 
 		}
-		System.out.println(commonDoc);
+		System.out.println("common doc "+commonDoc);
 
 		return commonDoc.keySet();
 	}
@@ -249,7 +247,10 @@ public class CollectionManager implements Initializable {
 
 	@FXML
 	public void insertNewDocument() {
-
+		Document document = new Document();
+		ObjectId id = new ObjectId();
+		document.put("_id", id.toString());
+		collection.insertOne(document);
 	}
 
 	private static int getMostPopularElement(int[] a) {
