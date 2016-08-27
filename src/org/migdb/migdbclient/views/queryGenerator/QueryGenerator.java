@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import org.bson.Document;
 import org.json.simple.JSONObject;
@@ -86,7 +87,8 @@ public class QueryGenerator implements Initializable {
 	private TextArea outputQuery;
 	@FXML
 	private TableView<QueryDocumentDTO> queryParametersTableView;
-	@FXML private TabPane queryGeneratorTabPane;
+	@FXML
+	private TabPane queryGeneratorTabPane;
 
 	@FXML
 	private TableColumn<QueryDocumentDTO, String> fieldTableColumn;
@@ -99,19 +101,28 @@ public class QueryGenerator implements Initializable {
 	/*
 	 * @FXML private TableColumn<QueryDocumentDTO, String> conditionTableColumn;
 	 */
-	
+
 	/**
 	 * Text Search Tab
 	 */
-	@FXML private ComboBox<String> textSearchDatabaseComboBox;
-	@FXML private ComboBox<String> textSearchCollectionComboBox;
-	@FXML private ComboBox<String> textSearchFieldComboBox;
-	@FXML private CheckBox textSearchOldVersionCheckBox;
-	@FXML private Label textSearchTextIndexLabel;
-	@FXML private TextField textSearchKeywordTextField;
-	@FXML private Button textSearchCreateButton;
-	@FXML private Button textSearchViewButton;
-	@FXML private Button textSearchDropButton;
+	@FXML
+	private ComboBox<String> textSearchDatabaseComboBox;
+	@FXML
+	private ComboBox<String> textSearchCollectionComboBox;
+	@FXML
+	private ComboBox<String> textSearchFieldComboBox;
+	@FXML
+	private CheckBox textSearchOldVersionCheckBox;
+	@FXML
+	private Label textSearchTextIndexLabel;
+	@FXML
+	private TextField textSearchKeywordTextField;
+	@FXML
+	private Button textSearchCreateButton;
+	@FXML
+	private Button textSearchViewButton;
+	@FXML
+	private Button textSearchDropButton;
 	/*********************************************/
 
 	MongoCollection<Document> collectionDocument;
@@ -147,7 +158,7 @@ public class QueryGenerator implements Initializable {
 		queryDatabaseListComboBox.getSelectionModel().select(0);
 		textSearchDatabaseComboBox.getSelectionModel().select(0);
 
-		// Set collection list according to a selected databse when ui loaded
+		// Set collection list according to a selected database when ui loaded
 		queryCollectionListComboBox.getItems()
 				.addAll(getCollectionOf(queryDatabaseListComboBox.getSelectionModel().getSelectedItem()));
 		queryCollectionListComboBox.getSelectionModel().select(0);
@@ -158,18 +169,10 @@ public class QueryGenerator implements Initializable {
 		collectionDocument = db
 				.getCollection(queryCollectionListComboBox.getSelectionModel().getSelectedItem().toString());
 		selectedDocument = collectionDocument.find().into(new ArrayList<Document>());
-		
-		queryGeneratorTabPane.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-		    @Override
-		    public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
-		        if(newValue.toString().equals("2")){
-		        	// Set collection list to the textSearchCollectionComboBox
-		    		textSearchCollectionComboBox.getItems()
-		    		.addAll(getCollectionOf(textSearchDatabaseComboBox.getSelectionModel().getSelectedItem()));
-		    		textSearchCollectionComboBox.getSelectionModel().select(0);
-		        }
-		    }
-		}); 
+
+		textSearchCollectionComboBox.getItems()
+				.addAll(getCollectionOf(textSearchDatabaseComboBox.getSelectionModel().getSelectedItem()));
+		textSearchCollectionComboBox.getSelectionModel().select(0);
 
 		/**
 		 * databaseListComboBox changed event When changing
@@ -191,6 +194,22 @@ public class QueryGenerator implements Initializable {
 			}
 		});
 
+		// Text search database combo box change event
+		textSearchDatabaseComboBox.valueProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue ov, String t, String t1) {
+				counter = 0;
+				collectionFElementHolder = getCollectionOf(
+						textSearchDatabaseComboBox.getSelectionModel().getSelectedItem()).get(0).toString();
+				MongoDBResource.INSTANCE
+						.setDB(textSearchDatabaseComboBox.getSelectionModel().getSelectedItem().toString());
+				db = MongoDBResource.INSTANCE.getDatabase();
+				collectionDocument = db
+						.getCollection(textSearchCollectionComboBox.getSelectionModel().getSelectedItem().toString());
+				selectedDocument = collectionDocument.find().into(new ArrayList<Document>());
+			}
+		});
+
 		// databaseListComboBox click action event
 		queryDatabaseListComboBox.setOnAction((event) -> {
 			queryCollectionListComboBox.getItems().clear();
@@ -199,11 +218,21 @@ public class QueryGenerator implements Initializable {
 			queryCollectionListComboBox.getSelectionModel().select(0);
 		});
 
+		// textSearchDatabaseComboBox click action event
+		textSearchDatabaseComboBox.setOnAction((event) -> {
+			textSearchCollectionComboBox.getItems().clear();
+			textSearchCollectionComboBox.getItems()
+					.addAll(getCollectionOf(textSearchDatabaseComboBox.getSelectionModel().getSelectedItem()));
+			textSearchCollectionComboBox.getSelectionModel().select(0);
+		});
+
 		// Fill queryFieldListComboBox and querySortColumnComboBox Combo boxe's
 		// when document combo box change
 		if (!selectedDocument.isEmpty()) {
 			queryFieldListComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 			queryFieldListComboBox.getSelectionModel().select(0);
+			textSearchFieldComboBox.getItems().addAll(getCommonColumns(selectedDocument));
+			textSearchFieldComboBox.getSelectionModel().select(0);
 			querySortColumnComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 		}
 
@@ -232,6 +261,37 @@ public class QueryGenerator implements Initializable {
 			}
 		});
 
+		/**
+		 * textSearchCollectionComboBox's value changing event action
+		 */
+		textSearchCollectionComboBox.valueProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue comboBoxVal, String t, String t1) {
+				collectionDocument = (counter <= 0) ? db.getCollection(collectionFElementHolder)
+						: db.getCollection((String) comboBoxVal.getValue());
+				counter++;
+				selectedDocument = collectionDocument.find().into(new ArrayList<Document>());
+				textSearchFieldComboBox.getItems().clear();
+				if (!selectedDocument.isEmpty()) {
+					textSearchFieldComboBox.getItems().addAll(getCommonColumns(selectedDocument));
+					textSearchFieldComboBox.getSelectionModel().select(0);
+					textSearchTextIndexLabel.setText(textSearchFieldComboBox.getSelectionModel().getSelectedItem().toString());
+
+				}
+
+			}
+		});
+		
+		textSearchFieldComboBox.valueProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue comboBoxVal, String t, String t1) {
+				textSearchTextIndexLabel.setText(String.valueOf(comboBoxVal.getValue()));
+			}
+		});
+		
+		// Set text search index to label when page loading
+		textSearchTextIndexLabel.setText(textSearchFieldComboBox.getSelectionModel().getSelectedItem().toString());
+
 		// Set operators to the operatorsComboBox
 		dao = new SqliteDAO();
 		queryOperatorsComboBox.getItems().addAll(dao.getQueryOperators());
@@ -245,6 +305,17 @@ public class QueryGenerator implements Initializable {
 
 		// queryBuildButton button click event
 		queryBuildButton.addEventHandler(ActionEvent.ACTION, event -> queryBuild());
+		
+		// Generate text index button click event
+		textSearchCreateButton.addEventHandler(ActionEvent.ACTION, event -> textSearchBuild(event));
+		
+		// View text index button click event
+		textSearchViewButton.addEventHandler(ActionEvent.ACTION, event -> textSearchBuild(event));
+		
+		// Drop text index button click event
+		textSearchDropButton.addEventHandler(ActionEvent.ACTION, event -> textSearchBuild(event));
+
+
 
 		// Initialize queryParameters table view
 		fieldTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("Field"));
@@ -313,12 +384,14 @@ public class QueryGenerator implements Initializable {
 					.getSelectedToggle();
 			ObservableList<QueryDocumentDTO> param = (ObservableList<QueryDocumentDTO>) queryParametersTableView
 					.getItems();
-			
-			int limit = (!queryLimitTextField.getText().isEmpty()) ? Integer.parseInt(queryLimitTextField.getText()) : 0 ;
-			int skip = (!querySkipTextField.getText().isEmpty()) ? Integer.parseInt(querySkipTextField.getText()) : 0 ;
-			String sortField = (querySortColumnComboBox.getSelectionModel().getSelectedItem() != null) ? querySortColumnComboBox.getSelectionModel().getSelectedItem().toString() : "" ;
-			int sortOrder = (querySortOrderComboBox.getSelectionModel().getSelectedItem()).equals("Ascending") ? 1 : -1 ;
-			
+
+			int limit = (!queryLimitTextField.getText().isEmpty()) ? Integer.parseInt(queryLimitTextField.getText())
+					: 0;
+			int skip = (!querySkipTextField.getText().isEmpty()) ? Integer.parseInt(querySkipTextField.getText()) : 0;
+			String sortField = (querySortColumnComboBox.getSelectionModel().getSelectedItem() != null)
+					? querySortColumnComboBox.getSelectionModel().getSelectedItem().toString() : "";
+			int sortOrder = (querySortOrderComboBox.getSelectionModel().getSelectedItem()).equals("Ascending") ? 1 : -1;
+
 			outputQuery.clear();
 			outputQuery.setEditable(false);
 
@@ -345,46 +418,66 @@ public class QueryGenerator implements Initializable {
 
 			FindIterable<Document> iterable = null;
 			BasicDBObject sortObj = new BasicDBObject(sortField, sortOrder);
-			
-			if(limit == 0 && skip == 0 && sortField.isEmpty()){
+
+			if (limit == 0 && skip == 0 && sortField.isEmpty()) {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery);
-				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
-				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty()\n");
-			} else if(limit != 0 && skip == 0 && sortField.isEmpty()) {
+				outputQuery.appendText(
+						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty()\n");
+			} else if (limit != 0 && skip == 0 && sortField.isEmpty()) {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit);
-				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
-				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().limit("+limit+")\n");
-			} else if(limit == 0 && skip != 0 && sortField.isEmpty()) {
+				outputQuery.appendText(
+						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText(
+						"db." + collection + ".find(" + javaQuery.toString() + ").pretty().limit(" + limit + ")\n");
+			} else if (limit == 0 && skip != 0 && sortField.isEmpty()) {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).skip(skip);
-				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
-				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().skip("+skip+")\n");
-			} else if(limit == 0 && skip == 0 && !sortField.isEmpty()) {
+				outputQuery.appendText(
+						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText(
+						"db." + collection + ".find(" + javaQuery.toString() + ").pretty().skip(" + skip + ")\n");
+			} else if (limit == 0 && skip == 0 && !sortField.isEmpty()) {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).sort(sortObj);
-				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
-				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().sort({'"+sortField+"':"+sortOrder+"})\n");
-			} else if(limit != 0 && skip != 0 && sortField.isEmpty()) {
-				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit).skip(skip);
-				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
-				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().limit("+limit+").skip("+skip+")\n");
-			} else if(limit != 0 && skip == 0 && !sortField.isEmpty()){
-				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit).sort(sortObj);
-				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
-				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().limit("+limit+").sort({'"+sortField+"':"+sortOrder+"})\n");
-			} else if(limit == 0 && skip != 0 && !sortField.isEmpty()){
-				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).skip(skip).sort(sortObj);
-				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
-				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().skip("+skip+").sort({'"+sortField+"':"+sortOrder+"})\n");
+				outputQuery.appendText(
+						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty().sort({'"
+						+ sortField + "':" + sortOrder + "})\n");
+			} else if (limit != 0 && skip != 0 && sortField.isEmpty()) {
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit)
+						.skip(skip);
+				outputQuery.appendText(
+						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty().limit("
+						+ limit + ").skip(" + skip + ")\n");
+			} else if (limit != 0 && skip == 0 && !sortField.isEmpty()) {
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit)
+						.sort(sortObj);
+				outputQuery.appendText(
+						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty().limit("
+						+ limit + ").sort({'" + sortField + "':" + sortOrder + "})\n");
+			} else if (limit == 0 && skip != 0 && !sortField.isEmpty()) {
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).skip(skip)
+						.sort(sortObj);
+				outputQuery.appendText(
+						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty().skip(" + skip
+						+ ").sort({'" + sortField + "':" + sortOrder + "})\n");
 			} else {
-				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit).skip(skip).sort(sortObj);
-				outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
-				outputQuery.appendText("db."+collection+".find("+javaQuery.toString()+").pretty().limit("+limit+").skip("+skip+").sort({'"+sortField+"':"+sortOrder+"})\n");
+				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit).skip(skip)
+						.sort(sortObj);
+				outputQuery.appendText(
+						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty().limit("
+						+ limit + ").skip(" + skip + ").sort({'" + sortField + "':" + sortOrder + "})\n");
 			}
 
-			outputQuery.appendText("\t\t\t\t\t\t\t\t ------------------------------     Executed Result       ------------------------------\n\n");
+			outputQuery.appendText(
+					"\t\t\t\t\t\t\t\t ------------------------------     Executed Result       ------------------------------\n\n");
 			iterable.forEach(new Block<Document>() {
 				@Override
 				public void apply(final Document document) {
-					outputQuery.appendText(document.toJson()+"\n");
+					outputQuery.appendText(document.toJson() + "\n");
 				}
 			});
 
@@ -392,12 +485,48 @@ public class QueryGenerator implements Initializable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Method for building text search queries
 	 */
-	private void textSearchBuild(){
-		
+	private void textSearchBuild(ActionEvent event) {
+		try {
+			
+			Button btn = (Button) event.getSource();
+			
+			String dbName = textSearchDatabaseComboBox.getSelectionModel().getSelectedItem();
+			String collection = textSearchCollectionComboBox.getSelectionModel().getSelectedItem();
+			String[] keywordTextArray = (textSearchKeywordTextField.getText().toString()).split(",");
+			StringJoiner keywordText = new StringJoiner(" ");
+			String textIndex = textSearchTextIndexLabel.getText();
+			boolean isChecked = (textSearchOldVersionCheckBox.isSelected()) ? true : false ;
+			outputQuery.clear();
+			
+			for(String a : keywordTextArray){
+				keywordText.add(a.trim());
+			}
+			
+			if(btn.getId().equals("textSearchCreateButton")){
+				if(!isChecked){
+					outputQuery.appendText("Using below query you can create a text index on "+textIndex+" field : \n\t\t db."+collection+".ensureIndex({"+textIndex+":'text'})\n\n");
+					outputQuery.appendText("Using below query you can search for all the documents that have word '"+keywordText+"' in their text according to created text index : \n\t\t db."+collection+".find({$text:{$search:'"+keywordText+"'}}).pretty()");
+				} else {
+					outputQuery.appendText("Initially Text Search was an experimental feature but starting from version 2.6, the configuration is enabled by default. But if you are using previous version of MongoDB, you have to enable text search with following code: \n\t\t"
+							+ "db.a	dminCommand({setParameter:true,textSearchEnabled:true}) \n\n");
+					outputQuery.appendText("Using below query you can create a text index on "+textIndex+" field : \n\t\t db."+collection+".ensureIndex({"+textIndex+":'text'})\n\n");
+					outputQuery.appendText("Using below query you can search for all the documents that have word '"+keywordText+"' in their text according to created text index : \n\t\t db."+collection+".runCommand({$text:{$search:'"+keywordText+"'}})");
+				}
+			} else if (btn.getId().equals("textSearchViewButton")){
+				outputQuery.appendText("db."+collection+".getIndexes()");
+			} else {
+				outputQuery.appendText("db."+collection+".dropIndex('"+textIndex+"_text')");
+			}
+
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	/**
