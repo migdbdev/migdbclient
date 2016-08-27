@@ -3,28 +3,42 @@ package org.migdb.migdbclient.views.mongodatamanager;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import javax.swing.tree.TreePath;
+
+import org.apache.commons.collections.KeyValue;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
+import org.migdb.migdbclient.resources.MongoDBResource;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Callback;
+import javafx.util.converter.DefaultStringConverter;
 
 public class DocumentManager implements Initializable {
 	@FXML
@@ -37,8 +51,8 @@ public class DocumentManager implements Initializable {
 	private TreeView<String> documentTreeView;
 	@FXML
 	private Button backButton;
-	MongoCollection<Document> collection;
-	private String collectionName;
+	public MongoCollection<Document> collection;
+	private static String collectionName;
 	private String documentId;
 
 	@Override
@@ -48,7 +62,7 @@ public class DocumentManager implements Initializable {
 	}
 
 	public void setDocument(MongoCollection<Document> collection, String name, String id) {
-		this.collectionName = name;
+		DocumentManager.collectionName = name;
 		this.collection = collection;
 		this.documentId = id;
 		System.out.println(collectionName + " " + documentId);
@@ -59,22 +73,37 @@ public class DocumentManager implements Initializable {
 	public void showDocument() {
 		collectionNameLabel.setText(collectionName);
 		objectIdLabel.setText(documentId);
-		Document filter;
-		try {
-			filter = new Document("_id", new ObjectId(documentId));
-		} catch (NoSuchElementException e) {
-			filter = new Document("_id", documentId);
-		} catch (IllegalArgumentException e) {
-			filter = new Document("_id", documentId);
+
+		MongoCursor<Document> cursor = collection.find(new Document("_id", documentId)).iterator();
+		Document document;
+		if (cursor.hasNext()) {
+			document = cursor.tryNext();
+		} else {
+			Document filter;
+			try {
+				filter = new Document("_id", new ObjectId(documentId));
+			} catch (NoSuchElementException e) {
+				filter = new Document("_id", documentId);
+			} catch (IllegalArgumentException e) {
+				filter = new Document("_id", documentId);
+			}
+			cursor = collection.find(filter).iterator();
+			document = cursor.next();
 		}
-		MongoCursor<Document> cursor = collection.find(filter).iterator();
-		Document document = cursor.next();
+
 		Set<Entry<String, Object>> entrySet = document.entrySet();
 		TreeItem<String> root = new TreeItem<String>("_id : " + document.get("_id").toString());
 		root.setExpanded(true);
 		resolveDocument(document, root);
 		documentTreeView.setRoot(root);
 		documentTreeView.setEditable(true);
+
+		documentTreeView.setCellFactory(new Callback<TreeView<String>, TreeCell<String>>() {
+			@Override
+			public TreeCell<String> call(TreeView<String> p) {
+				return new RenameMenuTreeCell(documentTreeView);
+			}
+		});
 	}
 
 	@FXML
@@ -134,6 +163,83 @@ public class DocumentManager implements Initializable {
 				parent.getChildren().add(new TreeItem<String>(object.toString()));
 			}
 		}
+	}
+
+	private static class RenameMenuTreeCell extends TextFieldTreeCell<String> {
+		private ContextMenu menu = new ContextMenu();
+		private TreeView<String> tree = null;
+
+		public RenameMenuTreeCell(TreeView<String> tree) {
+			super(new DefaultStringConverter());
+			this.tree = tree;
+
+			MenuItem renameItem = new MenuItem("Edit");
+			menu.getItems().add(renameItem);
+			renameItem.setOnAction(new EventHandler<ActionEvent>() {
+				@Override
+				public void handle(ActionEvent arg0) {
+					startEdit();
+				}
+			});
+		}
+
+		@Override
+		public void updateItem(String item, boolean empty) {
+			super.updateItem(item, empty);
+
+			if (!isEditing()) {
+				setContextMenu(menu);
+			}
+		}
+
+		@Override
+		public void commitEdit(String newValue) {
+
+			// if(getItem().contains(":")) {
+			if (this.tree.getSelectionModel().getSelectedItem().isLeaf()) {
+				String key = getItem().substring(0, getItem().indexOf(":") - 1);
+				String value = newValue.substring(newValue.indexOf(":") + 1, newValue.length());
+				String keyValue = key + " : " + newValue;
+				String rootValue = this.tree.getRoot().getValue();
+				String id = rootValue.substring(rootValue.indexOf(":") + 2, rootValue.length());
+				super.commitEdit(keyValue);
+				String path = getPath(this.tree, this.tree.getSelectionModel().getSelectedItem().getParent());
+				// update the real database
+				// System.out.println("key ="+key);
+				// System.out.println("value ="+value);
+				// System.out.println("keyValue ="+keyValue);
+				// System.out.println("id ="+id);
+				MongoDatabase db = MongoDBResource.INSTANCE.getDatabase();
+				MongoCollection<Document> collection = db.getCollection(collectionName);
+
+				if (path.equals("/")) {
+
+					collection.updateOne(new Document("_id", id), new Document("$set", new Document(key, value)));
+				} else {
+					System.out.println(path);
+					collection.updateOne(new Document("_id", id), new Document("$set", new Document(path+"."+key, value)));
+				}
+
+			} else {
+				System.out.println("You can not edit this field!!!");
+			}
+		}
+
+		private String getPath(TreeView<String> treeView, TreeItem<String> item) {
+			String path = "";
+			if (item.getValue().contains("_id")) {
+				path = "/" + path;
+			} else {
+				if (path.equals("")) {
+					path = item.getValue();
+				} else {
+					path = path + "." + item.getValue();
+				}
+				getPath(treeView, item.getParent());
+			}
+			return path;
+		}
+
 	}
 
 }
