@@ -14,6 +14,7 @@ import javax.swing.tree.TreePath;
 import org.apache.commons.collections.KeyValue;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.json.simple.JSONArray;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
@@ -138,7 +139,10 @@ public class DocumentManager implements Initializable {
 				parent.getChildren().add(newParent);
 
 			} else if (entry.getValue() instanceof ArrayList) {
-				TreeItem<String> newParent = new TreeItem<String>(entry.getKey());
+				ArrayList<Object> arrayList = (ArrayList<Object>) entry.getValue();
+//				System.out.println(arrayList);
+				int count = arrayList.size();
+				TreeItem<String> newParent = new TreeItem<String>(entry.getKey()+" ["+count+"]");
 				resolveArrayList((ArrayList<Object>) entry.getValue(), newParent);
 				newParent.setExpanded(true);
 				parent.getChildren().add(newParent);
@@ -152,9 +156,14 @@ public class DocumentManager implements Initializable {
 	}
 
 	private void resolveArrayList(ArrayList<Object> list, TreeItem<String> parent) {
+		int c=0;
 		for (Object object : list) {
+			
 			if (object instanceof Document) {
-				resolveDocument((Document) object, parent);
+				TreeItem<String> newParent = new TreeItem<String>(c+"");
+				resolveDocument((Document) object, newParent);
+				newParent.setExpanded(false);
+				parent.getChildren().add(newParent);
 			} else if (object instanceof ArrayList) {
 				resolveArrayList((ArrayList<Object>) object, parent);
 			} else if (object instanceof ObjectId) {
@@ -162,6 +171,7 @@ public class DocumentManager implements Initializable {
 			} else {
 				parent.getChildren().add(new TreeItem<String>(object.toString()));
 			}
+			c++;
 		}
 	}
 
@@ -203,7 +213,7 @@ public class DocumentManager implements Initializable {
 				String rootValue = this.tree.getRoot().getValue();
 				String id = rootValue.substring(rootValue.indexOf(":") + 2, rootValue.length());
 				super.commitEdit(keyValue);
-				String path = getPath(this.tree, this.tree.getSelectionModel().getSelectedItem().getParent());
+				String path = getPath(this.tree, this.tree.getSelectionModel().getSelectedItem().getParent(),"");
 				// update the real database
 				// System.out.println("key ="+key);
 				// System.out.println("value ="+value);
@@ -211,13 +221,12 @@ public class DocumentManager implements Initializable {
 				// System.out.println("id ="+id);
 				MongoDatabase db = MongoDBResource.INSTANCE.getDatabase();
 				MongoCollection<Document> collection = db.getCollection(collectionName);
-
 				if (path.equals("/")) {
 
 					collection.updateOne(new Document("_id", id), new Document("$set", new Document(key, value)));
 				} else {
 					System.out.println(path);
-					collection.updateOne(new Document("_id", id), new Document("$set", new Document(path+"."+key, value)));
+//					collection.updateOne(new Document("_id", id), new Document("$set", new Document(path+"."+key, value)));
 				}
 
 			} else {
@@ -225,20 +234,28 @@ public class DocumentManager implements Initializable {
 			}
 		}
 
-		private String getPath(TreeView<String> treeView, TreeItem<String> item) {
-			String path = "";
-			if (item.getValue().contains("_id")) {
+		private String getPath(TreeView<String> treeView, TreeItem<String> item, String path) {
+//			String path = "";
+			System.out.println("path"+path);
+			if (item.getParent()==null) {
 				path = "/" + path;
 			} else {
 				if (path.equals("")) {
 					path = item.getValue();
 				} else {
-					path = path + "." + item.getValue();
+					path =  getFirstWord(item.getValue())+"."+path;
 				}
-				getPath(treeView, item.getParent());
+				getPath(treeView, item.getParent(),path);
 			}
 			return path;
 		}
+		private String getFirstWord(String text) {
+		    if (text.indexOf(' ') > -1) {
+		      return text.substring(0, text.indexOf(' ')); 
+		    } else {
+		      return text;
+		    }
+		  }
 
 	}
 

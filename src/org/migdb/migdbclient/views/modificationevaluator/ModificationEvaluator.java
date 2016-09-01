@@ -107,8 +107,8 @@ public class ModificationEvaluator {
 				ManyToMany many = new ManyToMany();
 				many.identifyM2M();
 				
-				MongoWriter mongoWriter = new MongoWriter();
-				mongoWriter.write();
+//				MongoWriter mongoWriter = new MongoWriter();
+//				mongoWriter.write();
 				
 				ConnectionManagerController controller = new ConnectionManagerController();
 				controller.setSideBarDatabases();
