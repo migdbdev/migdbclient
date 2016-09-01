@@ -99,15 +99,16 @@ public class OneToOneMap {
 						/*System.out.println();*/
 						/*JSONArray collections = new JSONArray();
 						JSONObject collectionObj = new JSONObject();*/
-						
+						valueObject.put("data", valueArray);
+						valueObject.put("collectionName", collectionName);
+						collectionArray.add(valueObject);
 						
 					}
 				}
 			}
 			
-			valueObject.put("values", valueArray);
-			valueObject.put("collectionName", collectionName);
-			collectionArray.add(valueObject);
+			
+			
 			collectionObject.put("collections", collectionArray);
 			JSONObject json = new JSONObject();
 			String updatedson = json.toJSONString(collectionObject);

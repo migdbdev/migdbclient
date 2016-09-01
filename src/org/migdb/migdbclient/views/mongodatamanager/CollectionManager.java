@@ -27,9 +27,13 @@ import com.mongodb.client.result.DeleteResult;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -37,7 +41,12 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import tray.animations.AnimationType;
 import tray.notification.NotificationType;
 
@@ -88,13 +97,13 @@ public class CollectionManager implements Initializable {
 		}
 		else{
 			String title = "Attention";
-		    String message = "The Collection you selected is Empty";
-		    AnimationType animationType = AnimationType.FADE;
-		    NotificationType notificationType = NotificationType.WARNING;
-		    int showTime = 6;
+			String message = "The Collection you selected is Empty";
+			AnimationType animationType = AnimationType.FADE;
+			NotificationType notificationType = NotificationType.WARNING;
+			int showTime = 6;
 
-		    MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);
-		    notification.createDefinedNotification();
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);
+			notification.createDefinedNotification();
 		}
 
 	}
@@ -247,10 +256,18 @@ public class CollectionManager implements Initializable {
 
 	@FXML
 	public void insertNewDocument() {
-		Document document = new Document();
-		ObjectId id = new ObjectId();
-		document.put("_id", id.toString());
-		collection.insertOne(document);
+		AnchorPane root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.NEW_DOC.getPath()));
+		AnchorPane mongoDataManagerAncPane;
+		try {
+			mongoDataManagerAncPane = loader.load();
+			root.getChildren().clear();
+			root.getChildren().add(mongoDataManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static int getMostPopularElement(int[] a) {
