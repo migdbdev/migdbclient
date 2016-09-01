@@ -186,11 +186,11 @@ public class ManyToMany {
 
 		for (Object object : table1Data) {
 			JSONObject table1DataObject = (JSONObject) object;
-			String table1Value = table1DataObject.get(referencingCol).toString();
+			String table1Value = table1DataObject.get(referencedCol).toString();
 			JSONArray referencingDataArray = new JSONArray();
 			for (Object object2 : mappingData) {
 				JSONObject mappingObject = (JSONObject) object2;
-				String referencedValue = mappingObject.get(referencedCol).toString();
+				String referencedValue = mappingObject.get(referencingCol).toString();
 				if (referencedValue.equals(table1Value)) {
 					JSONObject referencingObject = findTable2Value(mappingObject);
 					// System.out.println(table1DataObject+"###"+referencingObject);
@@ -198,7 +198,7 @@ public class ManyToMany {
 				}
 			}
 			// System.out.println(referencingDataArray);
-			generateMappedDataArray(referencedTable, referencingTable, referencingCol, table1Value,
+			generateMappedDataArray(referencedTable, referencingTable, referencedCol, table1Value,
 					referencingDataArray);
 		}
 		// insertToMapped(referencedTable);
@@ -236,7 +236,7 @@ public class ManyToMany {
 	public JSONObject findTable2Value(JSONObject mappingObject) {
 
 		JSONObject table2 = ManyToManyResource.INSTANCE.getTable2();
-		JSONArray table2Data = (JSONArray) table2.get("values");
+		JSONArray table2Data = (JSONArray) table2.get("data");
 		JSONObject table2MappingInfo = ManyToManyResource.INSTANCE.getTable2Info();
 		String referencingCol = table2MappingInfo.get("referencingCol").toString();
 		String referencedCol = table2MappingInfo.get("referencedCol").toString();
@@ -303,11 +303,11 @@ public class ManyToMany {
 
 		for (Object object : table1Data) {
 			JSONObject table1DataObject = (JSONObject) object;
-			String table1Value = table1DataObject.get(referencingCol).toString();
+			String table1Value = table1DataObject.get(referencedCol).toString();
 			JSONArray referencingIdArray = new JSONArray();
 			for (Object object2 : mappingData) {
 				JSONObject mappingObject = (JSONObject) object2;
-				String referencedValue = mappingObject.get(referencedCol).toString();
+				String referencedValue = mappingObject.get(referencingCol).toString();
 				if (referencedValue.equals(table1Value)) {
 					System.out.println(mappingObject + "@@@" + table1DataObject);
 					JSONObject referencingId = findReferencedId(mappingObject);
