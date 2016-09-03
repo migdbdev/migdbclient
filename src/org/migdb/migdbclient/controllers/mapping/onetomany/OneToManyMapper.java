@@ -161,11 +161,11 @@ public class OneToManyMapper {
 										manySideDocObj.put("collectionName", referencingTabName);
 										JSONArray valArray = new JSONArray();
 										valArray.add(referencingData);
-										manySideDocObj.put("values", valArray);
+										manySideDocObj.put("data", valArray);
 										collectionList.add(manySideDocObj);
 									} else {
 										JSONObject collection = (JSONObject) collectionList.get(referencingIndex);
-										JSONArray values = (JSONArray) collection.get("values");
+										JSONArray values = (JSONArray) collection.get("data");
 										if(values != null){
 											if(values.size()>l) {
 												JSONObject valObj = (JSONObject) values.get(l);
@@ -185,7 +185,7 @@ public class OneToManyMapper {
 										} else {
 											JSONArray valArray = new JSONArray();
 											valArray.add(referencingData);
-											collection.put("values", valArray);
+											collection.put("data", valArray);
 										}
 									}
 									
@@ -204,13 +204,13 @@ public class OneToManyMapper {
 							dataObj.add(referencedData);
 							System.out.println(dataObj);
 							documentObj.put("collectionName", referencedTabName);
-							documentObj.put("values", dataObj);
+							documentObj.put("data", dataObj);
 							System.out.println("document "+ documentObj);
 							collectionList.add(documentObj);
 							//System.out.println(collectionList);
 						} else {
 							JSONObject collection = (JSONObject) collectionList.get(index);
-							JSONArray values = (JSONArray) collection.get("values");
+							JSONArray values = (JSONArray) collection.get("data");
 							if(values != null){
 								if(values.size()>k) {
 									JSONObject valObj = (JSONObject) values.get(k);
@@ -221,7 +221,7 @@ public class OneToManyMapper {
 							} else {
 								JSONArray valArray = new JSONArray();
 								valArray.add(referencedData);
-								collection.put("values", valArray);
+								collection.put("data", valArray);
 							}
 							//System.out.println(collectionList);
 						}
@@ -238,12 +238,12 @@ public class OneToManyMapper {
 							oneSideDocObj.put("collectionName", referencedTabName);
 							JSONArray valArray = new JSONArray();
 							valArray.add(referencedData);
-							oneSideDocObj.put("values", valArray);
+							oneSideDocObj.put("data", valArray);
 							collectionList.add(oneSideDocObj);
 							//System.out.println(collectionList);
 						} else {
 							JSONObject collection = (JSONObject) collectionList.get(referencedIndex);
-							JSONArray values = (JSONArray) collection.get("values");
+							JSONArray values = (JSONArray) collection.get("data");
 							if(values != null){
 								if(values.size()>k) {
 									JSONObject valObj = (JSONObject) values.get(k);
@@ -258,7 +258,7 @@ public class OneToManyMapper {
 							} else {
 								JSONArray valArray = new JSONArray();
 								valArray.add(referencedData);
-								collection.put("values", valArray);
+								collection.put("data", valArray);
 							}
 							//System.out.println(collectionList);
 						}

@@ -5,14 +5,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import javax.management.openmbean.KeyAlreadyExistsException;
-
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.main.MainApp;
@@ -25,14 +23,17 @@ import org.migdb.migdbclient.utils.MigDBNotifier;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -40,7 +41,12 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import tray.animations.AnimationType;
 import tray.notification.NotificationType;
 
@@ -91,13 +97,13 @@ public class CollectionManager implements Initializable {
 		}
 		else{
 			String title = "Attention";
-		    String message = "The Collection you selected is Empty";
-		    AnimationType animationType = AnimationType.FADE;
-		    NotificationType notificationType = NotificationType.WARNING;
-		    int showTime = 6;
+			String message = "The Collection you selected is Empty";
+			AnimationType animationType = AnimationType.FADE;
+			NotificationType notificationType = NotificationType.WARNING;
+			int showTime = 6;
 
-		    MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);
-		    notification.createDefinedNotification();
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);
+			notification.createDefinedNotification();
 		}
 
 	}
@@ -134,6 +140,7 @@ public class CollectionManager implements Initializable {
 			System.out.println(arr[i]);
 		}
 		Document commonDoc = new Document();
+		commonDoc.put("_id", "1");
 		int commonCount = getMostPopularElement(arr);
 		Iterator<?> keyset = commonColumns.keySet().iterator();
 		while (keyset.hasNext()) {
@@ -145,7 +152,7 @@ public class CollectionManager implements Initializable {
 			}
 
 		}
-		System.out.println(commonDoc);
+		System.out.println("common doc "+commonDoc);
 
 		return commonDoc.keySet();
 	}
@@ -249,7 +256,18 @@ public class CollectionManager implements Initializable {
 
 	@FXML
 	public void insertNewDocument() {
-
+		AnchorPane root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.NEW_DOC.getPath()));
+		AnchorPane mongoDataManagerAncPane;
+		try {
+			mongoDataManagerAncPane = loader.load();
+			root.getChildren().clear();
+			root.getChildren().add(mongoDataManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static int getMostPopularElement(int[] a) {
