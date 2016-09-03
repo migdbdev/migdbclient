@@ -10,16 +10,20 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.main.MainApp;
+import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.tablegen.CustomCellFactory;
 import org.migdb.migdbclient.tablegen.TableBean;
 import org.migdb.migdbclient.utils.MigDBNotifier;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.Block;
+import com.mongodb.DBCursor;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
@@ -27,26 +31,19 @@ import com.mongodb.client.result.DeleteResult;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import tray.animations.AnimationType;
 import tray.notification.NotificationType;
 
@@ -59,28 +56,41 @@ public class CollectionManager implements Initializable {
 	@FXML
 	private Label collectionNameLabel;
 	@FXML
-	private Label collectionCountLabel;
-	@FXML
 	private Button backButton;
 	@FXML
 	private Button insertNewDocButton;
-	MongoCollection<Document> collection;
 
+	@FXML
+	private TextField keyTextField;
+	@FXML
+	private TextField valueTextField;
+	@FXML
+	private TextField limitTextField;
+	@FXML
+	private Button searchButton;
+	@FXML
+	private ComboBox<String> operatorsComboBox;
+
+	MongoCollection<Document> collection;
 	private String collectionName;
 	private MongoDatabase db;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		db = MongoDBResource.INSTANCE.getDatabase();
+		keyTextField.setPromptText("Key");
+		valueTextField.setPromptText("Value");
+		operatorsComboBox.setPromptText("Operators");
+		SqliteDAO dao = new SqliteDAO();
+		operatorsComboBox.getItems().addAll(dao.getQueryOperators());
 
 	}
 
 	public void setCollection(String collectionName) {
 		this.collectionName = collectionName;
 		collection = db.getCollection(collectionName);
-		collectionNameLabel.setText(collectionName);
 		long documentCount = collection.count();
-		collectionCountLabel.setText("returned " + documentCount + " documents");
+		collectionNameLabel.setText(collectionName + " (" + documentCount + " Documents)");
 
 		// System.out.println(collectionName);
 
@@ -94,15 +104,14 @@ public class CollectionManager implements Initializable {
 		// System.out.println(document.keySet().toString());
 		if (!foundDocument.isEmpty()) {
 			setTable(foundDocument, getCommonColumns(foundDocument));
-		}
-		else{
+		} else {
 			String title = "Attention";
 			String message = "The Collection you selected is Empty";
 			AnimationType animationType = AnimationType.FADE;
 			NotificationType notificationType = NotificationType.WARNING;
 			int showTime = 6;
 
-			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
 			notification.createDefinedNotification();
 		}
 
@@ -152,7 +161,7 @@ public class CollectionManager implements Initializable {
 			}
 
 		}
-		System.out.println("common doc "+commonDoc);
+		System.out.println("common doc " + commonDoc);
 
 		return commonDoc.keySet();
 	}
@@ -164,7 +173,7 @@ public class CollectionManager implements Initializable {
 			TableColumn<TableBean, String> column = new TableColumn<>();
 			column.setCellValueFactory(new CustomCellFactory<TableBean, String>(col));
 			column.setText(col);
-
+			collectionTable.getItems().clear();
 			collectionTable.getColumns().add(column);
 		}
 		ObservableList<TableBean> tableList = FXCollections.observableArrayList();
@@ -268,6 +277,114 @@ public class CollectionManager implements Initializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@FXML
+	public void Search() {
+		if (validateSearch(operatorsComboBox)) {
+			String key = keyTextField.getText();
+			String value = valueTextField.getText();
+			String operator = operatorsComboBox.getSelectionModel().getSelectedItem();
+			System.out.println(key + " " + value + " " + operator + " " + collectionName);
+
+			List<Document> foundDocument = new ArrayList<>();
+			if (operator.equals("=")) {
+				BasicDBObject query = new BasicDBObject();
+				query.put(key, value);
+				FindIterable<Document> iterable = db.getCollection(collectionName).find(query);
+				foundDocument = iterableToList(iterable);
+			} else if (operator.equals("!=")) {
+				/* Step 4 : Create Query object */
+				BasicDBObject query = new BasicDBObject();
+				query.put(key, new BasicDBObject("$ne", value));
+
+				/* Step 5 : Get all documents */
+				FindIterable<Document> iterable = db.getCollection(collectionName).find(query);
+				foundDocument = iterableToList(iterable);
+			} 
+			else if (operator.equals("<")) {
+				/* Step 4 : Create Query object */
+				BasicDBObject query = new BasicDBObject();
+				query.put(key, new BasicDBObject("$gt", value));
+
+				/* Step 5 : Get all documents */
+				FindIterable<Document> iterable = db.getCollection(collectionName).find(query);
+				foundDocument = iterableToList(iterable);
+			}
+			else if (operator.equals("<=")) {
+				/* Step 4 : Create Query object */
+				BasicDBObject query = new BasicDBObject();
+				query.put(key, new BasicDBObject("$gte", value));
+				
+				/* Step 5 : Get all documents */
+				FindIterable<Document> iterable = db.getCollection(collectionName).find(query);
+				foundDocument = iterableToList(iterable);
+			}
+			else if (operator.equals(">")) {
+				/* Step 4 : Create Query object */
+				BasicDBObject query = new BasicDBObject();
+				query.put(key, new BasicDBObject("$lt", value));
+				
+				/* Step 5 : Get all documents */
+				FindIterable<Document> iterable = db.getCollection(collectionName).find(query);
+				foundDocument = iterableToList(iterable);
+			}
+			else if (operator.equals(">=")) {
+				/* Step 4 : Create Query object */
+				BasicDBObject query = new BasicDBObject();
+				query.put(key, new BasicDBObject("$lte", value));
+				
+				/* Step 5 : Get all documents */
+				FindIterable<Document> iterable = db.getCollection(collectionName).find(query);
+				foundDocument = iterableToList(iterable);
+			}
+
+			if (!foundDocument.isEmpty()) {
+				collectionTable.getColumns().clear();
+
+				setTable(foundDocument, getCommonColumns(foundDocument));
+			} else {
+				collectionTable.getItems().clear();
+				String title = "Attention";
+				String message = "No mathing values with given parameters";
+				AnimationType animationType = AnimationType.FADE;
+				NotificationType notificationType = NotificationType.WARNING;
+				int showTime = 6;
+
+				MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,
+						showTime);
+				notification.createDefinedNotification();
+			}
+		}
+	}
+
+	private boolean validateSearch(ComboBox<String> box) {
+		if (box.getSelectionModel().isEmpty()) {
+			String title = "Attention";
+			String message = "Please select an Operator";
+			AnimationType animationType = AnimationType.FADE;
+			NotificationType notificationType = NotificationType.WARNING;
+			int showTime = 6;
+
+			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			notification.createDefinedNotification();
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	private List<Document> iterableToList(FindIterable<Document> iterable) {
+		List<Document> foundDocument = new ArrayList<>();
+
+		iterable.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				System.out.println(document);
+				foundDocument.add(document);
+			}
+		});
+		return foundDocument;
 	}
 
 	private static int getMostPopularElement(int[] a) {

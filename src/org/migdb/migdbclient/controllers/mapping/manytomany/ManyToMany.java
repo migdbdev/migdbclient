@@ -154,11 +154,13 @@ public class ManyToMany {
 		if (Double.parseDouble(table1Response.get("complexity").toString()) > Double
 				.parseDouble(table2Response.get("complexity").toString())) {
 			summary.put("parent", referencingTable1Info.get("referencedTab"));
-			summary.put("method", table1Response.get("mappingModel"));
+//			summary.put("method", table1Response.get("mappingModel"));
+			summary.put("method", "EMBEDDING");
 
 		} else {
 			summary.put("parent", referencingTable2Info.get("referencedTab"));
-			summary.put("method", table2Response.get("mappingModel"));
+//			summary.put("method", table2Response.get("mappingModel"));
+			summary.put("method", "EMBEDDING");
 
 		}
 //		JSONObject summary = new JSONObject();

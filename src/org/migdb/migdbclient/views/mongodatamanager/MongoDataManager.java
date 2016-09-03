@@ -176,15 +176,15 @@ public class MongoDataManager implements Initializable {
 			if (!collectionname.equals("")) {
 				addNewCollection(collectionname);
 				dialog.close();
-			}
-			else{
+			} else {
 				String title = "Attention";
 				String message = "Please Enter a name to create collection";
 				AnimationType animationType = AnimationType.POPUP;
 				NotificationType notificationType = NotificationType.ERROR;
 				int showTime = 6;
 
-				MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+				MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,
+						showTime);
 				notification.createDefinedNotification();
 			}
 
@@ -267,9 +267,11 @@ public class MongoDataManager implements Initializable {
 		MongoCursor<String> cursor = db.listCollectionNames().iterator();
 		while (cursor.hasNext()) {
 			String st = cursor.next();
-			MongoCollection<Document> collection = db.getCollection(st);
-			int count = (int) collection.count();
-			list.add(st + "   (" + count + " Documents)");
+			if (!st.equals("system.indexes")) {
+				MongoCollection<Document> collection = db.getCollection(st);
+				int count = (int) collection.count();
+				list.add(st + "   (" + count + " Documents)");
+			}
 		}
 		System.out.println(list);
 		return list;

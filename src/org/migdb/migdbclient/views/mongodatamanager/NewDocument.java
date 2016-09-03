@@ -11,6 +11,7 @@ import org.migdb.migdbclient.models.mongodatamanager.ObjectContainer;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -35,13 +36,17 @@ public class NewDocument implements Initializable{
 	
 	@FXML
 	public void addKeyValue(){
+		Label label = new Label();
+		label.setText("Key Value :  ");
 		TextField key = new TextField();
+		key.setPromptText("Key");
 		TextField value = new TextField();
-		
+		value.setPromptText("Value");
 		KeyValueContainer childContainer = new KeyValueContainer(key, value);
 		objectContainer.getObjectContainer().add(childContainer);
 		
 		HBox box = new HBox();
+		box.getChildren().add(label);
 		box.getChildren().add(key);
 		box.getChildren().add(value);
 		
@@ -49,12 +54,17 @@ public class NewDocument implements Initializable{
 	}
 	@FXML
 	public void addArray(){
+		Label label = new Label();
+		label.setText("Array List  :  ");
 		TextField key = new TextField();
+		key.setPromptText("Key");
 		TextField value = new TextField();
+		value.setPromptText("Value");
 		ArrayContainer arrayContainer = new ArrayContainer(key, value);
 		objectContainer.getObjectContainer().add(arrayContainer);
 		
 		HBox box = new HBox();
+		box.getChildren().add(label);
 		box.getChildren().add(key);
 		box.getChildren().add(value);
 		container.getChildren().add(box);
