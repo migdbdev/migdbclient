@@ -149,7 +149,7 @@ public class RootLayoutController implements Initializable {
 			AnchorPane root;
 			root = CenterLayout.INSTANCE.getRootContainer();
 			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MainApp.class.getResource(FxmlPath.MODIFICATIONEVALUATOR.getPath()));
+			loader.setLocation(MainApp.class.getResource(FxmlPath.COLLECTIONSTRUCTURE.getPath()));
 			AnchorPane modificationEvaluator = loader.load();
 			root.getChildren().clear();
 			root.getChildren().add(modificationEvaluator);
