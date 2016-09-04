@@ -7,8 +7,8 @@
 
 <AnchorPane fx:id="collectionAncPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="973.0" stylesheets="@../../resources/css/custom.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.mongodatamanager.CollectionManager">
    <children>
-      <Button fx:id="backButton" layoutX="22.0" layoutY="526.0" mnemonicParsing="false" onAction="#showMongoDataManager" styleClass="dark-blue" text="&lt;&lt; Back" />
-      <TableView fx:id="collectionTable" layoutX="22.0" layoutY="86.0" prefHeight="420.0" prefWidth="531.0" AnchorPane.bottomAnchor="94.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="422.0" AnchorPane.topAnchor="100.0">
+      <Button fx:id="backButton" layoutX="20.0" layoutY="547.0" mnemonicParsing="false" onAction="#showMongoDataManager" styleClass="dark-blue" text="&lt;&lt; Back" />
+      <TableView fx:id="collectionTable" layoutX="21.0" layoutY="144.0" prefHeight="391.0" prefWidth="531.0" AnchorPane.bottomAnchor="79.0" AnchorPane.leftAnchor="21.0" AnchorPane.rightAnchor="421.0" AnchorPane.topAnchor="144.0">
          <contextMenu>
             <ContextMenu>
               <items>
@@ -18,11 +18,13 @@
             </ContextMenu>
          </contextMenu></TableView>
       <Label fx:id="collectionNameLabel" layoutX="155.0" layoutY="14.0" text="Label" />
-      <Button fx:id="insertNewDocButton" layoutX="587.0" layoutY="115.0" mnemonicParsing="false" onAction="#insertNewDocument" styleClass="dark-blue" text="New Document" />
+      <Button fx:id="insertNewDocButton" layoutX="587.0" layoutY="163.0" mnemonicParsing="false" onAction="#insertNewDocument" styleClass="dark-blue" text="New Document" />
       <TextField fx:id="keyTextField" layoutX="34.0" layoutY="52.0" />
       <ComboBox fx:id="operatorsComboBox" layoutX="211.0" layoutY="52.0" prefWidth="150.0" />
       <TextField fx:id="valueTextField" layoutX="389.0" layoutY="52.0" />
-      <Button fx:id="searchButton" layoutX="587.0" layoutY="52.0" mnemonicParsing="false" onAction="#Search" styleClass="dark-blue" text="Search" />
+      <Button fx:id="searchButton" layoutX="587.0" layoutY="89.0" mnemonicParsing="false" onAction="#Search" styleClass="dark-blue" text="Search" />
       <Label layoutX="34.0" layoutY="14.0" text="Collection Name" />
+      <Label layoutX="33.0" layoutY="98.0" text="Set Limit" />
+      <TextField fx:id="limitTextField" layoutX="95.0" layoutY="94.0" />
    </children>
 </AnchorPane>

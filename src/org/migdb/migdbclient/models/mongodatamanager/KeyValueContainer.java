@@ -17,8 +17,15 @@ public class KeyValueContainer implements JsonGeneratable{
 	@Override
 	public String generateJson() {
 		//null validation
-		String result = key.getText()+" : "+value.getText();
+		String result = "\""+key.getText()+"\" : \""+value.getText()+"\"";
 		return result;
+	}
+
+
+	@Override
+	public boolean isSelected() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
