@@ -153,7 +153,7 @@ public class ConnectionManagerController implements Initializable {
 		vbox.setSpacing(8);
 		vbox.setLayoutX(x);
 		vbox.setLayoutY(y);
-		vbox.setStyle("-fx-background-color: #336699;");
+		vbox.setStyle("-fx-background-color: #237f4e;");
 
 		Text connectionName = new Text(connName);
 		connectionName.setFont(Font.font("Arial", FontWeight.BOLD, 14));
@@ -191,7 +191,7 @@ public class ConnectionManagerController implements Initializable {
 		// Add hover effect
 		vbox.setOnMouseEntered(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
-				vbox.setStyle("-fx-background-color: #1815DE;");
+				vbox.setStyle("-fx-background-color: #65A583;");
 			}
 		});
 
@@ -199,7 +199,7 @@ public class ConnectionManagerController implements Initializable {
 		// Remove hover effect
 		vbox.setOnMouseExited(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
-				vbox.setStyle("-fx-background-color: #336699;");
+				vbox.setStyle("-fx-background-color: #237f4e;");
 			}
 		});
 
