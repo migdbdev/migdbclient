@@ -4,6 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.migdb.migdbclient.resources.CollectionStructureJSON;
 import org.migdb.migdbclient.resources.MappingRequestMessage;
 
 import com.sun.jersey.api.client.Client;
@@ -49,7 +50,7 @@ public class ServiceAccessor {
 
 	}
 
-	public static JSONObject getCollectionStructureJSON(){
+	public static JSONObject getCollectionStructureJSON(String name){
 		String filename = "a90ed2a4-f28d-43af-a5cf-4803b6e47ca5";
 		Client client = Client.create();
 
@@ -79,5 +80,33 @@ public class ServiceAccessor {
 		}
 		return json;
 
+	}
+
+	public static String saveCollectionStructureJSON(JSONObject object){
+		Client client = Client.create();
+		WebResource webResource = client
+				.resource("http://localhost:8080/migdbserver/services/mappingrequest");
+		String input = object.toJSONString();
+		client.addFilter(new HTTPBasicAuthFilter("fhgi8598ugh985yhob580uojg0t", "dfjgn984u608jb950o9bipj0945yjpbjmgi"));
+		ClientResponse response = webResource.type("application/json")
+				.accept("application/json")
+				.post(ClientResponse.class, input);
+
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Failed : HTTP error code : "
+					+ response.getStatus());
+		}
+		String output = response.getEntity(String.class);
+		JSONParser parser = new JSONParser();
+		JSONObject json;
+		String filename = "";
+		try {
+			json = (JSONObject) parser.parse(output);
+			filename = (String) json.get("response");
+			System.out.println("JSON file name retrieved:"+filename);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return filename;
 	}
 }
