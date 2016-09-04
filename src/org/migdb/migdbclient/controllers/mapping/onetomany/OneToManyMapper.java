@@ -13,6 +13,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.models.dto.Reference;
+import org.migdb.migdbclient.resources.ChangeStructure;
+import org.migdb.migdbclient.utils.ServiceAccessor;
 
 public class OneToManyMapper {
 	
@@ -28,9 +30,7 @@ public class OneToManyMapper {
 	JSONArray tableList;
 	JSONArray collectionList;
 	ArrayList<Reference> connectedTables = new ArrayList<Reference>();
-	int maxRefObjCount = 0;
 	int refObjLimit = 5;
-	int refColLimit = 10;
 	
 	
 	public void mapOneToMany(){
@@ -99,6 +99,8 @@ public class OneToManyMapper {
 				JSONArray referencedColumns = (JSONArray) referencedTab.get("columns");
 				JSONObject referencedCol = (JSONObject) referencedColumns.get(referencedColIndex);
 				String referencedColName = (String) referencedCol.get("colName");
+				JSONArray referencedDataTypesArr = (JSONArray) referencedTab.get("dataTypeCount");
+				JSONObject referencedDataType = (JSONObject) referencedDataTypesArr.get(0);
 				
 				JSONObject referencingTab = (JSONObject) tableList.get(referencingTblIndex);
 				String referencingTabName = (String) referencingTab.get("name");
@@ -106,22 +108,96 @@ public class OneToManyMapper {
 				JSONObject referencingCol = (JSONObject) referencingColumns.get(referencingColIndex);
 				String referencingColName = (String) referencingCol.get("colName");
 				Long referencingColCount = (Long) referencingTab.get("colCount");
+				JSONArray referencingDataTypesArr = (JSONArray) referencingTab.get("dataTypeCount");
+				JSONObject referencingDataType = (JSONObject) referencingDataTypesArr.get(0);
 				
 				JSONArray referencedArr = (JSONArray) referencingTab.get("referencedBy");
 				JSONArray referencingArr = (JSONArray) referencingTab.get("referencingFrom");
-				
-				String mappingType = "";
 				
 				JSONArray dataObj= new JSONArray();
 				JSONArray referencedDataArr = (JSONArray) referencedTab.get("data");
 				JSONArray referencingDataArr = (JSONArray) referencingTab.get("data");
 				
-				if((referencedArr.isEmpty()) && (referencingArr.size() == 1) &&  (referencingColCount<refColLimit)) {
-					mappingType = "Embedding";
-				} else {
-					mappingType = "Referencing";
-					getObjCount(referencedDataArr, referencingDataArr, referencedColName, referencingColName);
+				String mappingType = "";
+				float oneSideComplexity = -1;
+				float manySideComplexity = -1;
+				
+				JSONObject ChangeStructureObject = new JSONObject();
+				ChangeStructure structure = ChangeStructure.getInstance();
+				
+				try {
+					
+					ServiceAccessor accessor = new ServiceAccessor();
+					JSONObject oneSideResponse = accessor.getMappingModel("client123456", "req123456",String.valueOf((Long)referencedTab.get("colCount")), String.valueOf((Long) referencedTab.get("NUMERIC_COUNT")),String.valueOf((Long) referencedTab.get("STRING_COUNT")),String.valueOf((Long) referencedTab.get("DATE_COUNT")));
+					JSONObject manySideResponse = accessor.getMappingModel("client123456", "req123456",String.valueOf((Long)referencingTab.get("colCount")),String.valueOf((Long)referencingTab.get("NUMERIC_COUNT")),String.valueOf((Long)referencingTab.get("STRING_COUNT")),String.valueOf((Long)referencingTab.get("DATE_COUNT")));
+					
+					oneSideComplexity = Float.parseFloat((String)oneSideResponse.get("complexity"));
+					manySideComplexity = Float.parseFloat((String)manySideResponse.get("complexity"));
+
+					if(oneSideComplexity >= manySideComplexity) {
+						String mappingModel = (String)manySideResponse.get("mappingModel");
+						if(mappingModel.equals("EMBEDDING") && referencedArr.isEmpty() && (referencingArr.size() == 1)) {
+							mappingType = "Embedding";
+							
+							ChangeStructureObject.put("from", referencedTabName);
+							ChangeStructureObject.put("to", referencingTabName);
+							ChangeStructureObject.put("toText", "EMBEDDING");
+							
+						} else {
+							mappingType = "Referencing";
+							
+							ChangeStructureObject.put("from", referencingTabName);
+							ChangeStructureObject.put("to", referencedTabName);
+							ChangeStructureObject.put("toText", "REFERENCING");
+							
+						}
+					} else {
+						mappingType = "Referencing";
+						
+						ChangeStructureObject.put("from", referencingTabName);
+						ChangeStructureObject.put("to", referencedTabName);
+						ChangeStructureObject.put("toText", "REFERENCING");
+						
+					}
+					
+				} catch (Exception e) {
+					
+					if((referencedArr.isEmpty()) && (referencingArr.size() == 1)) {
+						mappingType = "Embedding";
+						manySideComplexity = 0;
+						oneSideComplexity = 1;
+						
+						ChangeStructureObject.put("from", referencedTabName);
+						ChangeStructureObject.put("to", referencingTabName);
+						ChangeStructureObject.put("toText", "EMBEDDING");
+						
+					} else {
+						mappingType = "Referencing";
+						int objectCount = getObjCount(referencedDataArr, referencingDataArr, referencedColName, referencingColName);
+						if(objectCount > refObjLimit) {
+							manySideComplexity = 1;
+							oneSideComplexity = 0;
+							
+							ChangeStructureObject.put("from", referencingTabName);
+							ChangeStructureObject.put("to", referencedTabName);
+							ChangeStructureObject.put("toText", "REFERENCING");
+							
+						} else {
+							manySideComplexity = 0;
+							oneSideComplexity = 1;
+							
+							ChangeStructureObject.put("from", referencedTabName);
+							ChangeStructureObject.put("to", referencingTabName);
+							ChangeStructureObject.put("toText", "EMBEDDING");
+							
+						}
+					}
+					
 				}
+				
+				ChangeStructureObject.put("text", "");				
+				structure.linkDataArray.add(ChangeStructureObject);
+
 				
 				for(int k=0; k<referencedDataArr.size(); k++) {
 					JSONObject referencedData = (JSONObject) referencedDataArr.get(k);
@@ -129,7 +205,7 @@ public class OneToManyMapper {
 					JSONArray manySideData = new JSONArray();	
 					
 					ObjectId referencedId = null;
-					if(maxRefObjCount > refObjLimit) {
+					if(mappingType.equals("Referencing") && manySideComplexity>oneSideComplexity) {
 						referencedId = new ObjectId();
 					}
 					
@@ -147,7 +223,7 @@ public class OneToManyMapper {
 									manySideData.add(referencingData);
 								} else {
 									ObjectId referencingId = null;
-									if(maxRefObjCount > refObjLimit) {
+									if(manySideComplexity>oneSideComplexity) {
 										referencingData.put(referencedTabName, referencedId.toString());
 									} else {
 										referencingId = new ObjectId();
@@ -169,13 +245,13 @@ public class OneToManyMapper {
 										if(values != null){
 											if(values.size()>l) {
 												JSONObject valObj = (JSONObject) values.get(l);
-												if(maxRefObjCount > refObjLimit) {
+												if(manySideComplexity>oneSideComplexity) {
 													valObj.put(referencedTabName, referencedId.toString());
 												} else {
 													valObj.put("_id", referencingId.toString());
 												}
 											}else {
-												if(maxRefObjCount > refObjLimit) {
+												if(manySideComplexity>oneSideComplexity) {
 													referencingData.put(referencedTabName, referencedId.toString());
 												} else {
 													referencingData.put("_id", referencingId.toString());
@@ -226,7 +302,7 @@ public class OneToManyMapper {
 							//System.out.println(collectionList);
 						}
 					} else {
-						if(maxRefObjCount > refObjLimit) {
+						if(manySideComplexity>oneSideComplexity) {
 							referencedData.put("_id", referencedId.toString());	
 						} else {
 							referencedData.put(referencingTabName, manySideData);
@@ -247,7 +323,7 @@ public class OneToManyMapper {
 							if(values != null){
 								if(values.size()>k) {
 									JSONObject valObj = (JSONObject) values.get(k);
-									if(maxRefObjCount > refObjLimit) {
+									if(manySideComplexity>oneSideComplexity) {
 										valObj.put("_id", referencedId.toString());	
 									} else {
 										valObj.put(referencingTabName, manySideData);
@@ -266,13 +342,11 @@ public class OneToManyMapper {
 					
 				}	
 				
-				maxRefObjCount = 0;
 			}
 			
 			if (!exist) {
 				collectionJsonObject.put("collections", collectionList);
 			} 
-			System.out.println(collectionList);
 			
 			JSONObject json = new JSONObject();
 			
@@ -322,7 +396,7 @@ public class OneToManyMapper {
 		return index;
 	}
 	
-	public void getObjCount(JSONArray referencedDataArr, JSONArray referencingDataArr, String referencedColName, String referencingColName) {
+	public int getObjCount(JSONArray referencedDataArr, JSONArray referencingDataArr, String referencedColName, String referencingColName) {
 		int count=0;
 		for(int i=0; i<referencedDataArr.size(); i++) {
 			JSONObject referencedData = (JSONObject) referencedDataArr.get(i);
@@ -337,9 +411,8 @@ public class OneToManyMapper {
 				}
 			}
 		}
-		if(count > maxRefObjCount) {
-			maxRefObjCount = count;
-		}
+
+		return count;
 	}
 
 }
