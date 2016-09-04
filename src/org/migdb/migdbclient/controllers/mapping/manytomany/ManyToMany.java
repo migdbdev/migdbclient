@@ -458,9 +458,9 @@ public class ManyToMany {
 		}
 	}
 	public void saveChangeStructure() {
-		System.out.println("save change structure");
 		ChangeStructure structure =ChangeStructure.getInstance();
 		CollectionStructureJSONHandler handler = new CollectionStructureJSONHandler();
+		System.out.println("save change structure "+structure);
 		handler.save(structure);
 	}
 
