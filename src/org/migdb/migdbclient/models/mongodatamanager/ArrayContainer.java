@@ -25,13 +25,24 @@ public class ArrayContainer implements JsonGeneratable{
 
 	@Override
 	public String generateJson() {
-		String result = "{ "+key.getText()+" : [";
+		String result = "{ \""+key.getText()+"\" : [\"";
+		int i =1;
 		for(TextField item : array){
+			
 			// validate comma
-			result += item.getText()+" , ";
+			result += item.getText();
+			if (i++ != array.size()) {
+				result += "\" , \"";
+			}
 		}
-		result += "] }";
+		result += "\"] }";
 		return result;
+	}
+
+	@Override
+	public boolean isSelected() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

@@ -15,7 +15,8 @@ public enum FilePath {
 	XMLPATH("Xmldump.xml"),
 	DBSTRUCTUREFILE("Database structure.json"),
 	DELETEDITEMFILE("Item deleted.json"),
-	COLLECTIONFILE("Collection.json");
+	COLLECTIONFILE("Collection.json"),
+	CHANGESTRUCTURE("ChangeStructure.json");
 
 	private String path;
 
