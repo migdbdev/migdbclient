@@ -11,7 +11,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.migdb.migdbclient.config.FilePath;
+import org.migdb.migdbclient.resources.ChangeStructure;
 import org.migdb.migdbclient.resources.ManyToManyResource;
+import org.migdb.migdbclient.utils.CollectionStructureJSONHandler;
 import org.migdb.migdbclient.utils.ServiceAccessor;
 
 import com.mongodb.util.JSON;
@@ -25,7 +27,7 @@ public class ManyToMany {
 	JSONObject mapped = new JSONObject();
 	JSONArray mappedDataArray;
 	JSONObject mappingMethod;
-	JSONArray ChangeStructure;
+//	JSONArray changeStructure;
 
 	public ManyToMany() {
 		super();
@@ -45,7 +47,9 @@ public class ManyToMany {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		ChangeStructure = new JSONArray();
+//		ChangeStructure structure = ChangeStructure.getInstance();
+//		changeStructure = structure.linkDataArray;
+//		ChangeStructure = ChangeStructure
 
 	}
 
@@ -81,7 +85,7 @@ public class ManyToMany {
 				}
 
 				writeMappedJson();
-				writeChangeStructure();
+				saveChangeStructure();
 			}
 		}
 
@@ -183,7 +187,9 @@ public class ManyToMany {
 			ChangeStructureObject.put("toText", table2Response.get("mappingModel"));
 
 		}
-		ChangeStructure.add(ChangeStructureObject);
+		ChangeStructure structure = ChangeStructure.getInstance();
+		structure.linkDataArray.add(ChangeStructureObject);
+//		changeStructure.add(ChangeStructureObject);
 		// JSONObject summary = new JSONObject();
 		// summary.put("method", "EMBEDDING");
 		// summary.put("parent", "employee");
@@ -451,17 +457,11 @@ public class ManyToMany {
 			e.printStackTrace();
 		}
 	}
-	public void writeChangeStructure() {
-		FileWriter file;
-		try {
-			file = new FileWriter(FilePath.DOCUMENT.getPath() + FilePath.CHANGESTRUCTURE.getPath());
-			file.write(ChangeStructure.toJSONString());
-			file.flush();
-			file.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void saveChangeStructure() {
+		System.out.println("save change structure");
+		ChangeStructure structure =ChangeStructure.getInstance();
+		CollectionStructureJSONHandler handler = new CollectionStructureJSONHandler();
+		handler.save(structure);
 	}
 
 	public boolean isTableMapped(JSONObject table) {
