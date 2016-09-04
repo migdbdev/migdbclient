@@ -21,8 +21,6 @@ import org.migdb.migdbclient.resources.MongoDBResource;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -65,10 +63,6 @@ public class QueryGenerator implements Initializable {
 	private ComboBox<String> queryFieldListComboBox;
 	@FXML
 	private ComboBox<String> queryOperatorsComboBox;
-	@FXML
-	private RadioButton queryFindRadioButton;
-	@FXML
-	private RadioButton queryFindOneRadioButton;
 	@FXML
 	private Button queryBuildButton;
 	@FXML
@@ -124,13 +118,56 @@ public class QueryGenerator implements Initializable {
 	@FXML
 	private Button textSearchDropButton;
 	/*********************************************/
+	
+	/*
+	 * Aggregation Tab
+	 */
+	@FXML
+	private ComboBox<String> aggregationDatabaseComboBox;
+	@FXML
+	private ComboBox<String> aggregationColectionComboBox;
+	@FXML
+	private ComboBox<String> aggregationFieldsComboBox;
+	@FXML
+	private ComboBox<String> aggregationOperatorsComboBox;
+	@FXML
+	private ComboBox<String> aggregationGroupbyComboBox;
+	@FXML
+	private ComboBox<String> aggregationSortColumnComboBox;
+	@FXML
+	private ComboBox<String> aggregationSortOrderComboBox;
+	
+	private final ToggleGroup aggregationRadioGroup = new ToggleGroup();
+	@FXML
+	private RadioButton aggregationCountRadioButton;
+	@FXML
+	private RadioButton aggregationSumRadioButton;
+	
+	@FXML
+	private TableView<QueryDocumentDTO> aggregationParametersTableView;
+	@FXML
+	private TableColumn<QueryDocumentDTO, String> aggregationFieldTableColumn;
+	@FXML
+	private TableColumn<QueryDocumentDTO, String> aggregationOperatorsTableColumn;
+	@FXML
+	private TableColumn<QueryDocumentDTO, String> aggregationValuesTableColumn;
+	@FXML
+	private TableColumn<QueryDocumentDTO, QueryDocumentDTO> aggregationRemoveTableColumn;
+	
+	@FXML
+	private TextField aggregationValueTextField;
+	
+	@FXML
+	private Button aggregationAddButton;
+	@FXML
+	private Button aggregationShowQueryButton;
+	/*********************************************/
 
 	MongoCollection<Document> collectionDocument;
 	List<Document> selectedDocument;
 	private MongoDatabase db;
 	private String collectionFElementHolder;
 	private int counter;
-	private final ToggleGroup radioGroup = new ToggleGroup();
 
 	private SqliteDAO dao;
 
@@ -296,10 +333,6 @@ public class QueryGenerator implements Initializable {
 		dao = new SqliteDAO();
 		queryOperatorsComboBox.getItems().addAll(dao.getQueryOperators());
 
-		// Set toggle group to radio button
-		queryFindRadioButton.setToggleGroup(radioGroup);
-		queryFindOneRadioButton.setToggleGroup(radioGroup);
-
 		// addQueryParamButton button click event
 		addQueryParamButton.addEventHandler(ActionEvent.ACTION, event -> addQueryParam());
 
@@ -380,8 +413,6 @@ public class QueryGenerator implements Initializable {
 		try {
 			String dbName = queryDatabaseListComboBox.getSelectionModel().getSelectedItem();
 			String collection = queryCollectionListComboBox.getSelectionModel().getSelectedItem();
-			RadioButton queryType = (RadioButton) radioGroup.selectedToggleProperty().get().getToggleGroup()
-					.getSelectedToggle();
 			ObservableList<QueryDocumentDTO> param = (ObservableList<QueryDocumentDTO>) queryParametersTableView
 					.getItems();
 
