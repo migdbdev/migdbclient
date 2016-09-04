@@ -11,6 +11,7 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.main.MainApp;
+import org.migdb.migdbclient.resources.ChangeStructure;
 import org.migdb.migdbclient.utils.ServiceAccessor;
 
 import java.net.URL;
@@ -35,8 +36,8 @@ public class CollectionStructure implements Initializable {
 
 
     public void loadCollectionChangeList(){
-        jsonObject = ServiceAccessor.getCollectionStructureJSON();
-        System.out.println("success");
+      //  jsonObject = ServiceAccessor.getCollectionStructureJSON();
+      //  System.out.println("success");
     }
 
     public void loadStructure(){
@@ -44,6 +45,7 @@ public class CollectionStructure implements Initializable {
         String url = MainApp.class.getResource("/org/migdb/migdbclient/resources/webcontent/collectionRelationship.html").toExternalForm();
        // String jsonPath = MainApp.class.getResource("collectionList.json").toExternalForm();
        System.out.println(url);
+        String filename = ChangeStructure.getInstance().jsonFileName;
         java.net.CookieManager manager = new java.net.CookieManager();
         java.net.CookieHandler.setDefault(manager);
         manager.getCookieStore().removeAll();
@@ -184,21 +186,18 @@ public class CollectionStructure implements Initializable {
                                     "          xobj.send(null);\n" +
                                     "      }\n" +
                                     "      var nodeDataArray;\n" +
+                                    "    var linkDataArray;\n" +
                                     "\n" +
                                     "      function load() {\n" +
-                                    "          var url = \"http://localhost:8080/migdbserver/services/collectionstructure/get/a90ed2a4-f28d-43af-a5cf-4803b6e47ca5\";\n" +
+                                    "          var url = \"http://localhost:8080/migdbserver/services/collectionstructure/get/"+filename+"\";\n" +
                                     "          loadJSON(url, function (response) {\n" +
                                     "\n" +
-                                    "              nodeDataArray = JSON.parse(response);\n" +
+                                    "              nodeDataArray = JSON.parse(response.nodeDataArray);\n" +
+                                    "              linkDataArray = JSON.parse(response.linkDataArray);\n" +
                                     "              myDiagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);\n" +
                                     "\n" +
                                     "          });\n" +
                                     "      }\n" +
-                                    "    var linkDataArray = [\n" +
-                                    "      { from: \"Products\", to: \"Suppliers\", text: \"\", toText: \"EMBD\" },\n" +
-                                    "      { from: \"Products\", to: \"Categories\", text: \"\", toText: \"REFE\" },\n" +
-                                    "      { from: \"Order Details\", to: \"Products\", text: \"REFE\", toText: \"\" }\n" +
-                                    "    ];\n" +
                                     "    load();\n" +
                                     "  } \n" +
                                     " init();");
