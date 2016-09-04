@@ -405,10 +405,10 @@ public class QueryGenerator implements Initializable {
 					String operator = dao.getQueryOperatorsKeyword(dto.getOperators().toString());
 
 					if (dao.getQueryOperatorsKeyword(dto.getOperators().toString()).equals("")) {
-						obj.add(new BasicDBObject(dto.getField(), Integer.parseInt(dto.getValues())));
+						obj.add(new BasicDBObject(dto.getField(), dto.getValues()));
 					} else {
 						obj.add(new BasicDBObject(dto.getField(),
-								new BasicDBObject(operator, Integer.parseInt(dto.getValues()))));
+								new BasicDBObject(operator, dto.getValues())));
 					}
 
 				}

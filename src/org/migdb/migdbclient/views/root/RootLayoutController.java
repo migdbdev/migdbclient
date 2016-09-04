@@ -65,11 +65,11 @@ public class RootLayoutController implements Initializable {
 		CenterLayout.INSTANCE.setRoot(rootContainerAncpane);
 		LayoutInstance.INSTANCE.setSidebar(sideBarAnchorpane);
 		
-		connectionManagerLabel.setGraphic(new ImageView(ImagePath.TABDBCONNECTION.getPath()));
+		/*connectionManagerLabel.setGraphic(new ImageView(ImagePath.TABDBCONNECTION.getPath()));
 		modificationEvaluatorLabel.setGraphic(new ImageView(ImagePath.TABMIGRATION.getPath()));
 		queryConverterLabel.setGraphic(new ImageView(ImagePath.TABCONVERTER.getPath()));
 		queryGeneratorLabel.setGraphic(new ImageView(ImagePath.TABGENERATOR.getPath()));
-		datamanagerLabel.setGraphic(new ImageView(ImagePath.TABDATAMANAGER.getPath()));
+		datamanagerLabel.setGraphic(new ImageView(ImagePath.TABDATAMANAGER.getPath()));*/
 		
 		
 		showConnectionManager();
@@ -149,7 +149,7 @@ public class RootLayoutController implements Initializable {
 			AnchorPane root;
 			root = CenterLayout.INSTANCE.getRootContainer();
 			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MainApp.class.getResource(FxmlPath.MODIFICATIONEVALUATOR.getPath()));
+			loader.setLocation(MainApp.class.getResource(FxmlPath.COLLECTIONSTRUCTURE.getPath()));
 			AnchorPane modificationEvaluator = loader.load();
 			root.getChildren().clear();
 			root.getChildren().add(modificationEvaluator);

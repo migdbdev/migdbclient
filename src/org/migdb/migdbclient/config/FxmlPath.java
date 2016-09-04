@@ -12,7 +12,9 @@ public enum FxmlPath {
 	QUERYCONVERTER("/org/migdb/migdbclient/views/queryconverter/QueryConverter.fxml"),
 	QUERYGENERATOR("/org/migdb/migdbclient/views/queryGenerator/QueryGenerator.fxml"),
 	MONGODBPATHBROWSE("/org/migdb/migdbclient/views/filechooser/FileChooserDBPath.fxml"),
-	INTERNETCONNECTIVITY("/org/migdb/migdbclient/views/connectivity/InternetConnectivity.fxml");
+	INTERNETCONNECTIVITY("/org/migdb/migdbclient/views/connectivity/InternetConnectivity.fxml"),
+	COLLECTIONSTRUCTURE("/org/migdb/migdbclient/views/collectionstructure/CollectionStructure.fxml"),
+	NEW_DOC("/org/migdb/migdbclient/views/mongodatamanager/NewDocument.fxml");
 	
 	private String path;
 	

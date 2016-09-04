@@ -151,10 +151,12 @@ public class SetupNewDBConnectionController implements Initializable {
 	public void back(Event e) {
 		if ((((Node) e.getSource()).getId()).equals(ConnectionManager.MYSQLBACKLABELID.getConnManager())) {
 			mysqlLayoutAnchorpane.setVisible(false);
+			rootLayoutAnchorpane.setVisible(true);
 		} else {
 			mongoLayoutAnchorpane.setVisible(false);
+			mysqlLayoutAnchorpane.setVisible(true);
 		}
-		rootLayoutAnchorpane.setVisible(true);
+		
 	}
 
 	/**
