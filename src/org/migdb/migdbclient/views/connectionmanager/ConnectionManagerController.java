@@ -279,6 +279,7 @@ public class ConnectionManagerController implements Initializable {
 						    MongoDBResource.INSTANCE.setDB(dbName);
 						    MongoDatabase database = MongoDBResource.INSTANCE.getDatabase();
 						    database.drop();
+						    setSideBarDatabases();
 						} else {
 						    System.out.println("cancel");
 						}
