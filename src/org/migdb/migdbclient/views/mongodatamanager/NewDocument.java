@@ -51,7 +51,8 @@ public class NewDocument implements Initializable{
 		}
 		
 		Label label = new Label("Key Value :  ");
-		TextField key = new TextField("Key");
+		TextField key = new TextField();
+		key.setPromptText("Key");
 		
 		TextField value = new TextField();
 		value.setPromptText("Value");
@@ -82,8 +83,7 @@ public class NewDocument implements Initializable{
 				currentContainer = eo.getContainer();
 			}
 		}
-		Label label = new Label();
-		label.setText("Array List  :  ");
+		Label label = new Label("Array List  :  ");
 		TextField key = new TextField();
 		key.setPromptText("Key");
 		TextField value = new TextField();
@@ -101,7 +101,7 @@ public class NewDocument implements Initializable{
 		box.getChildren().add(label);
 		box.getChildren().add(key);
 		box.getChildren().add(value);
-		container.getChildren().add(box);
+		currentContainer.getChildren().add(box);
 	}
 	
 	@FXML

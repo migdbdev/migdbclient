@@ -81,7 +81,7 @@ public class CollectionManager implements Initializable {
 		db = MongoDBResource.INSTANCE.getDatabase();
 		keyTextField.setPromptText("Key");
 		valueTextField.setPromptText("Value");
-		operatorsComboBox.setPromptText("Operators");
+		operatorsComboBox.setPromptText("Operator");
 		SqliteDAO dao = new SqliteDAO();
 		operatorsComboBox.getItems().addAll(dao.getQueryOperators());
 		operatorsComboBox.getItems().add("in");
