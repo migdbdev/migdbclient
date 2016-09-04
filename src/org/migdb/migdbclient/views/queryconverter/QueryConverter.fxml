@@ -7,8 +7,8 @@
 
 <AnchorPane fx:id="rootLayoutAnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="614.0" prefWidth="973.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.queryconverter.QueryConverterController">
    <children>
-      <TextArea fx:id="sqlQueryTxt" layoutX="76.0" layoutY="127.0" prefHeight="289.0" prefWidth="286.0" />
-      <TextArea fx:id="mongoQueryTxt" layoutX="504.0" layoutY="128.0" prefHeight="289.0" prefWidth="278.0" />
-      <Button layoutX="394.0" layoutY="248.0" mnemonicParsing="false" onMouseClicked="#convert" prefHeight="25.0" prefWidth="80.0" text="Convert" />
+      <TextArea fx:id="sqlQueryTxt" layoutX="50.0" layoutY="40.0" prefHeight="500.0" prefWidth="340.0" />
+      <TextArea fx:id="mongoQueryTxt" layoutX="549.0" layoutY="40.0" prefHeight="500.0" prefWidth="340.0" />
+      <Button layoutX="423.0" layoutY="256.0" mnemonicParsing="false" onMouseClicked="#convert" prefHeight="25.0" prefWidth="94.0" text="Convert" />
    </children>
 </AnchorPane>
