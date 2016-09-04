@@ -115,7 +115,7 @@ public class MainApp extends Application {
 
 	public void showMainStage() {
 		try {
-			runner.start();
+			/*runner.start();*/
 
 			// Create application folder in a user's document
 			File migDB = new File(FilePath.DOCUMENT.getPath());
