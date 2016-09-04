@@ -85,7 +85,7 @@ public class ServiceAccessor {
 	public static String saveCollectionStructureJSON(JSONObject object){
 		Client client = Client.create();
 		WebResource webResource = client
-				.resource("http://localhost:8080/migdbserver/services/mappingrequest");
+				.resource("http://localhost:8080/migdbserver/services/collectionstructure/save");
 		String input = object.toJSONString();
 		client.addFilter(new HTTPBasicAuthFilter("fhgi8598ugh985yhob580uojg0t", "dfjgn984u608jb950o9bipj0945yjpbjmgi"));
 		ClientResponse response = webResource.type("application/json")
