@@ -1,5 +1,6 @@
 package org.migdb.migdbclient.controllers.mapping.manytomany;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -24,9 +25,13 @@ public class ManyToMany {
 	JSONObject mapped = new JSONObject();
 	JSONArray mappedDataArray;
 	JSONObject mappingMethod;
+	JSONArray ChangeStructure;
 
 	public ManyToMany() {
 		super();
+		// File ChangeStructure = new File(FilePath.DOCUMENT.getPath() +
+		// FilePath.CHANGESTRUCTURE.getPath());
+
 		JSONParser parser = new JSONParser();
 		JSONParser parser1 = new JSONParser();
 		Object obj;
@@ -40,6 +45,7 @@ public class ManyToMany {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		ChangeStructure = new JSONArray();
 
 	}
 
@@ -75,6 +81,7 @@ public class ManyToMany {
 				}
 
 				writeMappedJson();
+				writeChangeStructure();
 			}
 		}
 
@@ -147,25 +154,39 @@ public class ManyToMany {
 			}
 		}
 		ServiceAccessor accessor = new ServiceAccessor();
-		JSONObject table1Response = accessor.getMappingModel("ClientId", "requestId","5","0","5","0");
-		JSONObject table2Response = accessor.getMappingModel("ClientId", "requestId","3","1","2","0");
+		JSONObject table1Response = accessor.getMappingModel("ClientId", "requestId", "5", "0", "5", "0");
+		JSONObject table2Response = accessor.getMappingModel("ClientId", "requestId", "3", "1", "2", "0");
 		JSONObject summary = new JSONObject();
+		// ********************************
+		JSONObject ChangeStructureObject = new JSONObject();
+		ChangeStructureObject.put("text", "");
+		// ********************************
+
 		System.out.println("mapping request : " + table1Response + "\n" + table2Response);
 		if (Double.parseDouble(table1Response.get("complexity").toString()) > Double
 				.parseDouble(table2Response.get("complexity").toString())) {
 			summary.put("parent", referencingTable1Info.get("referencedTab"));
-//			summary.put("method", table1Response.get("mappingModel"));
+			// summary.put("method", table1Response.get("mappingModel"));
 			summary.put("method", "EMBEDDING");
+			
+			ChangeStructureObject.put("from", referencingTable1Info.get("referencedTab"));
+			ChangeStructureObject.put("to", referencingTable2Info.get("referencedTab"));
+			ChangeStructureObject.put("toText", table1Response.get("mappingModel"));
 
 		} else {
 			summary.put("parent", referencingTable2Info.get("referencedTab"));
-//			summary.put("method", table2Response.get("mappingModel"));
+			// summary.put("method", table2Response.get("mappingModel"));
 			summary.put("method", "EMBEDDING");
+			
+			ChangeStructureObject.put("from", referencingTable2Info.get("referencedTab"));
+			ChangeStructureObject.put("to", referencingTable1Info.get("referencedTab"));
+			ChangeStructureObject.put("toText", table2Response.get("mappingModel"));
 
 		}
-//		JSONObject summary = new JSONObject();
-//		summary.put("method", "EMBEDDING");
-//		summary.put("parent", "employee");
+		ChangeStructure.add(ChangeStructureObject);
+		// JSONObject summary = new JSONObject();
+		// summary.put("method", "EMBEDDING");
+		// summary.put("parent", "employee");
 		return summary;
 	}
 
@@ -242,11 +263,11 @@ public class ManyToMany {
 		JSONObject table2MappingInfo = ManyToManyResource.INSTANCE.getTable2Info();
 		String referencingCol = table2MappingInfo.get("referencingCol").toString();
 		String referencedCol = table2MappingInfo.get("referencedCol").toString();
-//		System.out.println("*************"+mappingObject+"##############");
-//		System.out.println(ManyToManyResource.INSTANCE.getMappingTable());
-//		System.out.println(ManyToManyResource.INSTANCE.getTable1());
-//		System.out.println(ManyToManyResource.INSTANCE.getTable2());
-//		System.out.println(referencedCol+" "+referencingCol);
+		// System.out.println("*************"+mappingObject+"##############");
+		// System.out.println(ManyToManyResource.INSTANCE.getMappingTable());
+		// System.out.println(ManyToManyResource.INSTANCE.getTable1());
+		// System.out.println(ManyToManyResource.INSTANCE.getTable2());
+		// System.out.println(referencedCol+" "+referencingCol);
 		String referencedValue = mappingObject.get(referencingCol).toString();
 		for (Object object : table2Data) {
 			JSONObject table2DataObject = (JSONObject) object;
@@ -423,6 +444,18 @@ public class ManyToMany {
 		try {
 			file = new FileWriter(FilePath.DOCUMENT.getPath() + FilePath.COLLECTIONFILE.getPath());
 			file.write(mapped.toJSONString());
+			file.flush();
+			file.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void writeChangeStructure() {
+		FileWriter file;
+		try {
+			file = new FileWriter(FilePath.DOCUMENT.getPath() + FilePath.CHANGESTRUCTURE.getPath());
+			file.write(ChangeStructure.toJSONString());
 			file.flush();
 			file.close();
 		} catch (IOException e) {
