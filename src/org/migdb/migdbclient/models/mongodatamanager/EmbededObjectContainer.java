@@ -1,6 +1,7 @@
 package org.migdb.migdbclient.models.mongodatamanager;
 
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -23,7 +24,9 @@ public class EmbededObjectContainer extends ObjectContainer {
 	}
 	
 	public VBox getView() {
+		Label label = new Label("Object : ");
 		HBox box = new HBox();
+		box.getChildren().add(label);
 		box.getChildren().add(check);
 		box.getChildren().add(key);
 		container.getChildren().add(box);
