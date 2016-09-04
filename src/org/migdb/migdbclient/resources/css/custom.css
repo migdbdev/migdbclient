@@ -186,6 +186,35 @@
 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Showquerybuttonhover.png);
 }
 /* ************************************************************ */
+
+/* ************** Update button style ************** */
+.button_update {
+	-fx-pref-width:190;
+	-fx-pref-height:40;
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Updatebutton.png);
+}
+
+.button_update:hover {
+	-fx-pref-width:190;
+	-fx-pref-height:40;
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Updatebuttonhover.png);
+}
+/* ************************************************* */
+
+/* ************** Convert button style ************** */
+.button_convert {
+	-fx-pref-width:190;
+	-fx-pref-height:40;
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Convertbutton.png);
+}
+
+.button_convert:hover {
+	-fx-pref-width:190;
+	-fx-pref-height:40;
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Convertbuttonhover.png);
+}
+/* ************************************************** */
+
 .label_Connections {
 	-fx-font-size: 20.0pt;
     -fx-font-family: "Segoe UI Semibold";
