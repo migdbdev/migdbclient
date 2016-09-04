@@ -4,9 +4,9 @@ import org.json.simple.JSONArray;
 
 public class ChangeStructure {
 
-    public static JSONArray nodeDataArray = new JSONArray();
-    public static JSONArray linkDataArray = new JSONArray();
-    public static String jsonFileName= "";
+    public JSONArray nodeDataArray = new JSONArray();
+    public JSONArray linkDataArray = new JSONArray();
+    public String jsonFileName= "";
 
     private static ChangeStructure instance = null;
     protected ChangeStructure() {
