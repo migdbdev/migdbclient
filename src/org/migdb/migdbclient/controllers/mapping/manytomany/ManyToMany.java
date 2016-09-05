@@ -170,8 +170,8 @@ public class ManyToMany {
 		if (Double.parseDouble(table1Response.get("complexity").toString()) > Double
 				.parseDouble(table2Response.get("complexity").toString())) {
 			summary.put("parent", referencingTable1Info.get("referencedTab"));
-			// summary.put("method", table1Response.get("mappingModel"));
-			summary.put("method", "EMBEDDING");
+			 summary.put("method", table1Response.get("mappingModel"));
+//			summary.put("method", "EMBEDDING");
 			
 			ChangeStructureObject.put("from", referencingTable1Info.get("referencedTab"));
 			ChangeStructureObject.put("to", referencingTable2Info.get("referencedTab"));
@@ -179,8 +179,8 @@ public class ManyToMany {
 
 		} else {
 			summary.put("parent", referencingTable2Info.get("referencedTab"));
-			// summary.put("method", table2Response.get("mappingModel"));
-			summary.put("method", "EMBEDDING");
+			 summary.put("method", table2Response.get("mappingModel"));
+//			summary.put("method", "EMBEDDING");
 			
 			ChangeStructureObject.put("from", referencingTable2Info.get("referencedTab"));
 			ChangeStructureObject.put("to", referencingTable1Info.get("referencedTab"));
