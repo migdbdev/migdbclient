@@ -27,10 +27,10 @@ public class ArrayContainer implements JsonGeneratable{
 
 	@Override
 	public String generateJson() {
-		String result = "{ \""+key.getText()+"\" : [\"";
+		String result = "\""+key.getText()+"\" : [\"";
 		int i =1;
 		String st = array.get(0).getText();
-		List<String> items = Arrays.asList(st.split("\\s*,\\s*"));
+		List<String> items = Arrays.asList(st.split(","));
 		for(String item : items){
 			
 			// validate comma
@@ -39,7 +39,7 @@ public class ArrayContainer implements JsonGeneratable{
 				result += "\" , \"";
 			}
 		}
-		result += "\"] }";
+		result += "\"]";
 		return result;
 	}
 
