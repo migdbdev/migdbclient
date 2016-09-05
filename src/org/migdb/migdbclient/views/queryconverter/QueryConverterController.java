@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
@@ -559,8 +561,12 @@ public class QueryConverterController {
 			Table leftTable = (Table) plainSelect.getFromItem();
 			Table rightTable = (Table) join.getRightItem();
 			LinkedHashMap<String, Object> lookupObj = new LinkedHashMap<String, Object>();
-			lookupObj.put("from", "\"" + rightTable.getName() + "\"");
+			
+			String statement = "";
+			
 			if (join.isLeft()) {
+				
+				lookupObj.put("from", "\"" + rightTable.getName() + "\"");
 				Expression onExpression = join.getOnExpression();
 				Column leftCol = null;
 				Column rightCol = null;
@@ -601,20 +607,78 @@ public class QueryConverterController {
 					}
 				}
 				lookupObj.put("as", "\"" + rightTable.getName() + "\"");
+				
+				
+				lookupList.add(lookupObj);
+
+				Expression whereExpression = plainSelect.getWhere();
+				
+				HashMap<String, Object> conditions = convertWhere(whereExpression);
+				
+				String matchConditions = conditions.toString();
+				Pattern ptrn = Pattern.compile("(\\{|\\s)[a-zA-Z_\\.]+\\=");
+				Matcher m = ptrn.matcher(matchConditions);
+				while(m.find()) 
+				{
+					String subString = (String) (m.group().subSequence(1, m.group().length()-1));
+					System.out.println(subString);
+					matchConditions = matchConditions.replace(subString, "\""+subString+"\"");
+				}
+				
+				if(leftTable.getAlias() == null) {
+					String prefix = leftTable.getName()+".";
+					matchConditions = matchConditions.replace(prefix, "");				
+				} else {
+					Alias a = leftTable.getAlias();
+					matchConditions = matchConditions.replace(a+".", "");
+				}
+				
+				List<SelectItem> selectItems = plainSelect.getSelectItems();
+				HashMap<String, Object> cols = new HashMap<String, Object>();
+				
+				for(int i=0; i<selectItems.size(); i++) {
+					SelectItem item = selectItems.get(i);
+					if (item instanceof SelectExpressionItem) {
+						SelectExpressionItem expressionItem = (SelectExpressionItem) item;
+						Expression expression = expressionItem.getExpression();
+						if(expression instanceof Column) {
+							Column column = (Column) expression;
+							cols.put(column.getColumnName(), expression);
+						}
+					}
+				}
+				
+				statement = "db."+leftTable.getName()+".aggregate([";
+				if(!conditions.isEmpty()) {
+					statement+= "\n\t{\n\t\t$match:\n\t\t\t"+
+				matchConditions.replace("=", ":").replace(",", ",\n\t\t\t")+"\n\t},";
+				}
+				statement+= "\n\t{\n\t\t$lookup:\n\t\t\t"+lookupObj.toString().replace("=", ":")
+						.replace(",", ",\n\t\t\t")+"\n\t},";
+				
+				statement+= "\n\t{ $unwind: "+rightTable.getName()+" }";
+
+				if(!cols.isEmpty()) {
+					statement+= ",\n\t{\n\t\t$project:\n\t\t\t"+
+							matchConditions.replace("=", ":").replace(",", ",\n\t\t\t")+"\n\t}";
+				}
 
 			}
+			
+			else if(join.isRight()) {
+				
+				
+				
+			}
 
-			System.out.println(lookupObj);
-			lookupList.add(lookupObj);
+			
+			
+			mongoQuery = statement+"\n])";
+
+			
 		}
 		
-		List<SelectItem> selectItems = plainSelect.getSelectItems();	
 		
-		Expression whereExpression = plainSelect.getWhere();
-		
-		HashMap<String, Object> conditions = convertWhere(whereExpression);
-		
-		System.out.println(conditions);
 		
 		
 		/*mongoQuery = "db." + plainSelect.getFromItem() + ".aggregate([\n\t{\n\t\t$lookup: \n\t\t\t{ \n\t\t\t\t"
