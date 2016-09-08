@@ -17,6 +17,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -56,12 +57,13 @@ public class FileChooserDBPathController implements Initializable {
 			
 			@Override
 			public void handle(ActionEvent event) {
-				FileChooser fileChooser = new FileChooser();
+				DirectoryChooser fileChooser = new DirectoryChooser();
+				fileChooser.setTitle("Mongo database path chooser");
 				//Show open file dialog
-	              File file = fileChooser.showOpenDialog(null);
+	              File selectedDirectory = fileChooser.showDialog(null);
 	              browseDbPathTextField.clear();
-	              browseDbPathTextField.setText(file.getPath());
-				
+	              String directoryPath = (selectedDirectory.isDirectory() && selectedDirectory != null) ? selectedDirectory.getAbsolutePath() : "" ;
+	              browseDbPathTextField.setText(directoryPath);
 			}
 		});
 		
