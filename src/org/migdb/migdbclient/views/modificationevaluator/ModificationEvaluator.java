@@ -110,7 +110,10 @@ public class ModificationEvaluator {
 				ManyToMany many = new ManyToMany();
 				many.identifyM2M();
 				
-				 try {
+				MongoWriter mongoWriter = new MongoWriter();
+	    		mongoWriter.write();
+				
+				 /*try {
 			    		root = CenterLayout.INSTANCE.getRootContainer();
 			    		FXMLLoader loader = new FXMLLoader();
 			    		loader.setLocation(MainApp.class.getResource(FxmlPath.COLLECTIONSTRUCTURE.getPath()));
@@ -119,7 +122,7 @@ public class ModificationEvaluator {
 			    		root.getChildren().add(collectionStructure);
 					} catch (Exception e) {
 						e.printStackTrace();
-					}
+					}*/
 			}
 		});
 

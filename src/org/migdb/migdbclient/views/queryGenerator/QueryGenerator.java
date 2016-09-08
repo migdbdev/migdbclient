@@ -399,12 +399,18 @@ public class QueryGenerator implements Initializable {
 
 		// addQueryParamButton button click event
 		addQueryParamButton.addEventHandler(ActionEvent.ACTION, event -> addQueryParam());
+		
+		// aggregationAddButton button click event
+				aggregationAddButton.addEventHandler(ActionEvent.ACTION, event -> addAggregationQueryParam());
 
 		// queryBuildButton button click event
 		queryBuildButton.addEventHandler(ActionEvent.ACTION, event -> queryBuild());
 
 		// Generate text index button click event
 		textSearchCreateButton.addEventHandler(ActionEvent.ACTION, event -> textSearchBuild(event));
+		
+		// aggregationShowQueryButton button click event
+		aggregationShowQueryButton.addEventHandler(ActionEvent.ACTION, event -> aggregation());
 
 		// View text index button click event
 		textSearchViewButton.addEventHandler(ActionEvent.ACTION, event -> textSearchBuild(event));
@@ -656,6 +662,25 @@ public class QueryGenerator implements Initializable {
 		}
 
 	}
+	
+	private void aggregation() {
+		try {
+			String dbName = aggregationDatabaseComboBox.getSelectionModel().getSelectedItem();
+			String collection = aggregationColectionComboBox.getSelectionModel().getSelectedItem();
+			ObservableList<QueryDocumentDTO> param = (ObservableList<QueryDocumentDTO>) aggregationParametersTableView
+					.getItems();
+			
+			outputQuery.appendText("db.employee.aggregate([\n"
+					+ "\t{\n"
+					+ "\t\t $group: {\n"
+					+ "\t\t\t count: {$sum: \"employee\"}\n"
+					+ "\t}\n"
+					+ "\t}\n"
+					+ "])");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Get list of all the mongo databases
@@ -775,6 +800,19 @@ public class QueryGenerator implements Initializable {
 			dto.setValues(queryValuesTextField.getText());
 			queryParams.add(dto);
 			queryParametersTableView.setItems(queryParams);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void addAggregationQueryParam() {
+		try {
+			QueryDocumentDTO dto = new QueryDocumentDTO();
+			dto.setField(aggregationFieldsComboBox.getSelectionModel().getSelectedItem());
+			dto.setOperators(aggregationOperatorsComboBox.getSelectionModel().getSelectedItem());
+			dto.setValues(aggregationValueTextField.getText());
+			queryParams.add(dto);
+			aggregationParametersTableView.setItems(queryParams);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
