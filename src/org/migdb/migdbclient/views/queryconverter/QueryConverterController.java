@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
@@ -542,6 +544,151 @@ public class QueryConverterController {
 		}
 		return mongoQuery;
 	}
+	
+	/**
+	 * Method to convert join queries
+	 * @param joins
+	 * @param plainSelect
+	 * @return
+	 */
+	private String convertJoin(List<Join> joins, PlainSelect plainSelect) {
+
+		String mongoQuery = "";
+		List<LinkedHashMap<String, Object>> lookupList = new ArrayList<LinkedHashMap<String, Object>>();
+
+		for (int k = 0; k < joins.size(); k++) {
+			Join join = joins.get(0);
+			Table leftTable = (Table) plainSelect.getFromItem();
+			Table rightTable = (Table) join.getRightItem();
+			LinkedHashMap<String, Object> lookupObj = new LinkedHashMap<String, Object>();
+			
+			String statement = "";
+			
+			if (join.isLeft()) {
+				
+				lookupObj.put("from", "\"" + rightTable.getName() + "\"");
+				Expression onExpression = join.getOnExpression();
+				Column leftCol = null;
+				Column rightCol = null;
+				if (onExpression instanceof EqualsTo) {
+					EqualsTo eq = (EqualsTo) onExpression;
+					Expression leftExp = eq.getLeftExpression();
+					if (leftExp instanceof Column) {
+						leftCol = (Column) leftExp;
+						if (leftTable.getAlias() == null && leftCol.getTable().getName().equals(leftTable.getName())) {
+							lookupObj.put("localField", "\"" + leftCol.getColumnName() + "\"");
+						} else if (leftTable.getAlias() != null
+								&& leftTable.getAlias().getName().equals(leftCol.getTable().getName())) {
+							lookupObj.put("localField", "\"" + leftCol.getColumnName() + "\"");
+						} else if (rightTable.getAlias() == null
+								&& leftCol.getTable().getName().equals(rightTable.getName())) {
+							lookupObj.put("foreignField", "\"" + leftCol.getColumnName() + "\"");
+						} else if (rightTable.getAlias() != null
+								&& rightTable.getAlias().getName().equals(leftCol.getTable().getName())) {
+							lookupObj.put("foreignField", "\"" + leftCol.getColumnName() + "\"");
+						}
+					}
+					Expression rightExp = eq.getRightExpression();
+					if (rightExp instanceof Column) {
+						rightCol = (Column) rightExp;
+						if (rightTable.getAlias() == null
+								&& rightCol.getTable().getName().equals(rightTable.getName())) {
+							lookupObj.put("foreignField", "\"" + rightCol.getColumnName() + "\"");
+						} else if (rightTable.getAlias() != null
+								&& rightTable.getAlias().getName().equals(rightCol.getTable().getName())) {
+							lookupObj.put("foreignField", "\"" + rightCol.getColumnName() + "\"");
+						} else if (leftTable.getAlias() == null
+								&& leftCol.getTable().getName().equals(leftTable.getName())) {
+							lookupObj.put("localField", "\"" + rightCol.getColumnName() + "\"");
+						} else if (leftTable.getAlias() != null
+								&& leftTable.getAlias().getName().equals(leftCol.getTable().getName())) {
+							lookupObj.put("localField", "\"" + rightCol.getColumnName() + "\"");
+						}
+					}
+				}
+				lookupObj.put("as", "\"" + rightTable.getName() + "\"");
+				
+				
+				lookupList.add(lookupObj);
+
+				Expression whereExpression = plainSelect.getWhere();
+				
+				HashMap<String, Object> conditions = convertWhere(whereExpression);
+				
+				String matchConditions = conditions.toString();
+				Pattern ptrn = Pattern.compile("(\\{|\\s)[a-zA-Z_\\.]+\\=");
+				Matcher m = ptrn.matcher(matchConditions);
+				while(m.find()) 
+				{
+					String subString = (String) (m.group().subSequence(1, m.group().length()-1));
+					System.out.println(subString);
+					matchConditions = matchConditions.replace(subString, "\""+subString+"\"");
+				}
+				
+				if(leftTable.getAlias() == null) {
+					String prefix = leftTable.getName()+".";
+					matchConditions = matchConditions.replace(prefix, "");				
+				} else {
+					Alias a = leftTable.getAlias();
+					matchConditions = matchConditions.replace(a+".", "");
+				}
+				
+				List<SelectItem> selectItems = plainSelect.getSelectItems();
+				HashMap<String, Object> cols = new HashMap<String, Object>();
+				
+				for(int i=0; i<selectItems.size(); i++) {
+					SelectItem item = selectItems.get(i);
+					if (item instanceof SelectExpressionItem) {
+						SelectExpressionItem expressionItem = (SelectExpressionItem) item;
+						Expression expression = expressionItem.getExpression();
+						if(expression instanceof Column) {
+							Column column = (Column) expression;
+							cols.put(column.getColumnName(), expression);
+						}
+					}
+				}
+				
+				statement = "db."+leftTable.getName()+".aggregate([";
+				if(!conditions.isEmpty()) {
+					statement+= "\n\t{\n\t\t$match:\n\t\t\t"+
+				matchConditions.replace("=", ":").replace(",", ",\n\t\t\t")+"\n\t},";
+				}
+				statement+= "\n\t{\n\t\t$lookup:\n\t\t\t"+lookupObj.toString().replace("=", ":")
+						.replace(",", ",\n\t\t\t")+"\n\t},";
+				
+				statement+= "\n\t{ $unwind: "+rightTable.getName()+" }";
+
+				if(!cols.isEmpty()) {
+					statement+= ",\n\t{\n\t\t$project:\n\t\t\t"+
+							matchConditions.replace("=", ":").replace(",", ",\n\t\t\t")+"\n\t}";
+				}
+
+			}
+			
+			else if(join.isRight()) {
+				
+				
+				
+			}
+
+			
+			
+			mongoQuery = statement+"\n])";
+
+			
+		}
+		
+		
+		
+		
+		/*mongoQuery = "db." + plainSelect.getFromItem() + ".aggregate([\n\t{\n\t\t$lookup: \n\t\t\t{ \n\t\t\t\t"
+				+ "from: \"" + join.getRightItem() + "\",\n\t\t\t\t" + "localField: \""
+				+ leftCol.getColumnName() + "\",\n\t\t\t\t" + "foreignField: \"" + rightCol.getColumnName()
+				+ "\",\n\t\t\t\t" + "as: \"" + join.getRightItem() + "_docs\"," + "\n\t\t\t} \n\t} \n])";
+*/
+
+		return mongoQuery;
+	}
 
 	/**
 	 * @param str
@@ -911,71 +1058,6 @@ public class QueryConverterController {
 		return conditionPair;
 	}
 
-	private String convertJoin(List<Join> joins, PlainSelect plainSelect) {
 
-		String mongoQuery = "";
-		List<LinkedHashMap<String, Object>> lookupList = new ArrayList<LinkedHashMap<String, Object>>();
-
-		for (int k = 0; k < joins.size(); k++) {
-			Join join = joins.get(0);
-			Table leftTable = (Table) plainSelect.getFromItem();
-			Table rightTable = (Table) join.getRightItem();
-			LinkedHashMap<String, Object> lookupObj = new LinkedHashMap<String, Object>();
-			lookupObj.put("from", "\"" + rightTable.getName() + "\"");
-			if (join.isLeft()) {
-				Expression onExpression = join.getOnExpression();
-				Column leftCol = null;
-				Column rightCol = null;
-				if (onExpression instanceof EqualsTo) {
-					EqualsTo eq = (EqualsTo) onExpression;
-					Expression leftExp = eq.getLeftExpression();
-					if (leftExp instanceof Column) {
-						leftCol = (Column) leftExp;
-						if (leftTable.getAlias() == null && leftCol.getTable().getName().equals(leftTable.getName())) {
-							lookupObj.put("localField", "\"" + leftCol.getColumnName() + "\"");
-						} else if (leftTable.getAlias() != null
-								&& leftTable.getAlias().getName().equals(leftCol.getTable().getName())) {
-							lookupObj.put("localField", "\"" + leftCol.getColumnName() + "\"");
-						} else if (rightTable.getAlias() == null
-								&& leftCol.getTable().getName().equals(rightTable.getName())) {
-							lookupObj.put("foreignField", "\"" + leftCol.getColumnName() + "\"");
-						} else if (rightTable.getAlias() != null
-								&& rightTable.getAlias().getName().equals(leftCol.getTable().getName())) {
-							lookupObj.put("foreignField", "\"" + leftCol.getColumnName() + "\"");
-						}
-					}
-					Expression rightExp = eq.getRightExpression();
-					if (rightExp instanceof Column) {
-						rightCol = (Column) rightExp;
-						if (rightTable.getAlias() == null
-								&& rightCol.getTable().getName().equals(rightTable.getName())) {
-							lookupObj.put("foreignField", "\"" + rightCol.getColumnName() + "\"");
-						} else if (rightTable.getAlias() != null
-								&& rightTable.getAlias().getName().equals(rightCol.getTable().getName())) {
-							lookupObj.put("foreignField", "\"" + rightCol.getColumnName() + "\"");
-						} else if (leftTable.getAlias() == null
-								&& leftCol.getTable().getName().equals(leftTable.getName())) {
-							lookupObj.put("localField", "\"" + rightCol.getColumnName() + "\"");
-						} else if (leftTable.getAlias() != null
-								&& leftTable.getAlias().getName().equals(leftCol.getTable().getName())) {
-							lookupObj.put("localField", "\"" + rightCol.getColumnName() + "\"");
-						}
-					}
-				}
-				lookupObj.put("as", "\"" + rightTable.getName() + "\"");
-
-				mongoQuery = "db." + plainSelect.getFromItem() + ".aggregate([\n\t{\n\t\t$lookup: \n\t\t\t{ \n\t\t\t\t"
-						+ "from: \"" + join.getRightItem() + "\",\n\t\t\t\t" + "localField: \""
-						+ leftCol.getColumnName() + "\",\n\t\t\t\t" + "foreignField: \"" + rightCol.getColumnName()
-						+ "\",\n\t\t\t\t" + "as: \"" + join.getRightItem() + "_docs\"," + "\n\t\t\t} \n\t} \n])";
-
-			}
-
-			System.out.println(lookupObj);
-			lookupList.add(lookupObj);
-		}
-
-		return mongoQuery;
-	}
 
 }

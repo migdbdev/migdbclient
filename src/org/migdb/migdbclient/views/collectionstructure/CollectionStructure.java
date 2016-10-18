@@ -10,9 +10,11 @@ import javafx.scene.control.Button;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import org.json.simple.JSONObject;
+import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.ChangeStructure;
 import org.migdb.migdbclient.utils.ServiceAccessor;
+import org.migdb.migdbclient.views.connectionmanager.ConnectionManagerController;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -24,6 +26,8 @@ public class CollectionStructure implements Initializable {
     private WebView webview;
     @FXML
     private WebEngine engine;
+    @FXML
+    private Button proceed;
 
     private JSONObject jsonObject;
 
@@ -31,9 +35,23 @@ public class CollectionStructure implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         engine = webview.getEngine();
         loadStructure();
+        
+        proceed.addEventHandler(ActionEvent.ACTION, event -> procesContinuous());
+
     }
 
 
+    public void procesContinuous() {
+    	try {
+    		MongoWriter mongoWriter = new MongoWriter();
+    		mongoWriter.write();
+    		
+    		ConnectionManagerController controller = new ConnectionManagerController();
+    		controller.setSideBarDatabases();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    }
 
     public void loadCollectionChangeList(){
       //  jsonObject = ServiceAccessor.getCollectionStructureJSON();

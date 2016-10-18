@@ -142,15 +142,15 @@
 {
     -fx-background-color: 
         #090a0c,
-        linear-gradient(#38424b 0.0%, #1f2429 20.0%, #191d22 100.0%),
-        linear-gradient(#20262b, #191d22),
-        radial-gradient(center 50.0% 0.0%, radius 100.0%, rgba(114.0,131.0,148.0,0.9), rgba(255.0,255.0,255.0,0.0));
+        linear-gradient(#237f4e 0.0%, #1f7246 20.0%, #388b5f 100.0%),
+        linear-gradient(#237f4e, #388b5f),
+        radial-gradient(center 50.0% 0.0%, radius 100.0%, rgba(17,63,39), rgba(28,101,62));
 
 }
 
 .tab-pane .tab:selected
 {
-    -fx-background-color: #3c3c3c;
+    -fx-background-color: #65A583;
 }
 
 .tab .tab-label { 
@@ -167,6 +167,54 @@
 }
 /* *************************************************** */
 
+/* ****************** Add query parameters style ***************** */
+.button_addparameters_button {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Addparametersbutton.png);
+}
+
+.button_addparameters_button:hover {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Addparametersbuttonhover.png);
+}
+/* ************************************************************** */
+
+/* ****************** Show query button style ***************** */
+.button_showquery_button {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Showquerybutton.png);
+}
+
+.button_showquery_button:hover {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Showquerybuttonhover.png);
+}
+/* ************************************************************ */
+
+/* ************** Update button style ************** */
+.button_update {
+	-fx-pref-width:190;
+	-fx-pref-height:40;
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Updatebutton.png);
+}
+
+.button_update:hover {
+	-fx-pref-width:190;
+	-fx-pref-height:40;
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Updatebuttonhover.png);
+}
+/* ************************************************* */
+
+/* ************** Convert button style ************** */
+.button_convert {
+	-fx-pref-width:190;
+	-fx-pref-height:40;
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Convertbutton.png);
+}
+
+.button_convert:hover {
+	-fx-pref-width:190;
+	-fx-pref-height:40;
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Convertbuttonhover.png);
+}
+/* ************************************************** */
+
 .label_Connections {
 	-fx-font-size: 20.0pt;
     -fx-font-family: "Segoe UI Semibold";
@@ -174,18 +222,9 @@
 }
 
 .dark-blue {
-    -fx-background-color: 
-        #090a0c,
-        linear-gradient(#308014 0.0%, #308014 20.0%, #308014 100.0%),
-        linear-gradient(#308014, #308014);
-    -fx-background-radius: 5.0,4.0,3.0,5.0;
-    -fx-background-insets: 0.0,1.0,2.0,0.0;
-    -fx-text-fill: white;
-    -fx-effect: dropshadow( three-pass-box , rgba(0.0,0.0,0.0,0.6) , 5.0, 0.0 , 0.0 , 1.0 );
-    -fx-font-family: "Arial";
-    -fx-text-fill: linear-gradient(white, #d0d0d0);
-    -fx-font-size: 12.0px;
-    -fx-padding: 10.0 20.0 10.0 20.0;
+	-fx-pref-width:190;
+	-fx-pref-height:40;
+    -fx-background-image:url(/org/migdb/migdbclient/resources/images/Showquerybutton.png);
 }
 .dark-blue Text {
     -fx-effect: dropshadow( one-pass-box , rgba(0.0,0.0,0.0,0.9) , 1.0, 0.0 , 0.0 , 1.0 );

@@ -14,6 +14,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.migdb.migdbclient.config.FilePath;
+import org.migdb.migdbclient.resources.ChangeStructure;
 
 import com.google.gson.stream.JsonWriter;
 
@@ -43,6 +44,11 @@ public class OneToOneMap {
 			JSONObject valueObject = new JSONObject();
 			JSONArray valueArray = new JSONArray();
 			//JSONArray values = new JSONArray();
+			
+			ChangeStructure structure = ChangeStructure.getInstance();
+			structure.nodeDataArray.clear();
+			structure.linkDataArray.clear();
+			structure.jsonFileName = null;
 
 			while (iterator.hasNext()) {
 				JSONObject tbl = (JSONObject) iterator.next();
@@ -59,6 +65,16 @@ public class OneToOneMap {
 					String relationshipType = (String) referencingObj.get("relationshipType");
 
 					if (relationshipType.equals("OneToOne")) {
+						
+						JSONObject ChangeStructureObject = new JSONObject();
+						
+						ChangeStructureObject.put("from", tbl.get("name"));
+						ChangeStructureObject.put("to", referencingObj.get("referencingTab"));
+						ChangeStructureObject.put("toText", "EMBEDDING");
+						ChangeStructureObject.put("text", "");
+						
+						structure.linkDataArray.add(ChangeStructureObject);
+						
 						/*System.out.println("Table name : " + tbl.get("name"));
 						System.out.println("Referenced Column : " + referencedCol);
 						System.out.println("Referencing Table : " + referencingTab);
