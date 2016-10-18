@@ -118,7 +118,7 @@ public class QueryGenerator implements Initializable {
 	@FXML
 	private Button textSearchDropButton;
 	/*********************************************/
-	
+
 	/*
 	 * Aggregation Tab
 	 */
@@ -136,13 +136,13 @@ public class QueryGenerator implements Initializable {
 	private ComboBox<String> aggregationSortColumnComboBox;
 	@FXML
 	private ComboBox<String> aggregationSortOrderComboBox;
-	
+
 	private final ToggleGroup aggregationRadioGroup = new ToggleGroup();
 	@FXML
 	private RadioButton aggregationCountRadioButton;
 	@FXML
 	private RadioButton aggregationSumRadioButton;
-	
+
 	@FXML
 	private TableView<QueryDocumentDTO> aggregationParametersTableView;
 	@FXML
@@ -153,10 +153,10 @@ public class QueryGenerator implements Initializable {
 	private TableColumn<QueryDocumentDTO, String> aggregationValuesTableColumn;
 	@FXML
 	private TableColumn<QueryDocumentDTO, QueryDocumentDTO> aggregationRemoveTableColumn;
-	
+
 	@FXML
 	private TextField aggregationValueTextField;
-	
+
 	@FXML
 	private Button aggregationAddButton;
 	@FXML
@@ -191,9 +191,11 @@ public class QueryGenerator implements Initializable {
 		for (int i = 0; i < mongoDatabases.size(); i++) {
 			queryDatabaseListComboBox.getItems().add(mongoDatabases.get(i));
 			textSearchDatabaseComboBox.getItems().add(mongoDatabases.get(i));
+			aggregationDatabaseComboBox.getItems().add(mongoDatabases.get(i));
 		}
 		queryDatabaseListComboBox.getSelectionModel().select(0);
 		textSearchDatabaseComboBox.getSelectionModel().select(0);
+		aggregationDatabaseComboBox.getSelectionModel().select(0);
 
 		// Set collection list according to a selected database when ui loaded
 		queryCollectionListComboBox.getItems()
@@ -210,6 +212,10 @@ public class QueryGenerator implements Initializable {
 		textSearchCollectionComboBox.getItems()
 				.addAll(getCollectionOf(textSearchDatabaseComboBox.getSelectionModel().getSelectedItem()));
 		textSearchCollectionComboBox.getSelectionModel().select(0);
+
+		aggregationColectionComboBox.getItems()
+				.addAll(getCollectionOf(aggregationDatabaseComboBox.getSelectionModel().getSelectedItem()));
+		aggregationColectionComboBox.getSelectionModel().select(0);
 
 		/**
 		 * databaseListComboBox changed event When changing
@@ -247,6 +253,22 @@ public class QueryGenerator implements Initializable {
 			}
 		});
 
+		// Aggregate database combo box change event
+		aggregationDatabaseComboBox.valueProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue ov, String t, String t1) {
+				counter = 0;
+				collectionFElementHolder = getCollectionOf(
+						aggregationDatabaseComboBox.getSelectionModel().getSelectedItem()).get(0).toString();
+				MongoDBResource.INSTANCE
+						.setDB(aggregationDatabaseComboBox.getSelectionModel().getSelectedItem().toString());
+				db = MongoDBResource.INSTANCE.getDatabase();
+				collectionDocument = db
+						.getCollection(aggregationColectionComboBox.getSelectionModel().getSelectedItem().toString());
+				selectedDocument = collectionDocument.find().into(new ArrayList<Document>());
+			}
+		});
+
 		// databaseListComboBox click action event
 		queryDatabaseListComboBox.setOnAction((event) -> {
 			queryCollectionListComboBox.getItems().clear();
@@ -263,6 +285,14 @@ public class QueryGenerator implements Initializable {
 			textSearchCollectionComboBox.getSelectionModel().select(0);
 		});
 
+		// aggregationDatabaseComboBox click action event
+		aggregationDatabaseComboBox.setOnAction((event) -> {
+			aggregationColectionComboBox.getItems().clear();
+			aggregationColectionComboBox.getItems()
+					.addAll(getCollectionOf(aggregationDatabaseComboBox.getSelectionModel().getSelectedItem()));
+			aggregationColectionComboBox.getSelectionModel().select(0);
+		});
+
 		// Fill queryFieldListComboBox and querySortColumnComboBox Combo boxe's
 		// when document combo box change
 		if (!selectedDocument.isEmpty()) {
@@ -270,12 +300,19 @@ public class QueryGenerator implements Initializable {
 			queryFieldListComboBox.getSelectionModel().select(0);
 			textSearchFieldComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 			textSearchFieldComboBox.getSelectionModel().select(0);
+			aggregationFieldsComboBox.getItems().addAll(getCommonColumns(selectedDocument));
+			aggregationFieldsComboBox.getSelectionModel().select(0);
 			querySortColumnComboBox.getItems().addAll(getCommonColumns(selectedDocument));
+			aggregationSortColumnComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 		}
 
 		// Fill querySortOrderComboBox Combo box when ui loaded
 		querySortOrderComboBox.getItems().addAll("Ascending", "Descending");
 		querySortOrderComboBox.getSelectionModel().select(0);
+
+		// Fill aggregationSortOrderComboBox Combo box when ui loaded
+		aggregationSortOrderComboBox.getItems().addAll("Ascending", "Descending");
+		aggregationSortOrderComboBox.getSelectionModel().select(0);
 
 		/**
 		 * collectionListComboBox's value changing event action
@@ -312,20 +349,43 @@ public class QueryGenerator implements Initializable {
 				if (!selectedDocument.isEmpty()) {
 					textSearchFieldComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 					textSearchFieldComboBox.getSelectionModel().select(0);
-					textSearchTextIndexLabel.setText(textSearchFieldComboBox.getSelectionModel().getSelectedItem().toString());
+					textSearchTextIndexLabel
+							.setText(textSearchFieldComboBox.getSelectionModel().getSelectedItem().toString());
 
 				}
 
 			}
 		});
-		
+
+		/**
+		 * aggregationColectionComboBox's value changing event action
+		 */
+		aggregationColectionComboBox.valueProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue comboBoxVal, String t, String t1) {
+				collectionDocument = (counter <= 0) ? db.getCollection(collectionFElementHolder)
+						: db.getCollection((String) comboBoxVal.getValue());
+				counter++;
+				selectedDocument = collectionDocument.find().into(new ArrayList<Document>());
+				aggregationFieldsComboBox.getItems().clear();
+				if (!selectedDocument.isEmpty()) {
+					aggregationFieldsComboBox.getItems().addAll(getCommonColumns(selectedDocument));
+					aggregationFieldsComboBox.getSelectionModel().select(0);
+					aggregationSortColumnComboBox.getItems()
+							.addAll(aggregationFieldsComboBox.getSelectionModel().getSelectedItem().toString());
+
+				}
+
+			}
+		});
+
 		textSearchFieldComboBox.valueProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue comboBoxVal, String t, String t1) {
 				textSearchTextIndexLabel.setText(String.valueOf(comboBoxVal.getValue()));
 			}
 		});
-		
+
 		// Set text search index to label when page loading
 		textSearchTextIndexLabel.setText(textSearchFieldComboBox.getSelectionModel().getSelectedItem().toString());
 
@@ -333,22 +393,30 @@ public class QueryGenerator implements Initializable {
 		dao = new SqliteDAO();
 		queryOperatorsComboBox.getItems().addAll(dao.getQueryOperators());
 
+		// Set operators to the aggregationOperatorsComboBox
+		dao = new SqliteDAO();
+		aggregationOperatorsComboBox.getItems().addAll(dao.getQueryOperators());
+
 		// addQueryParamButton button click event
 		addQueryParamButton.addEventHandler(ActionEvent.ACTION, event -> addQueryParam());
+		
+		// aggregationAddButton button click event
+				aggregationAddButton.addEventHandler(ActionEvent.ACTION, event -> addAggregationQueryParam());
 
 		// queryBuildButton button click event
 		queryBuildButton.addEventHandler(ActionEvent.ACTION, event -> queryBuild());
-		
+
 		// Generate text index button click event
 		textSearchCreateButton.addEventHandler(ActionEvent.ACTION, event -> textSearchBuild(event));
 		
+		// aggregationShowQueryButton button click event
+		aggregationShowQueryButton.addEventHandler(ActionEvent.ACTION, event -> aggregation());
+
 		// View text index button click event
 		textSearchViewButton.addEventHandler(ActionEvent.ACTION, event -> textSearchBuild(event));
-		
+
 		// Drop text index button click event
 		textSearchDropButton.addEventHandler(ActionEvent.ACTION, event -> textSearchBuild(event));
-
-
 
 		// Initialize queryParameters table view
 		fieldTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("Field"));
@@ -371,6 +439,30 @@ public class QueryGenerator implements Initializable {
 				deleteButton.setOnAction(event -> queryParams.remove(dtoItem));
 			}
 		});
+
+		// Initialize aggregationTableView table view
+		aggregationFieldTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("Field"));
+		aggregationOperatorsTableColumn
+				.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("Operators"));
+		aggregationValuesTableColumn.setCellValueFactory(new PropertyValueFactory<QueryDocumentDTO, String>("Values"));
+		aggregationRemoveTableColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+		aggregationRemoveTableColumn.setCellFactory(param -> new TableCell<QueryDocumentDTO, QueryDocumentDTO>() {
+			private final Button deleteButton = new Button("Remove");
+
+			@Override
+			protected void updateItem(QueryDocumentDTO dtoItem, boolean empty) {
+				super.updateItem(dtoItem, empty);
+
+				if (dtoItem == null) {
+					setGraphic(null);
+					return;
+				}
+
+				setGraphic(deleteButton);
+				deleteButton.setOnAction(event -> queryParams.remove(dtoItem));
+			}
+		});
+
 		/*
 		 * conditionTableColumn.setCellValueFactory(new
 		 * PropertyValueFactory<QueryDocumentDTO, String>("condition"));
@@ -403,6 +495,12 @@ public class QueryGenerator implements Initializable {
 				}
 			}
 		});
+
+		/* ****************** Aggregation tab ****************** */
+
+		// Set toggle group to radio button
+		aggregationCountRadioButton.setToggleGroup(aggregationRadioGroup);
+		aggregationSumRadioButton.setToggleGroup(aggregationRadioGroup);
 
 	}
 
@@ -438,8 +536,7 @@ public class QueryGenerator implements Initializable {
 					if (dao.getQueryOperatorsKeyword(dto.getOperators().toString()).equals("")) {
 						obj.add(new BasicDBObject(dto.getField(), dto.getValues()));
 					} else {
-						obj.add(new BasicDBObject(dto.getField(),
-								new BasicDBObject(operator, dto.getValues())));
+						obj.add(new BasicDBObject(dto.getField(), new BasicDBObject(operator, dto.getValues())));
 					}
 
 				}
@@ -522,42 +619,67 @@ public class QueryGenerator implements Initializable {
 	 */
 	private void textSearchBuild(ActionEvent event) {
 		try {
-			
+
 			Button btn = (Button) event.getSource();
-			
+
 			String dbName = textSearchDatabaseComboBox.getSelectionModel().getSelectedItem();
 			String collection = textSearchCollectionComboBox.getSelectionModel().getSelectedItem();
 			String[] keywordTextArray = (textSearchKeywordTextField.getText().toString()).split(",");
 			StringJoiner keywordText = new StringJoiner(" ");
 			String textIndex = textSearchTextIndexLabel.getText();
-			boolean isChecked = (textSearchOldVersionCheckBox.isSelected()) ? true : false ;
+			boolean isChecked = (textSearchOldVersionCheckBox.isSelected()) ? true : false;
 			outputQuery.clear();
-			
-			for(String a : keywordTextArray){
+
+			for (String a : keywordTextArray) {
 				keywordText.add(a.trim());
 			}
-			
-			if(btn.getId().equals("textSearchCreateButton")){
-				if(!isChecked){
-					outputQuery.appendText("Using below query you can create a text index on "+textIndex+" field : \n\t\t db."+collection+".ensureIndex({"+textIndex+":'text'})\n\n");
-					outputQuery.appendText("Using below query you can search for all the documents that have word '"+keywordText+"' in their text according to created text index : \n\t\t db."+collection+".find({$text:{$search:'"+keywordText+"'}}).pretty()");
+
+			if (btn.getId().equals("textSearchCreateButton")) {
+				if (!isChecked) {
+					outputQuery.appendText("Using below query you can create a text index on " + textIndex
+							+ " field : \n\t\t db." + collection + ".ensureIndex({" + textIndex + ":'text'})\n\n");
+					outputQuery.appendText("Using below query you can search for all the documents that have word '"
+							+ keywordText + "' in their text according to created text index : \n\t\t db." + collection
+							+ ".find({$text:{$search:'" + keywordText + "'}}).pretty()");
 				} else {
-					outputQuery.appendText("Initially Text Search was an experimental feature but starting from version 2.6, the configuration is enabled by default. But if you are using previous version of MongoDB, you have to enable text search with following code: \n\t\t"
-							+ "db.a	dminCommand({setParameter:true,textSearchEnabled:true}) \n\n");
-					outputQuery.appendText("Using below query you can create a text index on "+textIndex+" field : \n\t\t db."+collection+".ensureIndex({"+textIndex+":'text'})\n\n");
-					outputQuery.appendText("Using below query you can search for all the documents that have word '"+keywordText+"' in their text according to created text index : \n\t\t db."+collection+".runCommand({$text:{$search:'"+keywordText+"'}})");
+					outputQuery.appendText(
+							"Initially Text Search was an experimental feature but starting from version 2.6, the configuration is enabled by default. But if you are using previous version of MongoDB, you have to enable text search with following code: \n\t\t"
+									+ "db.a	dminCommand({setParameter:true,textSearchEnabled:true}) \n\n");
+					outputQuery.appendText("Using below query you can create a text index on " + textIndex
+							+ " field : \n\t\t db." + collection + ".ensureIndex({" + textIndex + ":'text'})\n\n");
+					outputQuery.appendText("Using below query you can search for all the documents that have word '"
+							+ keywordText + "' in their text according to created text index : \n\t\t db." + collection
+							+ ".runCommand({$text:{$search:'" + keywordText + "'}})");
 				}
-			} else if (btn.getId().equals("textSearchViewButton")){
-				outputQuery.appendText("db."+collection+".getIndexes()");
+			} else if (btn.getId().equals("textSearchViewButton")) {
+				outputQuery.appendText("db." + collection + ".getIndexes()");
 			} else {
-				outputQuery.appendText("db."+collection+".dropIndex('"+textIndex+"_text')");
+				outputQuery.appendText("db." + collection + ".dropIndex('" + textIndex + "_text')");
 			}
 
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
+	}
+	
+	private void aggregation() {
+		try {
+			String dbName = aggregationDatabaseComboBox.getSelectionModel().getSelectedItem();
+			String collection = aggregationColectionComboBox.getSelectionModel().getSelectedItem();
+			ObservableList<QueryDocumentDTO> param = (ObservableList<QueryDocumentDTO>) aggregationParametersTableView
+					.getItems();
+			
+			outputQuery.appendText("db.employee.aggregate([\n"
+					+ "\t{\n"
+					+ "\t\t $group: {\n"
+					+ "\t\t\t count: {$sum: \"employee\"}\n"
+					+ "\t}\n"
+					+ "\t}\n"
+					+ "])");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -678,6 +800,19 @@ public class QueryGenerator implements Initializable {
 			dto.setValues(queryValuesTextField.getText());
 			queryParams.add(dto);
 			queryParametersTableView.setItems(queryParams);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void addAggregationQueryParam() {
+		try {
+			QueryDocumentDTO dto = new QueryDocumentDTO();
+			dto.setField(aggregationFieldsComboBox.getSelectionModel().getSelectedItem());
+			dto.setOperators(aggregationOperatorsComboBox.getSelectionModel().getSelectedItem());
+			dto.setValues(aggregationValueTextField.getText());
+			queryParams.add(dto);
+			aggregationParametersTableView.setItems(queryParams);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

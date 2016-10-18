@@ -18,11 +18,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.migdb.migdbclient.config.FilePath;
+import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.TreeviewSize;
 import org.migdb.migdbclient.controllers.mapping.manytomany.ManyToMany;
 import org.migdb.migdbclient.controllers.mapping.onetomany.OneToManyMapper;
 import org.migdb.migdbclient.controllers.mapping.onetoone.OneToOneMap;
 import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
+import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.models.modificationevaluator.TableReference;
 import org.migdb.migdbclient.models.modificationevaluator.ForeignKeyReference;
 import org.migdb.migdbclient.resources.CenterLayout;
@@ -32,6 +34,7 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -108,10 +111,18 @@ public class ModificationEvaluator {
 				many.identifyM2M();
 				
 				MongoWriter mongoWriter = new MongoWriter();
-				mongoWriter.write();
+	    		mongoWriter.write();
 				
-				ConnectionManagerController controller = new ConnectionManagerController();
-				controller.setSideBarDatabases();
+				 /*try {
+			    		root = CenterLayout.INSTANCE.getRootContainer();
+			    		FXMLLoader loader = new FXMLLoader();
+			    		loader.setLocation(MainApp.class.getResource(FxmlPath.COLLECTIONSTRUCTURE.getPath()));
+			    		AnchorPane collectionStructure = loader.load();
+			    		root.getChildren().clear();
+			    		root.getChildren().add(collectionStructure);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}*/
 			}
 		});
 
