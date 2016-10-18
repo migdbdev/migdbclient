@@ -72,13 +72,11 @@ public class MySQLParser {
 					jo.put(JsonConstants.COLUMNCOUNT.getJsonContant(), colCount);
 					jo.put(JsonConstants.PRIMARYKEY.getJsonContant(), dao.getPrimaryKey(host, port, database, username, password, dtoTable.getTableName().toString()));
 					
-					JSONArray dataTypeArray = new JSONArray();
 					JSONObject dataTypeObject = new JSONObject();
 					dataTypeObject.put("STRING_COUNT", dataTypeObject( dtoTable.getTableName().toString()).get("STRING"));
 					dataTypeObject.put("NUMERIC_COUNT", dataTypeObject( dtoTable.getTableName().toString()).get("NUMERIC"));
 					dataTypeObject.put("DATE_COUNT", dataTypeObject( dtoTable.getTableName().toString()).get("DATE"));
-					dataTypeArray.add(dataTypeObject);
-					jo.put("dataTypeCount", dataTypeArray);
+					jo.put("dataTypeCount", dataTypeObject);
 					
 					/*jw.name("name");
 					jw.value(dtoTable.getTableName());*/
