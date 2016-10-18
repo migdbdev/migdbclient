@@ -410,7 +410,7 @@ public class QueryGenerator implements Initializable {
 		textSearchCreateButton.addEventHandler(ActionEvent.ACTION, event -> textSearchBuild(event));
 		
 		// aggregationShowQueryButton button click event
-		aggregationShowQueryButton.addEventHandler(ActionEvent.ACTION, event -> aggregation());
+		aggregationShowQueryButton.addEventHandler(ActionEvent.ACTION, event -> aggregationBuild());
 
 		// View text index button click event
 		textSearchViewButton.addEventHandler(ActionEvent.ACTION, event -> textSearchBuild(event));
@@ -663,7 +663,7 @@ public class QueryGenerator implements Initializable {
 
 	}
 	
-	private void aggregation() {
+	private void aggregationBuild() {
 		try {
 			String dbName = aggregationDatabaseComboBox.getSelectionModel().getSelectedItem();
 			String collection = aggregationColectionComboBox.getSelectionModel().getSelectedItem();
