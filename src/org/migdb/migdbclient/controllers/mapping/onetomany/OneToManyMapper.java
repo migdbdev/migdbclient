@@ -99,8 +99,7 @@ public class OneToManyMapper {
 				JSONArray referencedColumns = (JSONArray) referencedTab.get("columns");
 				JSONObject referencedCol = (JSONObject) referencedColumns.get(referencedColIndex);
 				String referencedColName = (String) referencedCol.get("colName");
-				JSONArray referencedDataTypesArr = (JSONArray) referencedTab.get("dataTypeCount");
-				JSONObject referencedDataType = (JSONObject) referencedDataTypesArr.get(0);
+				JSONObject referencedDataType = (JSONObject) referencedTab.get("dataTypeCount");
 				
 				JSONObject referencingTab = (JSONObject) tableList.get(referencingTblIndex);
 				String referencingTabName = (String) referencingTab.get("name");
@@ -108,8 +107,7 @@ public class OneToManyMapper {
 				JSONObject referencingCol = (JSONObject) referencingColumns.get(referencingColIndex);
 				String referencingColName = (String) referencingCol.get("colName");
 				Long referencingColCount = (Long) referencingTab.get("colCount");
-				JSONArray referencingDataTypesArr = (JSONArray) referencingTab.get("dataTypeCount");
-				JSONObject referencingDataType = (JSONObject) referencingDataTypesArr.get(0);
+				JSONObject referencingDataType = (JSONObject) referencingTab.get("dataTypeCount");
 				
 				JSONArray referencedArr = (JSONArray) referencingTab.get("referencedBy");
 				JSONArray referencingArr = (JSONArray) referencingTab.get("referencingFrom");
