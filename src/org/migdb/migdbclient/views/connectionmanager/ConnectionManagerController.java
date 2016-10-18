@@ -126,6 +126,7 @@ public class ConnectionManagerController implements Initializable {
 				mongoHost = dto.getMongoHostName();
 				mysqlPort = dto.getMysqlPort();
 				mongoPort = dto.getMongoPort();
+				mysqlpassword = dto.getPassword();
 				schema = dto.getSchemaName();
 
 				connectionAnchorpane.getChildren()
@@ -147,7 +148,7 @@ public class ConnectionManagerController implements Initializable {
 	}
 
 	public VBox displayConnectionInfo(Double x, Double y, String connName, String uName, String mysqlHost,
-			String mongoHost, int mysqlPort, int mongoPort, String schema) {
+			String mongoHost, int mysqlPort, int mongoPort, String password, String schema) {
 		VBox vbox = new VBox();
 		vbox.setPadding(new Insets(10));
 		vbox.setSpacing(8);
