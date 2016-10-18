@@ -110,7 +110,7 @@ public class ConnectionManagerController implements Initializable {
 	}
 
 	public void connectionInfoSet() {
-		String connName, uName, mysqlHost, mongoHost, schema = null;
+		String connName, uName, mysqlHost, mongoHost, mysqlpassword, schema = null;
 		int mysqlPort, mongoPort = 0;
 		Double x = 10.0;
 		Double y = 10.0;
@@ -129,7 +129,7 @@ public class ConnectionManagerController implements Initializable {
 				schema = dto.getSchemaName();
 
 				connectionAnchorpane.getChildren()
-						.add(displayConnectionInfo(x, y, connName, uName, mysqlHost, mongoHost, mysqlPort, mongoPort, schema));
+						.add(displayConnectionInfo(x, y, connName, uName, mysqlHost, mongoHost, mysqlPort, mongoPort, mysqlpassword, schema));
 
 				if (x > 800) {
 					x = 10.0;
