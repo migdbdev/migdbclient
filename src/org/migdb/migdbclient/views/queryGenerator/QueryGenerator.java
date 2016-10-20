@@ -46,8 +46,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
 
 /**
  * @author KANI
@@ -123,6 +125,9 @@ public class QueryGenerator implements Initializable {
 	 * Aggregation Tab
 	 */
 	@FXML
+	private Label aggregationHavingTypeLabel;
+	
+	@FXML
 	private ComboBox<String> aggregationDatabaseComboBox;
 	@FXML
 	private ComboBox<String> aggregationColectionComboBox;
@@ -136,6 +141,13 @@ public class QueryGenerator implements Initializable {
 	private ComboBox<String> aggregationSortColumnComboBox;
 	@FXML
 	private ComboBox<String> aggregationSortOrderComboBox;
+	@FXML
+	private ComboBox<String> aggregationSumFieldComboBox;
+	@FXML
+	private ComboBox<String> aggregationHavingOperatorComboBox;
+	
+	@FXML
+	private GridPane aggregationHavingGrid;
 
 	private final ToggleGroup aggregationRadioGroup = new ToggleGroup();
 	@FXML
@@ -156,6 +168,8 @@ public class QueryGenerator implements Initializable {
 
 	@FXML
 	private TextField aggregationValueTextField;
+	@FXML
+	private TextField aggregationHavingTextField;
 
 	@FXML
 	private Button aggregationAddButton;
@@ -185,6 +199,26 @@ public class QueryGenerator implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 
 		queryParametersTableView.setEditable(true);
+		aggregationSumFieldComboBox.setVisible(false);
+		aggregationHavingGrid.setVisible(false);
+		
+		// aggregationRadioGroup's radio button click event
+		aggregationRadioGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>(){
+		    public void changed(ObservableValue<? extends Toggle> ov,
+		        Toggle old_toggle, Toggle new_toggle) {
+		            if (aggregationRadioGroup.getSelectedToggle() != null) {
+		            	RadioButton aggregationType = (RadioButton) aggregationRadioGroup.getSelectedToggle();
+		            	aggregationHavingTypeLabel.setText(aggregationType.getText());
+		            	aggregationHavingGrid.setVisible(true);
+		            	if(aggregationType.getText().toLowerCase().toString().equals("count")){
+		            		aggregationSumFieldComboBox.setVisible(false);
+		            	} else {
+		            		aggregationSumFieldComboBox.setVisible(true);
+		            	}
+		            }
+		        }
+		});
+		
 
 		// Set database name list to the databaseListComboBox
 		ArrayList<String> mongoDatabases = (ArrayList<String>) getMongoDatabases();
@@ -302,6 +336,11 @@ public class QueryGenerator implements Initializable {
 			textSearchFieldComboBox.getSelectionModel().select(0);
 			aggregationFieldsComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 			aggregationFieldsComboBox.getSelectionModel().select(0);
+			aggregationGroupbyComboBox.getItems().add("null");
+			aggregationGroupbyComboBox.getItems().addAll(getCommonColumns(selectedDocument));
+			aggregationGroupbyComboBox.getSelectionModel().select(0);
+			aggregationSumFieldComboBox.getItems().addAll(getCommonColumns(selectedDocument));
+			aggregationSumFieldComboBox.getSelectionModel().select(0);
 			querySortColumnComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 			aggregationSortColumnComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 		}
@@ -368,9 +407,16 @@ public class QueryGenerator implements Initializable {
 				counter++;
 				selectedDocument = collectionDocument.find().into(new ArrayList<Document>());
 				aggregationFieldsComboBox.getItems().clear();
+				aggregationGroupbyComboBox.getItems().clear();
+				aggregationSumFieldComboBox.getItems().clear();
 				if (!selectedDocument.isEmpty()) {
 					aggregationFieldsComboBox.getItems().addAll(getCommonColumns(selectedDocument));
 					aggregationFieldsComboBox.getSelectionModel().select(0);
+					aggregationGroupbyComboBox.getItems().add("null");
+					aggregationGroupbyComboBox.getItems().addAll(getCommonColumns(selectedDocument));
+					aggregationGroupbyComboBox.getSelectionModel().select(0);
+					aggregationSumFieldComboBox.getItems().addAll(getCommonColumns(selectedDocument));
+					aggregationSumFieldComboBox.getSelectionModel().select(0);
 					aggregationSortColumnComboBox.getItems()
 							.addAll(aggregationFieldsComboBox.getSelectionModel().getSelectedItem().toString());
 
@@ -396,6 +442,7 @@ public class QueryGenerator implements Initializable {
 		// Set operators to the aggregationOperatorsComboBox
 		dao = new SqliteDAO();
 		aggregationOperatorsComboBox.getItems().addAll(dao.getQueryOperators());
+		aggregationHavingOperatorComboBox.getItems().addAll(dao.getQueryOperators());
 
 		// addQueryParamButton button click event
 		addQueryParamButton.addEventHandler(ActionEvent.ACTION, event -> addQueryParam());
@@ -663,20 +710,63 @@ public class QueryGenerator implements Initializable {
 
 	}
 	
+	/**
+	 * Method for building aggregation queries
+	 */
 	private void aggregationBuild() {
 		try {
 			String dbName = aggregationDatabaseComboBox.getSelectionModel().getSelectedItem();
 			String collection = aggregationColectionComboBox.getSelectionModel().getSelectedItem();
-			ObservableList<QueryDocumentDTO> param = (ObservableList<QueryDocumentDTO>) aggregationParametersTableView
+			ObservableList<QueryDocumentDTO> parameters = (ObservableList<QueryDocumentDTO>) aggregationParametersTableView
 					.getItems();
+			RadioButton aggregationType = (RadioButton) aggregationRadioGroup.getSelectedToggle();
+			String aggregationOption = (aggregationType.getText().toLowerCase().toString().equals("count")) ? "1" : '"'+"$"+aggregationSumFieldComboBox.getSelectionModel().getSelectedItem()+'"';
 			
-			outputQuery.appendText("db.employee.aggregate([\n"
-					+ "\t{\n"
-					+ "\t\t $group: {\n"
-					+ "\t\t\t count: {$sum: \"employee\"}\n"
-					+ "\t}\n"
-					+ "\t}\n"
-					+ "])");
+			outputQuery.clear();
+			outputQuery.appendText("db."+collection+".aggregate([");
+			outputQuery.appendText("\n\t");
+			if(parameters.size() > 0) {
+				for (QueryDocumentDTO dto : parameters) {
+					dao = new SqliteDAO();
+					String operator = dao.getQueryOperatorsKeyword(dto.getOperators().toString());
+
+					if (operator.equals("")) {
+						outputQuery.appendText("{$match: {"+dto.getField()+": "+dto.getValues()+"}},");
+					} else {
+						outputQuery.appendText("{$match: {"+dto.getField()+":{"+operator+":"+dto.getValues()+"}}},");
+					}
+				}
+				outputQuery.appendText("\n\t");
+			}
+			outputQuery.appendText("{ $group:{");
+			outputQuery.appendText("\n\t\t");
+			if(aggregationGroupbyComboBox.getSelectionModel().getSelectedItem().equals("null")){
+				outputQuery.appendText("_id:null,");
+			} else {
+				outputQuery.appendText("_id:'"+aggregationGroupbyComboBox.getSelectionModel().getSelectedItem().toString()+"',");
+			}
+			outputQuery.appendText("\n\t\t");
+			outputQuery.appendText(aggregationType.getText()+":{$sum:"+aggregationOption+"}");
+			outputQuery.appendText("\n\t  }");
+			outputQuery.appendText("\n\t");
+			outputQuery.appendText("}");
+			if((aggregationSortColumnComboBox.getSelectionModel().getSelectedItem()) != null){
+				outputQuery.appendText(",");
+				outputQuery.appendText("\n\t");
+				int sortOrder = (aggregationSortOrderComboBox.getSelectionModel().getSelectedItem().toLowerCase().toString().equals("ascending")) ? 1 : -1 ;
+				outputQuery.appendText("{$sort: {"+aggregationSortColumnComboBox.getSelectionModel().getSelectedItem().toString()+":"+sortOrder+"}}");
+			}
+			if(!aggregationHavingTextField.getText().isEmpty()){
+				String havingOperator = dao.getQueryOperatorsKeyword(aggregationHavingOperatorComboBox.getSelectionModel().getSelectedItem());
+				outputQuery.appendText(",");
+				outputQuery.appendText("\n\t");
+				if (havingOperator.equals("")) {
+					outputQuery.appendText("{$match:{"+aggregationType.getText()+":"+aggregationHavingTextField.getText()+"}}");
+				} else {
+					outputQuery.appendText("{$match:{"+aggregationType.getText()+":{"+havingOperator+":"+aggregationHavingTextField.getText()+"}}}");
+				}
+			}
+			outputQuery.appendText("\n])");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
