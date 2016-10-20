@@ -17,6 +17,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.migdb.migdbclient.config.DataTypes;
 import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.TreeviewSize;
@@ -177,10 +178,9 @@ public class ModificationEvaluator {
 
 		try {
 			
-			List<String> numberTypes = Arrays.asList("tinyint","smallint","mediumint","int","bigint","float"
-					,"double","decimal");
+			List<String> numberTypes = DataTypes.NUMBERTYPES.getTypes();
 			
-			List<String> dateTypes = Arrays.asList("date","datetime","timestamp","time","year");
+			List<String> dateTypes = DataTypes.DATETYPES.getTypes();
 
 			tableList = (JSONArray) jsonObject.get("tables");
 
@@ -489,11 +489,12 @@ public class ModificationEvaluator {
 				JSONArray referenceByList = (JSONArray) table.get("referencedBy");
 				JSONArray referenceFromList = (JSONArray) table.get("referencingFrom");
 				String primaryKey = (String) table.get("primaryKey");
+				JSONArray cols = (JSONArray) table.get("columns");
+				int colCount = cols.size();
+				JSONArray dataList = (JSONArray) table.get("data");
 
 				if (!removedCols.isEmpty()) {
-
-					JSONArray cols = (JSONArray) table.get("columns");
-					int colCount = cols.size();
+				
 					// loop though the removed java column o0bjects
 					for (String colKey : removedCols.keySet()) {
 						if (colKey.equals(name)) {
@@ -529,6 +530,9 @@ public class ModificationEvaluator {
 													String refByTbl = (String) ref.get("referencingTab");
 													// if referencing table is not removed, check for referencing column removal
 													if (!removedTbls.contains(refByTbl)) {
+														
+														/*System.out.println("if");*/
+														
 														String refByCol = (String) ref.get("referencingCol");
 														if (removedCols.keySet().contains(refByTbl)) {
 															for (String c : removedCols.keySet()) {
@@ -561,7 +565,13 @@ public class ModificationEvaluator {
 																refByIndex.add(l);
 															}
 														}
-													}
+													} /*else {
+														System.out.println("else");
+														if (!colIndex.contains(k)) {
+															colIndex.add(k);
+															removedColList.add(cols.get(k));
+														}
+													}*/
 												} else {
 													if (!colIndex.contains(k)) {
 														colIndex.add(k);
@@ -606,59 +616,31 @@ public class ModificationEvaluator {
 									if(!refFromIndex.isEmpty()) {
 										removedRefFromIndex.put(i, refFromIndex);
 									}
+									
+									//remove data associated with removed columns
+									JSONArray removedDataList = new JSONArray();
+									for(int k=0; k<dataList.size(); k++){
+										JSONObject data = (JSONObject) dataList.get(k);
+										for(int l=0; l<removedColList.size(); l++) {
+											JSONObject removedCol = (JSONObject) removedColList.get(l);
+											String colName = (String) removedCol.get("colName");
+											JSONObject removedData = new JSONObject();
+											removedData.put(colName, data.get(colName));
+											removedDataList.add(removedData);
+										}
+									}
 
 									putJsonArray(name,removedColList,"columns");
 									putJsonArray(name,removedRefByList,"referencedBy");
 									putJsonArray(name,removedRefFromList,"referencingFrom");
+									putJsonArray(name,removedDataList,"data");
 
 								}
 							}
 						}
 					}
 
-					if ((!referenceByList.isEmpty()) && (!removedTbls.contains(name)) && (!removedCols.containsKey(i)) ) {
-						ArrayList<Integer> refByIndex = new ArrayList();
-						for (int k = 0; k < colCount; k++) {
-							JSONObject column = (JSONObject) cols.get(k);
-							String colName = (String) column.get("colName");
-							JSONArray removedRefByList = new JSONArray();
-							for (int l = 0; l < referenceByList.size(); l++) {
-								JSONObject ref = (JSONObject) referenceByList.get(l);
-								String refCol = (String) ref.get("referencedCol");
-								if (refCol.equals(colName)) {
-									String refByTbl = (String) ref.get("referencingTab");
-									// if referencing table is not removed, check for referencing column removal
-									if (!removedTbls.contains(refByTbl)) {
-										String refByCol = (String) ref.get("referencingCol");
-										if (removedCols.keySet().contains(refByTbl)) {
-											for (String c : removedCols.keySet()) {
-												if (c.equals(refByTbl)) {
-													if (removedCols.get(c).contains(refByCol)) {
-														// add ref object
-														removedRefByList.add(referenceByList.get(l));
-														if(!removedRefByIndex.containsKey(i)) {
-															refByIndex.add(l);
-														} else {
-															if(!removedRefByIndex.get(i).contains(l)) {
-																removedRefByIndex.get(i).add(l);
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-							if (!removedRefByList.isEmpty()) {
-								if(!refByIndex.isEmpty()) {
-									removedRefByIndex.put(i, refByIndex);
-								}
-
-								putJsonArray(name,removedRefByList,"referencedBy");
-							}
-						}
-					} 
+		
 				}
 
 				if (removedTbls.contains(name)) {
@@ -671,17 +653,92 @@ public class ModificationEvaluator {
 							JSONObject ref = (JSONObject) referenceByList.get(k);
 							String refTbl = (String) ref.get("referencingTab");
 							if (!removedTbls.contains(refTbl)) {
-								referencingTbls.add(refTbl);
+								String refCol = (String) ref.get("referencedCol");
+								if (removedCols.keySet().contains(refTbl)) {
+									for (String c : removedCols.keySet()) {
+										if (c.equals(refTbl)) {
+											if (!removedCols.get(c).contains(refCol)) {
+												referencingTbls.add(refTbl);
+											} 	
+										}
+									}
+								} else {
+									referencingTbls.add(refTbl);
+								}
 							}
 						}
-						message = setMessage(message, name, "table", referencingTbls);
-						errorCount++;
+						
+						if(referencingTbls.size()>0){
+							message = setMessage(message, name, "table", referencingTbls);
+							errorCount++;
+						} else {
+							removedTblIndex.add(i);
+							deletedItems.add(table);
+						}
+						
 					}
 				}
+				
+				
+				if ((!referenceByList.isEmpty()) && (!removedTbls.contains(name)) && (!removedCols.containsKey(i)) ) {
+					ArrayList<Integer> refByIndex = new ArrayList();
+					for (int k = 0; k < colCount; k++) {
+						JSONObject column = (JSONObject) cols.get(k);
+						String colName = (String) column.get("colName");
+						JSONArray removedRefByList = new JSONArray();
+						for (int l = 0; l < referenceByList.size(); l++) {
+							JSONObject ref = (JSONObject) referenceByList.get(l);
+							String refCol = (String) ref.get("referencedCol");
+							if (refCol.equals(colName)) {
+								String refByTbl = (String) ref.get("referencingTab");
+								// if referencing table is not removed, check for referencing column removal
+								if (!removedTbls.contains(refByTbl)) {
+									String refByCol = (String) ref.get("referencingCol");
+									if (removedCols.keySet().contains(refByTbl)) {
+										for (String c : removedCols.keySet()) {
+											if (c.equals(refByTbl)) {
+												if (removedCols.get(c).contains(refByCol)) {
+													// add ref object
+													removedRefByList.add(referenceByList.get(l));
+													if(!removedRefByIndex.containsKey(i)) {
+														refByIndex.add(l);
+													} else {
+														if(!removedRefByIndex.get(i).contains(l)) {
+															removedRefByIndex.get(i).add(l);
+														}
+													}
+												}
+											}
+										}
+									}
+								} else {
+									removedRefByList.add(referenceByList.get(l));
+									if(!removedRefByIndex.containsKey(i)) {
+										refByIndex.add(l);
+									} else {
+										if(!removedRefByIndex.get(i).contains(l)) {
+											removedRefByIndex.get(i).add(l);
+										}
+									}
+								}
+							}
+						}
+						if (!removedRefByList.isEmpty()) {
+							if(!refByIndex.isEmpty()) {
+								removedRefByIndex.put(i, refByIndex);
+							}
+
+							putJsonArray(name,removedRefByList,"referencedBy");
+						}
+					}
+				} 
+				
 			}
 
 			JSONObject json = new JSONObject();
 			JSONObject delObject;
+			
+			
 			if (exist) {
 				delObject = (JSONObject) parser.parse(new FileReader(jsonFile));
 				JSONArray deletedList = (JSONArray) delObject.get("deletedItems");
@@ -697,25 +754,17 @@ public class ModificationEvaluator {
 				String resultingJson = json.toJSONString(delObject);
 				FileUtils.writeStringToFile(jsonFile, resultingJson);
 
-				boolean isFirst = true;
-				for (int tableIndex : removedTblIndex) {
-					if (isFirst) {
-						tableList.remove(tableIndex);
-						isFirst = false;
-					} else {
-						tableList.remove(--tableIndex);
-					}
-				}
-
 				for (int colKeyIndex : removedColIndex.keySet()) {
 					JSONObject table = (JSONObject) tableList.get(colKeyIndex);
+					JSONArray data = (JSONArray) table.get("data");
 					JSONArray cols = (JSONArray) table.get("columns");
 					Long colCount = (Long) table.get("colCount");
 					String primaryKey = (String) table.get("primaryKey");
 					boolean isFirstCol = true;
-					for (int colIndex : removedColIndex.get(colKeyIndex)) {
+					for (int colIndex : removedColIndex.get(colKeyIndex)) {					
 						JSONObject column = (JSONObject) cols.get(colIndex);
-						if (primaryKey.equals(column.get("colName"))) {
+						String colName = (String) column.get("colName");
+						if (primaryKey.equals(colName)) {
 							table.remove("primaryKey");
 						}
 						if(isFirstCol) {
@@ -725,6 +774,11 @@ public class ModificationEvaluator {
 							cols.remove(--colIndex);
 						}
 						colCount--;
+						
+						for(int k =0; k<data.size(); k++) {
+							JSONObject dataObj = (JSONObject) data.get(k);
+							dataObj.remove(colName);
+						}
 					}
 					table.remove("colCount");
 					table.put("colCount", colCount);
@@ -755,6 +809,16 @@ public class ModificationEvaluator {
 						} else {
 							refBy.remove(--refIndex);
 						}
+					}
+				}
+				
+				boolean isFirst = true;
+				for (int tableIndex : removedTblIndex) {
+					if (isFirst) {
+						tableList.remove(tableIndex);
+						isFirst = false;
+					} else {
+						tableList.remove(--tableIndex);
 					}
 				}
 
@@ -866,6 +930,7 @@ public class ModificationEvaluator {
 				JSONObject newObject = new JSONObject();
 				newObject.put("name", name);
 				newObject.put(keyName, object);
+				deletedItems.add(newObject);
 			}
 		}
 	}
