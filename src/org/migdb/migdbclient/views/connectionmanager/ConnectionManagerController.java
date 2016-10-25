@@ -182,6 +182,7 @@ public class ConnectionManagerController implements Initializable {
 						ConnectionParameters.SESSION.setMongoHostName(mongoHost);
 						ConnectionParameters.SESSION.setMysqlPort(mysqlPort);
 						ConnectionParameters.SESSION.setMongoPort(mongoPort);
+						ConnectionParameters.SESSION.setPassword(password);
 						ConnectionParameters.SESSION.setSchemaName(schema);
 
 						setSideBarDatabases();
