@@ -21,6 +21,7 @@ import org.migdb.migdbclient.models.dto.ColumnsDTO;
 import org.migdb.migdbclient.models.dto.ReferenceDTO;
 import org.migdb.migdbclient.models.dto.RelationshiCardinalityDTO;
 import org.migdb.migdbclient.models.dto.TableDTO;
+import org.migdb.migdbclient.resources.ChangeStructure;
 import org.migdb.migdbclient.resources.ConnectionParameters;
 import org.migdb.migdbclient.resources.Session;
 import org.w3c.dom.Document;
@@ -56,6 +57,9 @@ public class MySQLParser {
 			File jsonFiel = new File(FilePath.DOCUMENT.getPath() + FilePath.DBSTRUCTUREFILE.getPath());
 			JSONObject jsonObj = new JSONObject();
 			JSONArray jsonArr = new JSONArray();
+			
+			ChangeStructure structure = ChangeStructure.getInstance();
+			structure.nodeDataArray.clear();
 			/*jw = new JsonWriter(new FileWriter(FilePath.DOCUMENT.getPath() + FilePath.DBSTRUCTUREFILE.getPath()));
 			*//*jw.beginObject();
 
@@ -77,6 +81,12 @@ public class MySQLParser {
 					dataTypeObject.put("NUMERIC_COUNT", dataTypeObject( dtoTable.getTableName().toString()).get("NUMERIC"));
 					dataTypeObject.put("DATE_COUNT", dataTypeObject( dtoTable.getTableName().toString()).get("DATE"));
 					jo.put("dataTypeCount", dataTypeObject);
+					
+					// Collects tables for collection structure gui
+					JSONObject ChangeStructureObject = new JSONObject();
+					JSONArray attributesArr = new JSONArray();
+					
+					ChangeStructureObject.put("key", dtoTable.getTableName());
 					
 					/*jw.name("name");
 					jw.value(dtoTable.getTableName());*/
@@ -101,9 +111,20 @@ public class MySQLParser {
 							jw.value(dtoColumn.getDATA_TYPE());*/
 							/*jw.endObject();*/
 							columns.add(columnObj);
+							
+							JSONObject attrubuteObj = new JSONObject();
+							attrubuteObj.put("name", dtoColumn.getCOLUMN_NAME());
+							attrubuteObj.put("iskey", false);
+							attrubuteObj.put("figure", "Cube1");
+							attrubuteObj.put("color", "bluegrad");
+							
+							attributesArr.add(attrubuteObj);
 						}
 					}
 					jo.put(JsonConstants.COLUMNOBJECT.getJsonContant(), columns);
+					ChangeStructureObject.put("items", attributesArr);
+					
+					structure.nodeDataArray.add(ChangeStructureObject);
 					/*jw.endArray(); // End columns array
 					 * 
 */
