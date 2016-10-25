@@ -46,7 +46,7 @@ public class OneToOneMap {
 			//JSONArray values = new JSONArray();
 			
 			ChangeStructure structure = ChangeStructure.getInstance();
-			structure.nodeDataArray.clear();
+			//structure.nodeDataArray.clear();
 			structure.linkDataArray.clear();
 			structure.jsonFileName = null;
 

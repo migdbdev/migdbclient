@@ -29,6 +29,7 @@ import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.models.modificationevaluator.TableReference;
 import org.migdb.migdbclient.models.modificationevaluator.ForeignKeyReference;
 import org.migdb.migdbclient.resources.CenterLayout;
+import org.migdb.migdbclient.resources.ChangeStructure;
 import org.migdb.migdbclient.views.connectionmanager.ConnectionManagerController;
 
 import javafx.event.ActionEvent;
@@ -83,6 +84,8 @@ public class ModificationEvaluator {
 	Object obj;
 	JSONObject jsonObject;
 	File file = new File(FilePath.DOCUMENT.getPath() + FilePath.DBSTRUCTUREFILE.getPath());
+	
+	ChangeStructure structure = ChangeStructure.getInstance();
 
 	@FXML
 	private void initialize() {
@@ -816,15 +819,19 @@ public class ModificationEvaluator {
 				for (int tableIndex : removedTblIndex) {
 					if (isFirst) {
 						tableList.remove(tableIndex);
+						structure.nodeDataArray.remove(tableIndex);
 						isFirst = false;
 					} else {
-						tableList.remove(--tableIndex);
+						int index = --tableIndex;
+						tableList.remove(index);
+						structure.nodeDataArray.remove(index);
 					}
 				}
 
 				String updatedson = json.toJSONString(jsonObject);
 				FileUtils.writeStringToFile(file, updatedson);
 				
+				modificationEvalAnchor.getChildren().clear();
 				generateTreeView();
 				removedTbls.clear();
 				removedCols.clear();
