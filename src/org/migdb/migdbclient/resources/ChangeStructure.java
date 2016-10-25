@@ -7,6 +7,8 @@ public class ChangeStructure {
     public JSONArray nodeDataArray = new JSONArray();
     public JSONArray linkDataArray = new JSONArray();
     public String jsonFileName= "";
+    public int mappingCount;
+
 
     private static ChangeStructure instance = null;
     protected ChangeStructure() {
