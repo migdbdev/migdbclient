@@ -129,8 +129,8 @@ public class ConnectionManagerController implements Initializable {
 				mysqlpassword = dto.getPassword();
 				schema = dto.getSchemaName();
 
-				connectionAnchorpane.getChildren()
-						.add(displayConnectionInfo(x, y, connName, uName, mysqlHost, mongoHost, mysqlPort, mongoPort, mysqlpassword, schema));
+				connectionAnchorpane.getChildren().add(displayConnectionInfo(x, y, connName, uName, mysqlHost,
+						mongoHost, mysqlPort, mongoPort, mysqlpassword, schema));
 
 				if (x > 800) {
 					x = 10.0;
@@ -174,16 +174,27 @@ public class ConnectionManagerController implements Initializable {
 		// Mouse clicked event
 		vbox.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
-				if(mouseevent.getButton().equals(MouseButton.PRIMARY)){
-					ConnectionParameters.SESSION.setConnectionName(connName);
-					ConnectionParameters.SESSION.setUserName(uName);
-					ConnectionParameters.SESSION.setMysqlHostName(mysqlHost);
-					ConnectionParameters.SESSION.setMongoHostName(mongoHost);
-					ConnectionParameters.SESSION.setMysqlPort(mysqlPort);
-					ConnectionParameters.SESSION.setMongoPort(mongoPort);
-					ConnectionParameters.SESSION.setSchemaName(schema);
-					rootLayoutAnchorpane.getChildren().clear();
-					setSideBarDatabases();
+				try {
+					if (mouseevent.getButton().equals(MouseButton.PRIMARY)) {
+						ConnectionParameters.SESSION.setConnectionName(connName);
+						ConnectionParameters.SESSION.setUserName(uName);
+						ConnectionParameters.SESSION.setMysqlHostName(mysqlHost);
+						ConnectionParameters.SESSION.setMongoHostName(mongoHost);
+						ConnectionParameters.SESSION.setMysqlPort(mysqlPort);
+						ConnectionParameters.SESSION.setMongoPort(mongoPort);
+						ConnectionParameters.SESSION.setSchemaName(schema);
+
+						setSideBarDatabases();
+						
+						FXMLLoader loader = new FXMLLoader();
+						loader.setLocation(MainApp.class.getResource(FxmlPath.DBMIGRATOR.getPath()));
+						AnchorPane migratorAnchorPane = loader.load();
+						rootLayoutAnchorpane = CenterLayout.INSTANCE.getRootContainer();
+						rootLayoutAnchorpane.getChildren().clear();
+						rootLayoutAnchorpane.getChildren().add(migratorAnchorPane);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		});
@@ -273,23 +284,24 @@ public class ConnectionManagerController implements Initializable {
 				public void handle(ActionEvent e) {
 					try {
 						String dbName = mongoTree.getSelectionModel().getSelectedItem().getValue();
-						Confirmation confirmation = new Confirmation("Confirmation Dialog", "Drop database "+dbName, "Command : Drop "+dbName);
+						Confirmation confirmation = new Confirmation("Confirmation Dialog", "Drop database " + dbName,
+								"Command : Drop " + dbName);
 						Optional<ButtonType> result = confirmation.showAndWait();
-						if (result.get() == ButtonType.OK){
-						    System.out.println("Ok");
-						    MongoDBResource.INSTANCE.setDB(dbName);
-						    MongoDatabase database = MongoDBResource.INSTANCE.getDatabase();
-						    database.drop();
-						    setSideBarDatabases();
+						if (result.get() == ButtonType.OK) {
+							System.out.println("Ok");
+							MongoDBResource.INSTANCE.setDB(dbName);
+							MongoDatabase database = MongoDBResource.INSTANCE.getDatabase();
+							database.drop();
+							setSideBarDatabases();
 						} else {
-						    System.out.println("cancel");
+							System.out.println("cancel");
 						}
 					} catch (Exception e3) {
 						e3.printStackTrace();
 					}
 				}
 			});
-			mongoContext.getItems().addAll(select,drop);
+			mongoContext.getItems().addAll(select, drop);
 
 			mysqlTree.setContextMenu(mysqlContext);
 			mongoTree.setContextMenu(mongoContext);
