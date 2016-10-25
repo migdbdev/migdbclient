@@ -31,7 +31,7 @@ public class DumpGenerator {
 								+ path + "\"& /stop cmd.exe");
 			} else {
 				p = Runtime.getRuntime()
-						.exec("cmd.exe /c start /wait cmd.exe /k \"mysqldump -h "+host+" -u "+userName+" -p "+password+" --no-create-db --no-create-info --skip-triggers --xml "+database+" > "
+						.exec("cmd.exe /c start /wait cmd.exe /k \"mysqldump -h "+host+" -u "+userName+" -p"+password+" --no-create-db --no-create-info --skip-triggers --xml "+database+" > "
 								+ path + "\"& /stop cmd.exe");
 			}
 			
