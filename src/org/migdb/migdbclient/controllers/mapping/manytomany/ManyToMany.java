@@ -76,7 +76,7 @@ public class ManyToMany {
 				}
 
 				writeMappedJson();
-				saveChangeStructure();
+				//saveChangeStructure();
 			}
 		}
 
@@ -481,7 +481,7 @@ public class ManyToMany {
 	 * (referencedCollection.equals(collectionName)) { //
 	 * object.put("collectionName", referencedCollection); //
 	 * object.put("values", mappedDataArray); }
-	 * 
+	 *
 	 * } // mappedData.add(object); System.out.println("before" + mapped); //
 	 * mapped.put("collections", mappedData); System.out.println("after" +
 	 * mapped); FileWriter file; try { file = new
@@ -489,7 +489,7 @@ public class ManyToMany {
 	 * file.write(mapped.toJSONString()); file.flush(); file.close(); } catch
 	 * (IOException e) { // TODO Auto-generated catch block e.printStackTrace();
 	 * }
-	 * 
+	 *
 	 * }
 	 */
 
