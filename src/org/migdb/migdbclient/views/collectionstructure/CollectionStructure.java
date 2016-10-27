@@ -7,6 +7,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
@@ -15,6 +19,7 @@ import org.json.simple.JSONObject;
 import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.ChangeStructure;
+import org.migdb.migdbclient.utils.ToggleSwitch;
 import org.migdb.migdbclient.views.connectionmanager.ConnectionManagerController;
 
 import java.net.URL;
@@ -29,6 +34,9 @@ public class CollectionStructure implements Initializable {
     private WebEngine engine;
     @FXML
     private Button proceed;
+    
+    @FXML
+    private AnchorPane relationshipAnchorPane;
 
     private JSONObject jsonObject;
 
@@ -37,6 +45,7 @@ public class CollectionStructure implements Initializable {
         engine = webview.getEngine();
         loadStructure();
         proceed.addEventHandler(ActionEvent.ACTION, event -> procesContinuous());
+        loadToggleButtonDynamically();
 
     }
 
@@ -60,13 +69,25 @@ public class CollectionStructure implements Initializable {
     public void loadToggleButtonDynamically(){
     	ChangeStructure structure = ChangeStructure.getInstance();
     	int relationshipCount = structure.linkDataArray.size();
+    	int layoutXReferenceType = 0;
+    	int layoutXToggleButton = 20;
     	for(int i =0 ; i < relationshipCount; i++){
     		// REFERENCING =
     		//EMBEDDING =
-    		JSONObject relationship = (JSONObject) structure.nodeDataArray.get(i);
-    		relationship.get("from");  // child table
+    		JSONObject relationship = (JSONObject) structure.linkDataArray.get(i);
+    		/*relationship.get("from");  // child table
     		relationship.get("to");   // parent table
     		relationship.get("toText"); // mappingModel
+*/    		boolean referenceType = (relationship.get("toText").equals("EMBEDDING")) ? true : false ;
+    		Label referenceTypeLabel = new Label(relationship.get("to")+" to "+relationship.get("from"));
+    		ToggleSwitch toggleButton = new ToggleSwitch(referenceType, relationship.get("from")+"#"+relationship.get("to"), "Embed", "Reference");
+    		System.out.println(relationship.get("from"));
+    		referenceTypeLabel.setLayoutY(layoutXReferenceType);
+    		referenceTypeLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
+    		toggleButton.setLayoutY(layoutXToggleButton);
+    		layoutXReferenceType+=60;
+    		layoutXToggleButton+=60;
+    		relationshipAnchorPane.getChildren().addAll(referenceTypeLabel,toggleButton);
 
     	}
 

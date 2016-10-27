@@ -17,6 +17,7 @@
             <Label text="Products" />
             <ComboBox prefWidth="150.0" promptText="Select Mapping" />
             <Button fx:id="proceed" mnemonicParsing="false" text="Proceed" />
+            <AnchorPane fx:id="relationshipAnchorPane" prefHeight="485.0" prefWidth="159.0" />
          </children>
       </VBox>
    </children>
