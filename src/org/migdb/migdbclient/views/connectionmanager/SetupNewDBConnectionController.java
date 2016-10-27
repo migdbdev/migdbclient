@@ -23,6 +23,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -45,7 +46,7 @@ public class SetupNewDBConnectionController implements Initializable {
 	@FXML
 	private TextField mysqlUsernameTextField;
 	@FXML
-	private TextField mysqlPasswordTextField;
+	private PasswordField mysqlPasswordTextField;
 	@FXML
 	private TextField mongoHostTexField;
 	@FXML
