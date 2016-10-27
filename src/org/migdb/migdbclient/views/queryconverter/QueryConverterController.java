@@ -636,7 +636,7 @@ public class QueryConverterController {
 				if (rightTable.getAlias() != null) {
 					Alias a = rightTable.getAlias();
 					matchConditions = matchConditions.replace(a.getName(), rightTable.getName());
-				} 
+				}
 
 				for (int i = 0; i < selectItems.size(); i++) {
 					SelectItem item = selectItems.get(i);
@@ -729,8 +729,6 @@ public class QueryConverterController {
 			Expression leftExp = whereExp.getLeftExpression();
 			Expression rightExp = whereExp.getRightExpression();
 
-			// List<Map<String, Object>> andList = new ArrayList<Map<String,
-			// Object>>();
 			HashMap<String, Object> innerPairLeft = convertWhere(leftExp);
 			conditionPair.putAll(innerPairLeft);
 			HashMap<String, Object> innerPairRight = convertWhere(rightExp);
@@ -816,8 +814,15 @@ public class QueryConverterController {
 
 		else if (whereExpression instanceof LikeExpression) {
 			LikeExpression exp = (LikeExpression) whereExpression;
-			System.out.println(exp.getEscape());
+			String rightExpression = exp.getRightExpression().toString().replace("'", "");
 
+			if (!rightExpression.startsWith("%")) {
+				conditionPair.put(exp.getLeftExpression().toString(),
+						"/^" +rightExpression.replace("%", "/"));
+			} else {
+				conditionPair.put(exp.getLeftExpression().toString(),
+						rightExpression.replace("%", "/"));
+			}
 		}
 
 		return conditionPair;
