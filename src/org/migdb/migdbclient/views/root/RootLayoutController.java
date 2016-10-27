@@ -102,7 +102,7 @@ public class RootLayoutController implements Initializable {
 		modificationEvaluatorLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
 				
-				showModificationEvaluator();
+				showDbMigrator();
 			}
 		});
 
@@ -144,15 +144,15 @@ public class RootLayoutController implements Initializable {
 	 * Method for add modification evaluator layout to the root container anchor
 	 * pane
 	 */
-	public void showModificationEvaluator() {
+	public void showDbMigrator() {
 		try {
 			AnchorPane root;
 			root = CenterLayout.INSTANCE.getRootContainer();
 			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MainApp.class.getResource(FxmlPath.COLLECTIONSTRUCTURE.getPath()));
-			AnchorPane modificationEvaluator = loader.load();
+			loader.setLocation(MainApp.class.getResource(FxmlPath.DBMIGRATOR.getPath()));
+			AnchorPane dbMigrator = loader.load();
 			root.getChildren().clear();
-			root.getChildren().add(modificationEvaluator);
+			root.getChildren().add(dbMigrator);
 
 		} catch (Exception e) {
 			e.printStackTrace();

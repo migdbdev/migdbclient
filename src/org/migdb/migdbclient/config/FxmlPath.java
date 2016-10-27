@@ -15,7 +15,7 @@ public enum FxmlPath {
 	INTERNETCONNECTIVITY("/org/migdb/migdbclient/views/connectivity/InternetConnectivity.fxml"),
 	COLLECTIONSTRUCTURE("/org/migdb/migdbclient/views/collectionstructure/CollectionStructure.fxml"),
 	NEW_DOC("/org/migdb/migdbclient/views/mongodatamanager/NewDocument.fxml"),
-	DBMIGRATOR("/org/migdb/migdbclient/views/connectionmanager/DbMigrater.fxml"),
+	DBMIGRATOR("/org/migdb/migdbclient/views/dbmigrate/DbMigrater.fxml"),
 	MAINWINDOW("/org/migdb/migdbclient/views/connectionmanager/MainWindow.fxml");
 	
 	private String path;
