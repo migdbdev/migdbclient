@@ -11,6 +11,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.ImagePath;
+import org.migdb.migdbclient.config.NotificationConfig;
 import org.migdb.migdbclient.controllers.MigrationProcess;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
@@ -23,6 +24,7 @@ import org.migdb.migdbclient.resources.LayoutInstance;
 import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.resources.Session;
 import org.migdb.migdbclient.resources.widgets.Confirmation;
+import org.migdb.migdbclient.utils.MigDBNotifier;
 import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
 import com.mongodb.MongoClient;
@@ -187,6 +189,7 @@ public class ConnectionManagerController implements Initializable {
 
 						setSideBarDatabases();
 						
+						// Load main stage after instance make active connection
 						FXMLLoader loader = new FXMLLoader();
 						loader.setLocation(MainApp.class.getResource(FxmlPath.DBMIGRATOR.getPath()));
 						AnchorPane migratorAnchorPane = loader.load();
@@ -315,7 +318,13 @@ public class ConnectionManagerController implements Initializable {
 			sidebar.getChildren().add(sidebarVbox);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			String title = "Attention";
+			String message = "It seems to be error. Please check your connection \n info again!";
+			String notificationType = NotificationConfig.SHOWERROR.getInfo();
+			int showTime = 6;
+			
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+			notification.createDefinedNotification();
 		}
 
 	}
