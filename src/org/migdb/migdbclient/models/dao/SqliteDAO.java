@@ -25,30 +25,27 @@ public class SqliteDAO {
 	}
 
 	/**
-	 * Create table called connections if not exists
+	 * Create table called CONNECTIONS and QUERY_OPERATORS if not exists
 	 */
 	public void createTable() {
 		Connection dbConn = null;
 
-		String query = "CREATE TABLE IF NOT EXISTS `CONNECTIONS` (`ConnectionName` TEXT,`mysqlHostName` TEXT,`mongoHostName` TEXT,`mysqlPort` INTEGER, `mongoPort` INTEGER,`UserName` TEXT,`Password` TEXT,`SchemaName` TEXT,PRIMARY KEY(ConnectionName));";
-
+		String queryConnection = "CREATE TABLE IF NOT EXISTS `CONNECTIONS` (`ConnectionName` TEXT,`mysqlHostName` TEXT,`mongoHostName` TEXT,`mysqlPort` INTEGER, `mongoPort` INTEGER,`UserName` TEXT,`Password` TEXT,`SchemaName` TEXT,PRIMARY KEY(ConnectionName));";
+		String queryOperators = "CREATE TABLE IF NOT EXISTS `QUERY_OPERATORS` ( `id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `Operation`	TEXT NOT NULL, `Symbol`	TEXT NOT NULL, `Keyword` TEXT );";
+		String[] queries = new String[]{queryConnection,queryOperators};
+		dbConn = dbConnManager.getConnection();
+		
 		try {
-			dbConn = dbConnManager.getConnection();
-			PreparedStatement ps = dbConn.prepareStatement(query);
-			ps.executeUpdate();
+			for(String sql : queries){
+				PreparedStatement ps = dbConn.prepareStatement(sql);
+				ps.executeUpdate();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			dbConnManager.closeConnection(dbConn);
 		}
 	}
-	
-	// Query operators table designing code
-	/*CREATE TABLE `QUERY_OPERATORS` (
-			`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-			`Operation`	TEXT NOT NULL,
-			`Symbol`	TEXT NOT NULL
-		);*/
 
 	/**
 	 * Insert connection informations into database
@@ -81,6 +78,29 @@ public class SqliteDAO {
 		}
 
 		return result;
+	}
+	
+	/**
+	 * Insert Operators into QUERY_OPERATORS table
+	 */
+	public void insertOperators() {
+		Connection dbConn = null;
+		try {
+			dbConn = dbConnManager.getConnection();
+			String query = "INSERT INTO QUERY_OPERATORS(id,Operation, Symbol, Keyword) VALUES"
+					+ "(1,'Equality','=',''),"
+					+ "(2,'Less Than','<','$lt'),"
+					+ "(3,'Less Than Equals','<=','$lte'),"
+					+ "(4,'Greater Than','>','$gt'),"
+					+ "(5,'Greater Than Equals','>=','$gte'),"
+					+ "(6,'Not Equals','!=','$ne');";
+			PreparedStatement ps = dbConn.prepareStatement(query);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dbConnManager.closeConnection(dbConn);
+		}
 	}
 
 	/**
@@ -132,6 +152,14 @@ public class SqliteDAO {
 		}
 	}
 	
+	/**
+	 * Insert relationship types into REFERENCEDLIST table
+	 * @param tablesName
+	 * @param columnName
+	 * @param referencedTableName
+	 * @param referencedColumnName
+	 * @param relationshipType
+	 */
 	public void insertRelationshipTypes(String tablesName, String columnName, String referencedTableName, String referencedColumnName, String relationshipType){
 		boolean result = false;
 		Connection dbConn = null;
@@ -152,6 +180,9 @@ public class SqliteDAO {
 		}
 	}
 	
+	/**
+	 * Drop relationship type from REFERENCEDLIST table
+	 */
 	public void dropRelationshipTypes(){
 		Connection dbConn = null;
 		try {
@@ -166,6 +197,10 @@ public class SqliteDAO {
 		}
 	}
 	
+	/**
+	 * View REFERENCEDLIST details
+	 * @return
+	 */
 	public ArrayList<RelationshiCardinalityDTO> getReferencedList() {
 		ArrayList<RelationshiCardinalityDTO> references = null;
 		Connection dbConn = null;
@@ -192,6 +227,10 @@ public class SqliteDAO {
 		return references;
 	}
 	
+	/**
+	 * Get query operators details
+	 * @return
+	 */
 	public ObservableList<String> getQueryOperators(){
 		ObservableList<String> operators = FXCollections.observableArrayList();
 		Connection dbConn = null;
@@ -212,6 +251,11 @@ public class SqliteDAO {
 		
 	}
 	
+	/**
+	 * Get Keyword in query operator according to symbol name
+	 * @param keyword
+	 * @return
+	 */
 	public String getQueryOperatorsKeyword(String keyword){
 		String keywords = null;
 		Connection dbConn = null;
@@ -232,6 +276,11 @@ public class SqliteDAO {
 		
 	}
 	
+	/**
+	 * Check whether mongo fatabase path is exists
+	 * @param type
+	 * @return
+	 */
 	public boolean isPathExist(String type){
 		boolean isExist = false;
 		Connection dbConn = null;
@@ -250,6 +299,12 @@ public class SqliteDAO {
 		return isExist;
 	}
 	
+	/**
+	 * Insert mongo database path
+	 * @param dbPath
+	 * @param isDefault
+	 * @param dbType
+	 */
 	public void insertMongoDbPath(String dbPath, int isDefault, String dbType){
 		Connection dbConn = null;
 		try {
