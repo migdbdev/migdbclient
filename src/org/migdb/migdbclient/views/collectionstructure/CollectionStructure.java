@@ -9,6 +9,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
 import org.migdb.migdbclient.main.MainApp;
@@ -34,7 +36,6 @@ public class CollectionStructure implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         engine = webview.getEngine();
         loadStructure();
-
         proceed.addEventHandler(ActionEvent.ACTION, event -> procesContinuous());
 
     }
@@ -44,7 +45,6 @@ public class CollectionStructure implements Initializable {
     	try {
     		MongoWriter mongoWriter = new MongoWriter();
     		mongoWriter.write();
-
     		ConnectionManagerController controller = new ConnectionManagerController();
     		controller.setSideBarDatabases();
 		} catch (Exception e) {
@@ -55,6 +55,21 @@ public class CollectionStructure implements Initializable {
     public void loadCollectionChangeList(){
       //  jsonObject = ServiceAccessor.getCollectionStructureJSON();
       //  System.out.println("success");
+    }
+
+    public void loadToggleButtonDynamically(){
+    	ChangeStructure structure = ChangeStructure.getInstance();
+    	int relationshipCount = structure.linkDataArray.size();
+    	for(int i =0 ; i < relationshipCount; i++){
+    		// REFERENCING =
+    		//EMBEDDING =
+    		JSONObject relationship = (JSONObject) structure.nodeDataArray.get(i);
+    		relationship.get("from");  // child table
+    		relationship.get("to");   // parent table
+    		relationship.get("toText"); // mappingModel
+
+    	}
+
     }
 
     public void loadStructure(){
