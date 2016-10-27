@@ -1,24 +1,30 @@
 package org.migdb.migdbclient.views.mongodatamanager;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 import org.bson.Document;
+import org.migdb.migdbclient.config.FxmlPath;
+import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.models.mongodatamanager.ArrayContainer;
 import org.migdb.migdbclient.models.mongodatamanager.EmbededObjectContainer;
 import org.migdb.migdbclient.models.mongodatamanager.JsonGeneratable;
 import org.migdb.migdbclient.models.mongodatamanager.KeyValueContainer;
 import org.migdb.migdbclient.models.mongodatamanager.ObjectContainer;
+import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.MongoDBResource;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -29,6 +35,8 @@ public class NewDocument implements Initializable{
 	private Button addArray;
 	@FXML
 	private Button addObject;
+	@FXML
+	private Button backButton;
 	
 	@FXML private VBox container;
 	
@@ -117,11 +125,32 @@ public class NewDocument implements Initializable{
 		System.out.println(objectContainer.generateJson());
 		MongoDatabase db = MongoDBResource.INSTANCE.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(collectionName);
-		collection.insertOne(Document.parse(objectContainer.generateJson()));;
+		collection.insertOne(Document.parse(objectContainer.generateJson()));
+		showCollectionManger();
 	}
 	
 	public void setNewDocument(String name){
 		this.collectionName = name;
+	}
+	
+	@FXML
+	public void showCollectionManger() {
+		AnchorPane root;
+		root = CenterLayout.INSTANCE.getRootContainer();
+		FXMLLoader loader = new FXMLLoader();
+		loader.setLocation(MainApp.class.getResource(FxmlPath.COLLECTIONMANAGER.getPath()));
+		AnchorPane mongoCollectionManagerAncPane;
+		try {
+			mongoCollectionManagerAncPane = loader.load();
+			CollectionManager collectionManager = (CollectionManager) loader.getController();
+			collectionManager.setCollection(collectionName);
+			root.getChildren().clear();
+			root.getChildren().add(mongoCollectionManagerAncPane);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 }
