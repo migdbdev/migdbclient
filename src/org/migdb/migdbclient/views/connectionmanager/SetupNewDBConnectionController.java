@@ -5,15 +5,20 @@ import java.sql.Connection;
 import java.util.ResourceBundle;
 
 import org.migdb.migdbclient.config.ConnectionManager;
+import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.NotificationConfig;
 import org.migdb.migdbclient.controllers.dbconnector.MySQLDbConnManager;
+import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
+import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.utils.MigDBNotifier;
+import org.migdb.migdbclient.views.root.RootLayoutController;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -190,6 +195,10 @@ public class SetupNewDBConnectionController implements Initializable {
 				String message = "Successfully created!";
 				String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
 				int showTime = 6;
+				
+				// Load connection manager fxml after successfully insert connection info
+				RootLayoutController rootCtrl = new RootLayoutController();
+				rootCtrl.showConnectionManager();
 				
 				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 				notification.createDefinedNotification();

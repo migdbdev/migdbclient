@@ -60,7 +60,7 @@ public class ConnectionManagerController implements Initializable {
 	@FXML
 	private AnchorPane rootLayoutAnchorpane;
 	@FXML
-	private AnchorPane connectionAnchorpane;
+	private AnchorPane connectionAnchorpane = new AnchorPane();
 	@FXML
 	private Label addConnectionLabel;
 
