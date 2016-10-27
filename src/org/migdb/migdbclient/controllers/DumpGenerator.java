@@ -27,11 +27,11 @@ public class DumpGenerator {
 
 			if(password.isEmpty()) {
 				p = Runtime.getRuntime()
-						.exec("start cmd.exe /c start /wait cmd.exe /k \"mysqldump -h "+host+" -u "+userName+" --no-create-db --no-create-info --skip-triggers --xml "+database+" > "
+						.exec("cmd.exe /c /wait cmd.exe /k \"mysqldump -h "+host+" -u "+userName+" --no-create-db --no-create-info --skip-triggers --xml "+database+" > "
 								+ path + "\"& /stop cmd.exe exit");
 			} else {
 				p = Runtime.getRuntime()
-						.exec("start cmd.exe /c start /wait cmd.exe /k \"mysqldump -h "+host+" -u "+userName+" -p"+password+" --no-create-db --no-create-info --skip-triggers --xml "+database+" > "
+						.exec("cmd.exe /c /wait cmd.exe /k \"mysqldump -h "+host+" -u "+userName+" -p"+password+" --no-create-db --no-create-info --skip-triggers --xml "+database+" > "
 								+ path + "\"& /stop cmd.exe exit");
 			}
 

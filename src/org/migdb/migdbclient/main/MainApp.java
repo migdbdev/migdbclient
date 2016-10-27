@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import org.migdb.migdbclient.config.Configurations;
 import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.ImagePath;
@@ -116,13 +117,12 @@ public class MainApp extends Application {
 	public void showMainStage() {
 		try {
 			/*runner.start();*/
-
-			// Create application folder in a user's document
-			File migDB = new File(FilePath.DOCUMENT.getPath());
-			if (!migDB.exists()) {
-				migDB.mkdir();
-			}
-
+			
+			Configurations config = new Configurations();
+			config.createAppFolder();
+			config.createConnectionTable();
+			config.insertOperators();
+			
 			primaryStage = new Stage(StageStyle.DECORATED);
 			primaryStage.setTitle("MigDB");
 			primaryStage.getIcons().add(new Image(ImagePath.FAVICON.getPath()));
