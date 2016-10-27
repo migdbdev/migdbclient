@@ -4,8 +4,8 @@ import java.net.URL;
 import java.sql.Connection;
 import java.util.ResourceBundle;
 
-import org.controlsfx.control.Notifications;
 import org.migdb.migdbclient.config.ConnectionManager;
+import org.migdb.migdbclient.config.NotificationConfig;
 import org.migdb.migdbclient.controllers.dbconnector.MySQLDbConnManager;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
@@ -22,8 +22,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import tray.animations.AnimationType;
-import tray.notification.NotificationType;
 
 public class SetupNewDBConnectionController implements Initializable {
 
@@ -189,20 +187,18 @@ public class SetupNewDBConnectionController implements Initializable {
 			
 			String title = "Attention";
 			String message = "Successfully created!";
-			AnimationType animationType = AnimationType.FADE;
-			NotificationType notificationType = NotificationType.SUCCESS;
+			String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
 			int showTime = 6;
 			
-			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 			notification.createDefinedNotification();
 		} else {
 			String title = "Attention";
 			String message = "It seems to be error. Please check again!";
-			AnimationType animationType = AnimationType.FADE;
-			NotificationType notificationType = NotificationType.ERROR;
+			String notificationType = NotificationConfig.SHOWERROR.getInfo();
 			int showTime = 6;
 			
-			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 			notification.createDefinedNotification();
 		}
 	}
@@ -222,21 +218,19 @@ public class SetupNewDBConnectionController implements Initializable {
 			String title = "MySQL Connection Status";
 			String message = "A successful MySQL connection was made with" + "\n"
 							+ " the parameters defined for this connection!";
-			AnimationType animationType = AnimationType.FADE;
-			NotificationType notificationType = NotificationType.SUCCESS;
+			String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
 			int showTime = 6;
 			
-			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 			notification.createDefinedNotification();
 			
 		} else {
 			String title = "MySQL Connection Status";
 			String message = "Can't connect to MySQL server with defined parameters!";
-			AnimationType animationType = AnimationType.FADE;
-			NotificationType notificationType = NotificationType.ERROR;
+			String notificationType = NotificationConfig.SHOWERROR.getInfo();
 			int showTime = 6;
 			
-			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 			notification.createDefinedNotification();
 		}
 		dao.closeConnection(dbConn);
