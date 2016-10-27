@@ -1,7 +1,6 @@
 package org.migdb.migdbclient.views.queryconverter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.joda.time.DateTime;
 import org.migdb.migdbclient.config.DataTypes;
 
 import javafx.fxml.FXML;
@@ -19,8 +17,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.util.Pair;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.expression.AllComparisonExpression;
-import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -34,7 +30,6 @@ import net.sf.jsqlparser.expression.operators.arithmetic.Subtraction;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
@@ -58,7 +53,6 @@ import net.sf.jsqlparser.statement.drop.Drop;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.Distinct;
-import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.OrderByElement;
@@ -540,9 +534,10 @@ public class QueryConverterController {
 		}
 		return mongoQuery;
 	}
-	
+
 	/**
 	 * Method to convert join queries
+	 * 
 	 * @param joins
 	 * @param plainSelect
 	 * @return
@@ -550,18 +545,39 @@ public class QueryConverterController {
 	private String convertJoin(List<Join> joins, PlainSelect plainSelect) {
 
 		String mongoQuery = "";
-		List<LinkedHashMap<String, Object>> lookupList = new ArrayList<LinkedHashMap<String, Object>>();
+
+		Expression whereExpression = plainSelect.getWhere();
+
+		HashMap<String, Object> conditions = convertWhere(whereExpression);
+
+		String matchConditions = conditions.toString();
+		Pattern ptrn = Pattern.compile("(\\{|\\s)[a-zA-Z_\\.]+\\=");
+		Matcher m = ptrn.matcher(matchConditions);
+		while (m.find()) {
+			String subString = (String) (m.group().subSequence(1, m.group().length() - 1));
+			matchConditions = matchConditions.replace(subString, "\"" + subString + "\"");
+		}
+
+		List<SelectItem> selectItems = plainSelect.getSelectItems();
+		HashMap<String, Object> cols = new HashMap<String, Object>();
+
+		String statement = "";
 
 		for (int k = 0; k < joins.size(); k++) {
-			Join join = joins.get(0);
+			Join join = joins.get(k);
 			Table leftTable = (Table) plainSelect.getFromItem();
 			Table rightTable = (Table) join.getRightItem();
 			LinkedHashMap<String, Object> lookupObj = new LinkedHashMap<String, Object>();
-			
-			String statement = "";
-			
-			if (join.isLeft()) {
-				
+
+			if (join.isLeft() || (join.isRight() && k == 0)) {
+
+				if (join.isRight()) {
+					rightTable = (Table) plainSelect.getFromItem();
+					leftTable = (Table) join.getRightItem();
+				}
+
+				mongoQuery = "db." + leftTable.getName() + ".aggregate([";
+
 				lookupObj.put("from", "\"" + rightTable.getName() + "\"");
 				Expression onExpression = join.getOnExpression();
 				Column leftCol = null;
@@ -569,6 +585,9 @@ public class QueryConverterController {
 				if (onExpression instanceof EqualsTo) {
 					EqualsTo eq = (EqualsTo) onExpression;
 					Expression leftExp = eq.getLeftExpression();
+					if (join.isRight()) {
+						leftExp = eq.getRightExpression();
+					}
 					if (leftExp instanceof Column) {
 						leftCol = (Column) leftExp;
 						if (leftTable.getAlias() == null && leftCol.getTable().getName().equals(leftTable.getName())) {
@@ -585,6 +604,9 @@ public class QueryConverterController {
 						}
 					}
 					Expression rightExp = eq.getRightExpression();
+					if (join.isRight()) {
+						rightExp = eq.getLeftExpression();
+					}
 					if (rightExp instanceof Column) {
 						rightCol = (Column) rightExp;
 						if (rightTable.getAlias() == null
@@ -603,93 +625,69 @@ public class QueryConverterController {
 					}
 				}
 				lookupObj.put("as", "\"" + rightTable.getName() + "\"");
-				
-				
-				lookupList.add(lookupObj);
 
-				Expression whereExpression = plainSelect.getWhere();
-				
-				HashMap<String, Object> conditions = convertWhere(whereExpression);
-				
-				String matchConditions = conditions.toString();
-				Pattern ptrn = Pattern.compile("(\\{|\\s)[a-zA-Z_\\.]+\\=");
-				Matcher m = ptrn.matcher(matchConditions);
-				while(m.find()) 
-				{
-					String subString = (String) (m.group().subSequence(1, m.group().length()-1));
-					System.out.println(subString);
-					matchConditions = matchConditions.replace(subString, "\""+subString+"\"");
-				}
-				
-				if(leftTable.getAlias() == null) {
-					String prefix = leftTable.getName()+".";
-					matchConditions = matchConditions.replace(prefix, "");				
+				if (leftTable.getAlias() == null) {
+					String prefix = leftTable.getName() + ".";
+					matchConditions = matchConditions.replace(prefix, "");
 				} else {
 					Alias a = leftTable.getAlias();
-					matchConditions = matchConditions.replace(a+".", "");
+					matchConditions = matchConditions.replace(a.getName() + ".", "");
 				}
-				
-				List<SelectItem> selectItems = plainSelect.getSelectItems();
-				HashMap<String, Object> cols = new HashMap<String, Object>();
-				HashMap<String, Object> c = new HashMap<String, Object>();
-				
-				for(int i=0; i<selectItems.size(); i++) {
+				if (rightTable.getAlias() != null) {
+					Alias a = rightTable.getAlias();
+					matchConditions = matchConditions.replace(a.getName(), rightTable.getName());
+				} 
+
+				for (int i = 0; i < selectItems.size(); i++) {
 					SelectItem item = selectItems.get(i);
 					if (item instanceof SelectExpressionItem) {
 						SelectExpressionItem expressionItem = (SelectExpressionItem) item;
 						Expression expression = expressionItem.getExpression();
-						if(expression instanceof Column) {
-							if(expression.toString().contains(rightTable.getName())) {
-								cols.put("\""+expression.toString()+"\"", 1);
-							} else {
-								Column column = (Column) expression;
-								cols.put("\""+column.getColumnName()+"\"", 1);
+						if (expression instanceof Column) {
+							Column column = (Column) expression;
+							if (column.getTable().getName().equals(rightTable.getName())) {
+								cols.put("\"" + expression.toString() + "\"", 1);
+							} else if (column.getTable().getName().equals(leftTable.getName())
+									|| (leftTable.getAlias() != null
+											&& leftTable.getAlias().getName().equals(column.getTable().getName()))) {
+								cols.put("\"" + column.getColumnName() + "\"", 1);
+							} else if (rightTable.getAlias() != null
+									&& rightTable.getAlias().getName().equals(column.getTable().getName())) {
+								String alias = rightTable.getAlias().getName();
+								cols.put("\"" + expression.toString().replace(alias, rightTable.getName()) + "\"", 1);
 							}
-							
 						}
 					}
 				}
-				
-				statement = "db."+leftTable.getName()+".aggregate([";
-				if(!conditions.isEmpty()) {
-					statement+= "\n\t{\n\t\t$match:\n\t\t\t"+
-				matchConditions.replace("=", ":").replace(",", ",\n\t\t\t")+"\n\t},";
+
+				if (k > 0) {
+					statement += ",";
 				}
-				statement+= "\n\t{\n\t\t$lookup:\n\t\t\t"+lookupObj.toString().replace("=", ":")
-						.replace(",", ",\n\t\t\t")+"\n\t},";
-				
-				statement+= "\n\t{ $unwind: \"$"+rightTable.getName()+"\" }";
+				statement += "\n\t{\n\t\t$lookup:" + lookupObj.toString().replace("=", ": ").replace(", ", ",\n\t\t\t")
+						.replace("{", " {\n\t\t\t").replace("}", "\n\t\t}") + "\n\t},";
 
-				if(!cols.isEmpty()) {
-					statement+= ",\n\t{\n\t\t$project:\n\t\t\t"+
-							cols.toString().replace("=", ":").replace(",", ",\n\t\t\t")+"\n\t}";
-				}
-
+				statement += "\n\t{ $unwind: \"$" + rightTable.getName() + "\" }";
 			}
-			
-			else if(join.isRight()) {
-				
-				
-				
-			}
-
-			
-			
-			mongoQuery = statement+"\n])";
-
-			
 		}
-		
-		
-		
-		
-		/*mongoQuery = "db." + plainSelect.getFromItem() + ".aggregate([\n\t{\n\t\t$lookup: \n\t\t\t{ \n\t\t\t\t"
-				+ "from: \"" + join.getRightItem() + "\",\n\t\t\t\t" + "localField: \""
-				+ leftCol.getColumnName() + "\",\n\t\t\t\t" + "foreignField: \"" + rightCol.getColumnName()
-				+ "\",\n\t\t\t\t" + "as: \"" + join.getRightItem() + "_docs\"," + "\n\t\t\t} \n\t} \n])";
-*/
+
+		if (!conditions.isEmpty()) {
+			matchConditions = matchConditions.substring(1, matchConditions.length() - 1).replace("{", "{ ").replace("}",
+					" }");
+			mongoQuery += "\n\t{\n\t\t$match: {\n\t\t\t" + matchConditions.replace("=", ": ").replace(", ", ",\n\t\t\t")
+					+ "\n\t\t}\n\t},";
+		}
+
+		mongoQuery += statement;
+
+		if (!cols.isEmpty()) {
+			mongoQuery += ",\n\t{\n\t\t$project:" + cols.toString().replace("=", ": ").replace(", ", ",\n\t\t\t")
+					.replace("{", " {\n\t\t\t").replace("}", "\n\t\t}") + "\n\t}";
+		}
+
+		mongoQuery += "\n])";
 
 		return mongoQuery;
+
 	}
 
 	/**
@@ -737,8 +735,6 @@ public class QueryConverterController {
 			conditionPair.putAll(innerPairLeft);
 			HashMap<String, Object> innerPairRight = convertWhere(rightExp);
 			conditionPair.putAll(innerPairRight);
-			
-			
 
 		}
 
@@ -749,14 +745,13 @@ public class QueryConverterController {
 			Expression rightExp = whereExp.getRightExpression();
 
 			List<Map<String, Object>> orList = new ArrayList<Map<String, Object>>();
-			
+
 			HashMap<String, Object> innerPairLeft = convertWhere(leftExp);
 			orList.add(innerPairLeft);
 			HashMap<String, Object> innerPairRight = convertWhere(rightExp);
 			orList.add(innerPairRight);
 
-
-			conditionPair.put("$or",orList);
+			conditionPair.put("$or", orList);
 		}
 
 		else if (whereExpression instanceof NotEqualsTo) {
@@ -827,7 +822,5 @@ public class QueryConverterController {
 
 		return conditionPair;
 	}
-
-
 
 }
