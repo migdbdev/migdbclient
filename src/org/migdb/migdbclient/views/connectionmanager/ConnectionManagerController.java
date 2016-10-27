@@ -191,11 +191,11 @@ public class ConnectionManagerController implements Initializable {
 						
 						// Load main stage after instance make active connection
 						FXMLLoader loader = new FXMLLoader();
-						loader.setLocation(MainApp.class.getResource(FxmlPath.DBMIGRATOR.getPath()));
-						AnchorPane migratorAnchorPane = loader.load();
+						loader.setLocation(MainApp.class.getResource(FxmlPath.MAINWINDOW.getPath()));
+						AnchorPane mainWindowAnchorPane = loader.load();
 						rootLayoutAnchorpane = CenterLayout.INSTANCE.getRootContainer();
 						rootLayoutAnchorpane.getChildren().clear();
-						rootLayoutAnchorpane.getChildren().add(migratorAnchorPane);
+						rootLayoutAnchorpane.getChildren().add(mainWindowAnchorPane);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

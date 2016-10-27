@@ -275,6 +275,24 @@
 
 /* ********************************************* */
 
+/* ********** Main Window Page style *********** */
+.mysql_connectivity {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/MySQL_Connectivity.jpg);
+}
+
+.mongo_connectivity {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Mongo_Connectivity.jpg);
+}
+
+.internet_connectivity {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Internet_Connectivity.jpg);
+}
+
+.NNetwork_connectivity {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/NNetwork_Connectivity.jpg);
+}
+/* ********************************************* */
+
 .label_Connections {
 	-fx-font-size: 20.0pt;
     -fx-font-family: "Segoe UI Semibold";
