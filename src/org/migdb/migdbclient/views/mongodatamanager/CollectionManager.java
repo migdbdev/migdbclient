@@ -59,16 +59,16 @@ public class CollectionManager implements Initializable {
 	@FXML
 	private Button insertNewDocButton;
 
+//	@FXML
+//	private TextField keyTextField;
+//	@FXML
+//	private TextField valueTextField;
+//	@FXML
+//	private TextField limitTextField;
+//	@FXML
+//	private Button searchButton;
 	@FXML
-	private TextField keyTextField;
-	@FXML
-	private TextField valueTextField;
-	@FXML
-	private TextField limitTextField;
-	@FXML
-	private Button searchButton;
-	@FXML
-	private ComboBox<String> operatorsComboBox;
+//	private ComboBox<String> operatorsComboBox;
 
 	MongoCollection<Document> collection;
 	private String collectionName;
@@ -77,12 +77,12 @@ public class CollectionManager implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		db = MongoDBResource.INSTANCE.getDatabase();
-		keyTextField.setPromptText("Key");
-		valueTextField.setPromptText("Value");
-		operatorsComboBox.setPromptText("Operator");
-		SqliteDAO dao = new SqliteDAO();
-		operatorsComboBox.getItems().addAll(dao.getQueryOperators());
-		operatorsComboBox.getItems().add("in");
+//		keyTextField.setPromptText("Key");
+//		valueTextField.setPromptText("Value");
+//		operatorsComboBox.setPromptText("Operator");
+//		SqliteDAO dao = new SqliteDAO();
+//		operatorsComboBox.getItems().addAll(dao.getQueryOperators());
+//		operatorsComboBox.getItems().add("in");
 
 	}
 
@@ -279,110 +279,110 @@ public class CollectionManager implements Initializable {
 			e.printStackTrace();
 		}
 	}
-
-	@FXML
-	public void Search() {
-		int limit =0;
-		try{
-		limit = Integer.parseInt(limitTextField.getText());
-		}catch(Exception e){
-			limit = 0;
-		}
-		if (validateSearch(operatorsComboBox)) {
-			String key = keyTextField.getText();
-			String value = valueTextField.getText();
-			String operator = operatorsComboBox.getSelectionModel().getSelectedItem();
-			System.out.println(key + " " + value + " " + operator + " " + collectionName);
-
-			List<Document> foundDocument = new ArrayList<>();
-			if (operator.equals("=")) {
-				BasicDBObject query = new BasicDBObject();
-				query.put(key, value);
-				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
-				foundDocument = iterableToList(iterable);
-			} else if (operator.equals("!=")) {
-				/* Step 4 : Create Query object */
-				BasicDBObject query = new BasicDBObject();
-				query.put(key, new BasicDBObject("$ne", value));
-
-				/* Step 5 : Get all documents */
-				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
-				foundDocument = iterableToList(iterable);
-			} else if (operator.equals("<")) {
-				/* Step 4 : Create Query object */
-				BasicDBObject query = new BasicDBObject();
-				query.put(key, new BasicDBObject("$gt", value));
-
-				/* Step 5 : Get all documents */
-				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
-				foundDocument = iterableToList(iterable);
-			} else if (operator.equals("<=")) {
-				/* Step 4 : Create Query object */
-				BasicDBObject query = new BasicDBObject();
-				query.put(key, new BasicDBObject("$gte", value));
-
-				/* Step 5 : Get all documents */
-				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
-				foundDocument = iterableToList(iterable);
-			} else if (operator.equals(">")) {
-				/* Step 4 : Create Query object */
-				BasicDBObject query = new BasicDBObject();
-				query.put(key, new BasicDBObject("$lt", value));
-
-				/* Step 5 : Get all documents */
-				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
-				foundDocument = iterableToList(iterable);
-			} else if (operator.equals(">=")) {
-				/* Step 4 : Create Query object */
-				BasicDBObject query = new BasicDBObject();
-				query.put(key, new BasicDBObject("$lte", value));
-
-				/* Step 5 : Get all documents */
-				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
-				foundDocument = iterableToList(iterable);
-			} else if (operator.equals("in")) {
-				/* Step 4 : Create Query object */
-				BasicDBObject query = new BasicDBObject();
-				List<String> items = Arrays.asList(value.split("\\s*,\\s*"));
-
-				query.put(key, new BasicDBObject("$in", items));
-
-				/* Step 5 : Get all documents */
-				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
-				foundDocument = iterableToList(iterable);
-			}
-
-			if (!foundDocument.isEmpty()) {
-				collectionTable.getColumns().clear();
-
-				setTable(foundDocument, getCommonColumns(foundDocument));
-			} else {
-				collectionTable.getItems().clear();
-				String title = "Attention";
-				String message = "No mathing values with given parameters";
-				String notificationType = NotificationConfig.SHOWWARNING.getInfo();
-				int showTime = 6;
-
-				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
-				notification.createDefinedNotification();
-			}
-		}
-	}
-
-	private boolean validateSearch(ComboBox<String> box) {
-		if (box.getSelectionModel().isEmpty()) {
-			String title = "Attention";
-			String message = "Please select an Operator";
-			String notificationType = NotificationConfig.SHOWWARNING.getInfo();
-			int showTime = 6;
-
-			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
-			notification.createDefinedNotification();
-			return false;
-		} else {
-			return true;
-		}
-	}
+//
+//	@FXML
+//	public void Search() {
+//		int limit =0;
+//		try{
+//		limit = Integer.parseInt(limitTextField.getText());
+//		}catch(Exception e){
+//			limit = 0;
+//		}
+//		if (validateSearch(operatorsComboBox)) {
+//			String key = keyTextField.getText();
+//			String value = valueTextField.getText();
+//			String operator = operatorsComboBox.getSelectionModel().getSelectedItem();
+//			System.out.println(key + " " + value + " " + operator + " " + collectionName);
+//
+//			List<Document> foundDocument = new ArrayList<>();
+//			if (operator.equals("=")) {
+//				BasicDBObject query = new BasicDBObject();
+//				query.put(key, value);
+//				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
+//				foundDocument = iterableToList(iterable);
+//			} else if (operator.equals("!=")) {
+//				/* Step 4 : Create Query object */
+//				BasicDBObject query = new BasicDBObject();
+//				query.put(key, new BasicDBObject("$ne", value));
+//
+//				/* Step 5 : Get all documents */
+//				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
+//				foundDocument = iterableToList(iterable);
+//			} else if (operator.equals("<")) {
+//				/* Step 4 : Create Query object */
+//				BasicDBObject query = new BasicDBObject();
+//				query.put(key, new BasicDBObject("$gt", value));
+//
+//				/* Step 5 : Get all documents */
+//				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
+//				foundDocument = iterableToList(iterable);
+//			} else if (operator.equals("<=")) {
+//				/* Step 4 : Create Query object */
+//				BasicDBObject query = new BasicDBObject();
+//				query.put(key, new BasicDBObject("$gte", value));
+//
+//				/* Step 5 : Get all documents */
+//				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
+//				foundDocument = iterableToList(iterable);
+//			} else if (operator.equals(">")) {
+//				/* Step 4 : Create Query object */
+//				BasicDBObject query = new BasicDBObject();
+//				query.put(key, new BasicDBObject("$lt", value));
+//
+//				/* Step 5 : Get all documents */
+//				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
+//				foundDocument = iterableToList(iterable);
+//			} else if (operator.equals(">=")) {
+//				/* Step 4 : Create Query object */
+//				BasicDBObject query = new BasicDBObject();
+//				query.put(key, new BasicDBObject("$lte", value));
+//
+//				/* Step 5 : Get all documents */
+//				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
+//				foundDocument = iterableToList(iterable);
+//			} else if (operator.equals("in")) {
+//				/* Step 4 : Create Query object */
+//				BasicDBObject query = new BasicDBObject();
+//				List<String> items = Arrays.asList(value.split("\\s*,\\s*"));
+//
+//				query.put(key, new BasicDBObject("$in", items));
+//
+//				/* Step 5 : Get all documents */
+//				FindIterable<Document> iterable = db.getCollection(collectionName).find(query).limit(limit);
+//				foundDocument = iterableToList(iterable);
+//			}
+//
+//			if (!foundDocument.isEmpty()) {
+//				collectionTable.getColumns().clear();
+//
+//				setTable(foundDocument, getCommonColumns(foundDocument));
+//			} else {
+//				collectionTable.getItems().clear();
+//				String title = "Attention";
+//				String message = "No mathing values with given parameters";
+//				String notificationType = NotificationConfig.SHOWWARNING.getInfo();
+//				int showTime = 6;
+//
+//				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+//				notification.createDefinedNotification();
+//			}
+//		}
+//	}
+//
+//	private boolean validateSearch(ComboBox<String> box) {
+//		if (box.getSelectionModel().isEmpty()) {
+//			String title = "Attention";
+//			String message = "Please select an Operator";
+//			String notificationType = NotificationConfig.SHOWWARNING.getInfo();
+//			int showTime = 6;
+//
+//			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+//			notification.createDefinedNotification();
+//			return false;
+//		} else {
+//			return true;
+//		}
+//	}
 
 	private List<Document> iterableToList(FindIterable<Document> iterable) {
 		List<Document> foundDocument = new ArrayList<>();
