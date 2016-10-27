@@ -31,8 +31,9 @@ public class SqliteDAO {
 		Connection dbConn = null;
 
 		String queryConnection = "CREATE TABLE IF NOT EXISTS `CONNECTIONS` (`ConnectionName` TEXT,`mysqlHostName` TEXT,`mongoHostName` TEXT,`mysqlPort` INTEGER, `mongoPort` INTEGER,`UserName` TEXT,`Password` TEXT,`SchemaName` TEXT,PRIMARY KEY(ConnectionName));";
-		String queryOperators = "CREATE TABLE IF NOT EXISTS `QUERY_OPERATORS` ( `id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `Operation`	TEXT NOT NULL, `Symbol`	TEXT NOT NULL, `Keyword` TEXT );";
-		String[] queries = new String[]{queryConnection,queryOperators};
+		String queryOperators = "CREATE TABLE IF NOT EXISTS `QUERY_OPERATORS` (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `Operation` TEXT NOT NULL, `Symbol` TEXT NOT NULL, `Keyword` TEXT );";
+		String queryPath = "CREATE TABLE IF NOT EXISTS `PATH` (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,`path` TEXT NOT NULL, `isDefault` INTEGER, `type` TEXT);";
+		String[] queries = new String[]{queryConnection,queryOperators,queryPath};
 		dbConn = dbConnManager.getConnection();
 		
 		try {
@@ -277,7 +278,7 @@ public class SqliteDAO {
 	}
 	
 	/**
-	 * Check whether mongo fatabase path is exists
+	 * Check whether mongo database path is exists
 	 * @param type
 	 * @return
 	 */
