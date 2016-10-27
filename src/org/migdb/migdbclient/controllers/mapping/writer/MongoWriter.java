@@ -18,6 +18,7 @@ import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ConnectionParameters;
 import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.utils.MigDBNotifier;
+import org.migdb.migdbclient.views.connectionmanager.ConnectionManagerController;
 import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
 import com.mongodb.MongoClient;
@@ -170,6 +171,10 @@ public class MongoWriter {
 			String message = "Database migration successfully completed";
 			String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
 			int showTime = 6;
+			
+			//Load side bar after migrated database creation successfully
+			ConnectionManagerController connCtrl = new ConnectionManagerController();
+			connCtrl.setSideBarDatabases();
 
 			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 			notification.createDefinedNotification();
