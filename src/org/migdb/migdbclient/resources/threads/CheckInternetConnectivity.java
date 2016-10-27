@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 /**
- * @author HP
+ * @author KANI
  *
  */
 public class CheckInternetConnectivity extends Thread {

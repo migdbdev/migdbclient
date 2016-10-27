@@ -3,8 +3,6 @@ package org.migdb.migdbclient.controllers.mapping.writer;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.bson.Document;
 import org.json.simple.JSONArray;
@@ -13,6 +11,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.config.FxmlPath;
+import org.migdb.migdbclient.config.NotificationConfig;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
@@ -21,12 +20,9 @@ import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.utils.MigDBNotifier;
 import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.util.JSON;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -41,8 +37,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import tray.animations.AnimationType;
-import tray.notification.NotificationType;
 
 public class MongoWriter {
 
@@ -102,12 +96,10 @@ public class MongoWriter {
 					else{
 						String title = "Attention";
 						String message = "The Name Already Exsists.Please Enter a new name to create database";
-						AnimationType animationType = AnimationType.POPUP;
-						NotificationType notificationType = NotificationType.ERROR;
+						String notificationType = NotificationConfig.SHOWERROR.getInfo();
 						int showTime = 6;
 
-						MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,
-								showTime);
+						MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 						notification.createDefinedNotification();
 					}
 				} catch (Exception e1) {
@@ -117,12 +109,10 @@ public class MongoWriter {
 			} else {
 				String title = "Attention";
 				String message = "Please Enter a name to create collection";
-				AnimationType animationType = AnimationType.POPUP;
-				NotificationType notificationType = NotificationType.ERROR;
+				String notificationType = NotificationConfig.SHOWERROR.getInfo();
 				int showTime = 6;
 
-				MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,
-						showTime);
+				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 				notification.createDefinedNotification();
 			}
 
@@ -156,37 +146,34 @@ public class MongoWriter {
 
 	private void writeToDB(String name) {
 		try {
-			MongoConnManager.INSTANCE.connect("localhost", 27017);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println(mappedJson);
-		JSONArray collections = (JSONArray) mappedJson.get("collections");
-		System.out.println(collections);
+			String mongoHost = ConnectionParameters.SESSION.getMongoHostName();
+			int mongoPort = ConnectionParameters.SESSION.getMongoPort();
+			MongoConnManager.INSTANCE.connect(mongoHost, mongoPort);
+			
+			System.out.println(mappedJson);
+			JSONArray collections = (JSONArray) mappedJson.get("collections");
+			System.out.println(collections);
 
-		MongoDBResource.INSTANCE.setDB(name);
-		MongoDatabase database = MongoDBResource.INSTANCE.getDatabase();
-		for (int i = 0; i < collections.size(); i++) {
-			JSONObject collection = (JSONObject) collections.get(i);
-			JSONArray documents = (JSONArray) collection.get("data");
-			for (int j = 0; j < documents.size(); j++) {
+			MongoDBResource.INSTANCE.setDB(name);
+			MongoDatabase database = MongoDBResource.INSTANCE.getDatabase();
+			for (int i = 0; i < collections.size(); i++) {
+				JSONObject collection = (JSONObject) collections.get(i);
+				JSONArray documents = (JSONArray) collection.get("data");
+				for (int j = 0; j < documents.size(); j++) {
 
-				Document document = Document.parse(documents.get(j).toString());
-				database.getCollection(collection.get("collectionName").toString()).insertOne(document);
+					Document document = Document.parse(documents.get(j).toString());
+					database.getCollection(collection.get("collectionName").toString()).insertOne(document);
+				}
+				System.out.println(collections.get(i));
 			}
-			System.out.println(collections.get(i));
-		}
-		String title = "Success";
-		String message = "Database migration successfully completed";
-		AnimationType animationType = AnimationType.POPUP;
-		NotificationType notificationType = NotificationType.SUCCESS;
-		int showTime = 6;
+			String title = "Success";
+			String message = "Database migration successfully completed";
+			String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
+			int showTime = 6;
 
-		MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,
-				showTime);
-		notification.createDefinedNotification();
-		try {
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+			notification.createDefinedNotification();
+			
 			showMongoDataManager();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
