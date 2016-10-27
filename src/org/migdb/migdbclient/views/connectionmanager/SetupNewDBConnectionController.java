@@ -179,27 +179,31 @@ public class SetupNewDBConnectionController implements Initializable {
 	 * Connection information save method
 	 */
 	public void insertConnection() {
-		SqliteDAO dao = new SqliteDAO();
-		boolean result = dao.insertConnection(connectionSave());
-		if (result == true) {
-			Stage stage = (Stage) submitButton.getScene().getWindow();
-			stage.close();
-			
-			String title = "Attention";
-			String message = "Successfully created!";
-			String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
-			int showTime = 6;
-			
-			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
-			notification.createDefinedNotification();
-		} else {
-			String title = "Attention";
-			String message = "It seems to be error. Please check again!";
-			String notificationType = NotificationConfig.SHOWERROR.getInfo();
-			int showTime = 6;
-			
-			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
-			notification.createDefinedNotification();
+		try {
+			SqliteDAO dao = new SqliteDAO();
+			boolean result = dao.insertConnection(connectionSave());
+			if (result == true) {
+				Stage stage = (Stage) submitButton.getScene().getWindow();
+				stage.close();
+				
+				String title = "Attention";
+				String message = "Successfully created!";
+				String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
+				int showTime = 6;
+				
+				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+				notification.createDefinedNotification();
+			} else {
+				String title = "Attention";
+				String message = "It seems to be error. Please check again!";
+				String notificationType = NotificationConfig.SHOWERROR.getInfo();
+				int showTime = 6;
+				
+				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+				notification.createDefinedNotification();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -207,33 +211,37 @@ public class SetupNewDBConnectionController implements Initializable {
 	 * Test if MySQL connection established or not
 	 */
 	public void testMySQLConnection() {
-		MySQLDbConnManager dao = new MySQLDbConnManager();
-		Connection dbConn = null;
-		String host = mysqlHostTextField.getText(), database = "", username = mysqlUsernameTextField.getText(),
-				password = mysqlPasswordTextField.getText();
-		int port = Integer.parseInt(mysqlPortTextField.getText());
-		dbConn = dao.getConnection(host, port, database, username, password);
-		if (dbConn != null) {
-			
-			String title = "MySQL Connection Status";
-			String message = "A successful MySQL connection was made with" + "\n"
-							+ " the parameters defined for this connection!";
-			String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
-			int showTime = 6;
-			
-			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
-			notification.createDefinedNotification();
-			
-		} else {
-			String title = "MySQL Connection Status";
-			String message = "Can't connect to MySQL server with defined parameters!";
-			String notificationType = NotificationConfig.SHOWERROR.getInfo();
-			int showTime = 6;
-			
-			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
-			notification.createDefinedNotification();
+		try {
+			MySQLDbConnManager dao = new MySQLDbConnManager();
+			Connection dbConn = null;
+			String host = mysqlHostTextField.getText(), database = "", username = mysqlUsernameTextField.getText(),
+					password = mysqlPasswordTextField.getText();
+			int port = Integer.parseInt(mysqlPortTextField.getText());
+			dbConn = dao.getConnection(host, port, database, username, password);
+			if (dbConn != null) {
+				
+				String title = "MySQL Connection Status";
+				String message = "A successful MySQL connection was made with" + "\n"
+								+ " the parameters defined for this connection!";
+				String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
+				int showTime = 6;
+				
+				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+				notification.createDefinedNotification();
+				
+			} else {
+				String title = "MySQL Connection Status";
+				String message = "Can't connect to MySQL server with defined parameters!";
+				String notificationType = NotificationConfig.SHOWERROR.getInfo();
+				int showTime = 6;
+				
+				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+				notification.createDefinedNotification();
+			}
+			dao.closeConnection(dbConn);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		dao.closeConnection(dbConn);
 	}
 
 }
