@@ -13,6 +13,7 @@ import java.util.Set;
 import org.bson.Document;
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.config.FxmlPath;
+import org.migdb.migdbclient.config.NotificationConfig;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.resources.CenterLayout;
@@ -23,7 +24,6 @@ import org.migdb.migdbclient.utils.MigDBNotifier;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
-import com.mongodb.DBCursor;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -45,8 +45,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import tray.animations.AnimationType;
-import tray.notification.NotificationType;
 
 public class CollectionManager implements Initializable {
 
@@ -109,11 +107,10 @@ public class CollectionManager implements Initializable {
 		} else {
 			String title = "Attention";
 			String message = "The Collection you selected is Empty";
-			AnimationType animationType = AnimationType.FADE;
-			NotificationType notificationType = NotificationType.WARNING;
+			String notificationType = NotificationConfig.SHOWWARNING.getInfo();
 			int showTime = 6;
 
-			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 			notification.createDefinedNotification();
 		}
 
@@ -363,12 +360,10 @@ public class CollectionManager implements Initializable {
 				collectionTable.getItems().clear();
 				String title = "Attention";
 				String message = "No mathing values with given parameters";
-				AnimationType animationType = AnimationType.FADE;
-				NotificationType notificationType = NotificationType.WARNING;
+				String notificationType = NotificationConfig.SHOWWARNING.getInfo();
 				int showTime = 6;
 
-				MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,
-						showTime);
+				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 				notification.createDefinedNotification();
 			}
 		}
@@ -378,11 +373,10 @@ public class CollectionManager implements Initializable {
 		if (box.getSelectionModel().isEmpty()) {
 			String title = "Attention";
 			String message = "Please select an Operator";
-			AnimationType animationType = AnimationType.FADE;
-			NotificationType notificationType = NotificationType.WARNING;
+			String notificationType = NotificationConfig.SHOWWARNING.getInfo();
 			int showTime = 6;
 
-			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 			notification.createDefinedNotification();
 			return false;
 		} else {

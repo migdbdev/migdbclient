@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.migdb.migdbclient.controllers;
 
@@ -20,11 +20,21 @@ public class DumpGenerator {
 		String database = Session.INSTANCE.getActiveDB();
 		String host = ConnectionParameters.SESSION.getMysqlHostName();
 		String userName = ConnectionParameters.SESSION.getUserName();
+		String password = ConnectionParameters.SESSION.getPassword();
 		try {
 			System.out.println(path);
-			Process p = Runtime.getRuntime()
-					.exec("cmd.exe /c start /wait cmd.exe /k \"mysqldump -h "+host+" -u "+userName+" --no-create-db --no-create-info --skip-triggers --xml "+database+" > "
-							+ path + "\"& /stop cmd.exe");
+			Process p;
+
+			if(password.isEmpty()) {
+				p = Runtime.getRuntime()
+						.exec("cmd.exe /c /wait cmd.exe /k \"mysqldump -h "+host+" -u "+userName+" --no-create-db --no-create-info --skip-triggers --xml "+database+" > "
+								+ path + "\"& /stop cmd.exe exit");
+			} else {
+				p = Runtime.getRuntime()
+						.exec("cmd.exe /c /wait cmd.exe /k \"mysqldump -h "+host+" -u "+userName+" -p"+password+" --no-create-db --no-create-info --skip-triggers --xml "+database+" > "
+								+ path + "\"& /stop cmd.exe exit");
+			}
+
 			System.out.println("Waiting for batch file ...");
 			p.waitFor();
 			System.out.println("Batch file done.");

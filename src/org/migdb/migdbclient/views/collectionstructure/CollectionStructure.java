@@ -13,7 +13,6 @@ import org.json.simple.JSONObject;
 import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.ChangeStructure;
-import org.migdb.migdbclient.utils.ServiceAccessor;
 import org.migdb.migdbclient.views.connectionmanager.ConnectionManagerController;
 
 import java.net.URL;
@@ -35,7 +34,7 @@ public class CollectionStructure implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         engine = webview.getEngine();
         loadStructure();
-        
+
         proceed.addEventHandler(ActionEvent.ACTION, event -> procesContinuous());
 
     }
@@ -45,7 +44,7 @@ public class CollectionStructure implements Initializable {
     	try {
     		MongoWriter mongoWriter = new MongoWriter();
     		mongoWriter.write();
-    		
+
     		ConnectionManagerController controller = new ConnectionManagerController();
     		controller.setSideBarDatabases();
 		} catch (Exception e) {
@@ -60,10 +59,8 @@ public class CollectionStructure implements Initializable {
 
     public void loadStructure(){
 
-        String url = MainApp.class.getResource("/org/migdb/migdbclient/resources/webcontent/collectionRelationship.html").toExternalForm();
-       // String jsonPath = MainApp.class.getResource("collectionList.json").toExternalForm();
-       System.out.println(url);
-        String filename = ChangeStructure.getInstance().jsonFileName;
+        String url = MainApp.class.getResource("/org/migdb/migdbclient/resources/webcontent/collectionRelationship.html").toExternalForm();;
+        System.out.println(url);
         java.net.CookieManager manager = new java.net.CookieManager();
         java.net.CookieHandler.setDefault(manager);
         manager.getCookieStore().removeAll();
@@ -185,38 +182,9 @@ public class CollectionStructure implements Initializable {
                                     "          },\n" +
                                     "          new go.Binding(\"text\", \"toText\"))\n" +
                                     "      );\n" +
-                                    "\n" +
-                                    "      //load json object\n" +
-                                    "      function loadJSON(file, callback) {\n" +
-                                    "\n" +
-                                    "          var xobj = new XMLHttpRequest();\n" +
-                                    "          xobj.overrideMimeType(\"application/json\");\n" +
-                                    "          xobj.open('GET', file, true);\n" +
-                                    "          var user = \"fhgi8598ugh985yhob580uojg0t\";\n" +
-                                    "          var pass=\"dfjgn984u608jb950o9bipj0945yjpbjmgi\";\n" +
-                                    "          xobj.setRequestHeader(\"Authorization\", \"Basic \" + btoa(user + \":\" + pass));\n" +
-                                    "          xobj.onreadystatechange = function () {\n" +
-                                    "              if (xobj.readyState == 4 && xobj.status == \"200\") {\n" +
-                                    "\n" +
-                                    "                  callback(xobj.responseText);\n" +
-                                    "              }\n" +
-                                    "          };\n" +
-                                    "          xobj.send(null);\n" +
-                                    "      }\n" +
-                                    "      var nodeDataArray;\n" +
-                                    "    var linkDataArray;\n" +
-                                    "\n" +
-                                    "      function load() {\n" +
-                                    "          var url = \"http://localhost:8080/migdbserver/services/collectionstructure/get/"+filename+"\";\n" +
-                                    "          loadJSON(url, function (response) {\n" +
-                                    "\n" +
-                                    "              nodeDataArray = JSON.parse(response.nodeDataArray);\n" +
-                                    "              linkDataArray = JSON.parse(response.linkDataArray);\n" +
+                                    "              nodeDataArray = "+ChangeStructure.getInstance().nodeDataArray.toString()+";\n" +
+                                    "              linkDataArray = "+ChangeStructure.getInstance().linkDataArray.toString()+";\n" +
                                     "              myDiagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);\n" +
-                                    "\n" +
-                                    "          });\n" +
-                                    "      }\n" +
-                                    "    load();\n" +
                                     "  } \n" +
                                     " init();");
                         }

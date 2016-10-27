@@ -249,8 +249,8 @@ public class ConnectionManagerController implements Initializable {
 
 			TreeView<String> mysqlTree = new TreeView<String>(mysqlItem);
 			TreeView<String> mongoTree = new TreeView<String>(mongoItem);
-			mysqlTree.setStyle("-fx-pref-width: 226;-fx-border-color: #336699");
-			mongoTree.setStyle("-fx-pref-width: 226;-fx-border-color: #336699");
+			mysqlTree.setStyle("-fx-pref-width: 226;");
+			mongoTree.setStyle("-fx-pref-width: 226;");
 
 			// MYSQL tree item context menu
 			ContextMenu mysqlContext = new ContextMenu();

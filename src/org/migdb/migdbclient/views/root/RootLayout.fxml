@@ -5,9 +5,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" stylesheets="@../../resources/css/custom.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.root.RootLayoutController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" styleClass="background" stylesheets="@../../resources/css/custom.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.root.RootLayoutController">
          <top>
-            <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="87.0" prefWidth="1200.0" stylesheets="@../../resources/css/custom.css" BorderPane.alignment="CENTER">
+            <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="87.0" prefWidth="1200.0" BorderPane.alignment="CENTER">
                <children>
                   <MenuBar prefHeight="31.0" prefWidth="1200.0" AnchorPane.bottomAnchor="141.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <menus>
@@ -65,11 +65,11 @@
             </AnchorPane>
          </top>
          <left>
-            <AnchorPane fx:id="sideBarAnchorpane" prefHeight="613.0" prefWidth="226.0" BorderPane.alignment="CENTER">
+            <AnchorPane fx:id="sideBarAnchorpane" prefWidth="226.0" BorderPane.alignment="CENTER">
          <children>
             <Label layoutX="45.0" layoutY="298.0" text="No connections available " />
          </children></AnchorPane>
          </left>
          <center>
-            <AnchorPane fx:id="rootContainerAncpane" styleClass="background" />
+            <AnchorPane fx:id="rootContainerAncpane" />
          </center></BorderPane>
