@@ -102,10 +102,10 @@
                      <tooltip>
                         <Tooltip text="Input username" />
                      </tooltip></TextField>
-                  <TextField fx:id="mysqlPasswordTextField" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                  <PasswordField fx:id="mysqlPasswordTextField" accessibleRole="PASSWORD_FIELD" GridPane.columnIndex="1" GridPane.rowIndex="3">
                      <tooltip>
                         <Tooltip text="Input password if any" />
-                     </tooltip></TextField>
+                     </tooltip></PasswordField>
                </children>
             </GridPane>
             <Button fx:id="testMySQLConnectionButton" layoutX="20.0" layoutY="357.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="190.0" styleClass="button_testconnection_button" />
