@@ -187,15 +187,24 @@ public class ConnectionManagerController implements Initializable {
 						ConnectionParameters.SESSION.setPassword(password);
 						ConnectionParameters.SESSION.setSchemaName(schema);
 
-						setSideBarDatabases();
+						if(setSideBarDatabases()){
+							// Load main stage after instance make active connection
+							FXMLLoader loader = new FXMLLoader();
+							loader.setLocation(MainApp.class.getResource(FxmlPath.MAINWINDOW.getPath()));
+							AnchorPane mainWindowAnchorPane = loader.load();
+							rootLayoutAnchorpane = CenterLayout.INSTANCE.getRootContainer();
+							rootLayoutAnchorpane.getChildren().clear();
+							rootLayoutAnchorpane.getChildren().add(mainWindowAnchorPane);
+						} else {
+							String title = "Attention";
+							String message = "It seems to be error. Please check your connection \n info again!";
+							String notificationType = NotificationConfig.SHOWERROR.getInfo();
+							int showTime = 6;
+							
+							MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+							notification.createDefinedNotification();
+						}
 						
-						// Load main stage after instance make active connection
-						FXMLLoader loader = new FXMLLoader();
-						loader.setLocation(MainApp.class.getResource(FxmlPath.MAINWINDOW.getPath()));
-						AnchorPane mainWindowAnchorPane = loader.load();
-						rootLayoutAnchorpane = CenterLayout.INSTANCE.getRootContainer();
-						rootLayoutAnchorpane.getChildren().clear();
-						rootLayoutAnchorpane.getChildren().add(mainWindowAnchorPane);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -222,10 +231,13 @@ public class ConnectionManagerController implements Initializable {
 		return vbox;
 	}
 
-	public void setSideBarDatabases() {
+	public boolean setSideBarDatabases() {
 
+		boolean result = false;
+		
 		try {
 
+			result = true;
 			MysqlDAO dao = new MysqlDAO();
 			MigrationProcess migrationObj = new MigrationProcess();
 			String host = ConnectionParameters.SESSION.getMysqlHostName();
@@ -318,14 +330,9 @@ public class ConnectionManagerController implements Initializable {
 			sidebar.getChildren().add(sidebarVbox);
 
 		} catch (Exception e) {
-			String title = "Attention";
-			String message = "It seems to be error. Please check your connection \n info again!";
-			String notificationType = NotificationConfig.SHOWERROR.getInfo();
-			int showTime = 6;
-			
-			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
-			notification.createDefinedNotification();
+			result = false;
 		}
+		return result;
 
 	}
 
