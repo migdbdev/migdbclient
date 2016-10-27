@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -76,13 +77,14 @@ public class ManyToMany {
 				}
 
 				writeMappedJson();
-				//saveChangeStructure();
+
 			}
 		}
 
 	}
 
 	public void setMapInstance(JSONObject mappingTable) {
+		removeMappingTable(mappingTable.get("name").toString());
 		ManyToManyResource.INSTANCE.setMappingTable(mappingTable);
 		mappingMethod = getMappingDecision();
 		JSONArray referenceInfo = (JSONArray) mappingTable.get("referencingFrom");
@@ -123,7 +125,6 @@ public class ManyToMany {
 			}
 
 		}
-
 
 	}
 
@@ -321,7 +322,7 @@ public class ManyToMany {
 				String referencedValue = mappingObject.get(referencingCol).toString();
 				if (referencedValue.equals(table1Value)) {
 					System.out.println(mappingObject + "@@@" + table1DataObject);
-					JSONObject referencingId = findReferencedId(mappingObject);
+					String referencingId = findReferencedId(mappingObject);
 					referencingIdArray.add(referencingId);
 				}
 			}
@@ -355,7 +356,7 @@ public class ManyToMany {
 
 	}
 
-	public JSONObject findReferencedId(JSONObject mappingObject) {
+	public String findReferencedId(JSONObject mappingObject) {
 		JSONObject table2 = ManyToManyResource.INSTANCE.getTable2();
 		JSONArray table2Data = (JSONArray) table2.get("data");
 		JSONObject table2MappingInfo = ManyToManyResource.INSTANCE.getTable2Info();
@@ -366,9 +367,11 @@ public class ManyToMany {
 			JSONObject table2DataObject = (JSONObject) object;
 			String table2Value = table2DataObject.get(referencedCol).toString();
 			if (referencedValue.equals(table2Value)) {
-				JSONObject referencedObjectId = new JSONObject();
-				referencedObjectId.put("_id", table2DataObject.get("_id"));
-				return referencedObjectId;
+				// JSONObject referencedObjectId = new JSONObject();
+				// referencedObjectId.put("_id", table2DataObject.get("_id"));
+				// return referencedObjectId;
+				return table2DataObject.get("_id").toString();
+
 			}
 		}
 		return null;
@@ -470,6 +473,12 @@ public class ManyToMany {
 
 		// System.out.println(mapped);
 
+	}
+
+	private void removeMappingTable(String name) {
+		JSONArray jsonObject = new JSONArray();
+		jsonObject = ChangeStructure.getInstance().nodeDataArray;
+		System.out.println(name + " !@#$%^&*() "+ jsonObject);
 	}
 
 	/*
