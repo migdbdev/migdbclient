@@ -76,6 +76,12 @@ public class MainApp extends Application {
 		mainAnchorpane.getChildren().addAll(splashLayout, progressTextLayout);
 		splashLayout.setEffect(new DropShadow());
 		ConnectivityIsShowInstance.INSTANCE.setShow(false);
+		
+		// Perform necessary configuration when app loading
+		Configurations config = new Configurations();
+		config.createAppFolder();
+		config.createConnectionTable();
+		config.insertOperators();
 	}
 
 	@Override
@@ -117,11 +123,6 @@ public class MainApp extends Application {
 	public void showMainStage() {
 		try {
 			/*runner.start();*/
-			
-			Configurations config = new Configurations();
-			config.createAppFolder();
-			config.createConnectionTable();
-			config.insertOperators();
 			
 			primaryStage = new Stage(StageStyle.DECORATED);
 			primaryStage.setTitle("MigDB");
