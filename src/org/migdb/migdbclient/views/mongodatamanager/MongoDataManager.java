@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 
 import org.bson.Document;
 import org.migdb.migdbclient.config.FxmlPath;
+import org.migdb.migdbclient.config.NotificationConfig;
 import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
@@ -19,7 +20,6 @@ import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.DeleteResult;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,19 +31,17 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import tray.animations.AnimationType;
-import tray.notification.NotificationType;
 
 public class MongoDataManager implements Initializable {
 	@FXML
@@ -179,12 +177,10 @@ public class MongoDataManager implements Initializable {
 			} else {
 				String title = "Attention";
 				String message = "Please Enter a name to create collection";
-				AnimationType animationType = AnimationType.POPUP;
-				NotificationType notificationType = NotificationType.ERROR;
+				String notificationType = NotificationConfig.SHOWERROR.getInfo();
 				int showTime = 6;
 
-				MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,
-						showTime);
+				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 				notification.createDefinedNotification();
 			}
 
@@ -219,11 +215,10 @@ public class MongoDataManager implements Initializable {
 			collection.drop();
 			String title = "Attention";
 			String message = "Successfully Deleted!";
-			AnimationType animationType = AnimationType.POPUP;
-			NotificationType notificationType = NotificationType.SUCCESS;
+			String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
 			int showTime = 6;
 
-			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 			notification.createDefinedNotification();
 			System.out.println(name);
 			refreshDataManager();
@@ -241,21 +236,19 @@ public class MongoDataManager implements Initializable {
 			refreshDataManager();
 			String title = "Attention";
 			String message = "Successfully created!";
-			AnimationType animationType = AnimationType.POPUP;
-			NotificationType notificationType = NotificationType.SUCCESS;
+			String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
 			int showTime = 6;
 
-			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 			notification.createDefinedNotification();
 		} catch (MongoCommandException ex) {
 			ex.printStackTrace();
 			String title = "Attention";
 			String message = "Collection Already Exsist";
-			AnimationType animationType = AnimationType.POPUP;
-			NotificationType notificationType = NotificationType.ERROR;
+			String notificationType = NotificationConfig.SHOWERROR.getInfo();
 			int showTime = 6;
 
-			MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType, showTime);
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 			notification.createDefinedNotification();
 		}
 	}
