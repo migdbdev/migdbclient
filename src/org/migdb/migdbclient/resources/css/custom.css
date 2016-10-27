@@ -2,6 +2,40 @@
     -fx-background-color: #FFFFFF;
 }
 
+.features1 {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/features1.png);
+}
+.features2 {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/features2.png);
+}
+.features3 {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/features3.png);
+}
+.features4 {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/features4.png);
+}
+
+/* *************** DB Migrator Page style *************** */
+.bacground-migration {
+	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Untitled-1.png);
+}
+
+.db-combobox {
+	-fx-background-radius: 0.0 0.0 0.0 0.0;
+	-fx-border-color: #ffffff;
+}
+
+.db-combobox .list-view .list-cell:hover {
+	-fx-text-fill: #ffffff;
+	-fx-background-color: #237f4e;
+}
+
+.db-combobox .cell:selected {
+	-fx-text-fill: #ffffff;
+	-fx-background-color: #237f4e;
+}
+/* ***************************************************** */
+
 /* *************** Progress bar style *************** */
 .progress-bar > .bar {
     -fx-background-insets: 1.0 1.0 2.0 1.0;
@@ -144,7 +178,7 @@
         #090a0c,
         linear-gradient(#237f4e 0.0%, #1f7246 20.0%, #388b5f 100.0%),
         linear-gradient(#237f4e, #388b5f),
-        radial-gradient(center 50.0% 0.0%, radius 100.0%, rgba(17,63,39), rgba(28,101,62));
+        radial-gradient(center 50.0% 0.0%, radius 100.0%, rgba(17.0,63.0,39.0), rgba(28.0,101.0,62.0));
 
 }
 
@@ -189,31 +223,57 @@
 
 /* ************** Update button style ************** */
 .button_update {
-	-fx-pref-width:190;
-	-fx-pref-height:40;
+	-fx-pref-width:190.0;
+	-fx-pref-height:40.0;
 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Updatebutton.png);
 }
 
 .button_update:hover {
-	-fx-pref-width:190;
-	-fx-pref-height:40;
+	-fx-pref-width:190.0;
+	-fx-pref-height:40.0;
 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Updatebuttonhover.png);
 }
 /* ************************************************* */
 
 /* ************** Convert button style ************** */
 .button_convert {
-	-fx-pref-width:190;
-	-fx-pref-height:40;
+	-fx-pref-width:190.0;
+	-fx-pref-height:40.0;
 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Convertbutton.png);
 }
 
 .button_convert:hover {
-	-fx-pref-width:190;
-	-fx-pref-height:40;
+	-fx-pref-width:190.0;
+	-fx-pref-height:40.0;
 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Convertbuttonhover.png);
 }
 /* ************************************************** */
+
+/* ************** Tree view style ************** */
+.tree-cell:selected {
+    -fx-font-weight: bold ;
+}
+.tree-view, .tree-cell {
+    -fx-background-color: #E8E8E8;
+    -fx-text-fill: #000000;
+    -fx-border-color: #ffffff;
+}
+.tree-cell:expanded, .tree-cell:sub-tree-item {
+    -fx-background-color: #D0D0D0;
+}
+.tree-cell:selected {
+    -fx-font-weight: bold;
+    -fx-border-color: #ffffff;
+}
+.tree-cell {
+    -fx-padding: 0.75em 0em 0.75em 0em ;
+}
+.tree-cell:sub-tree-item {
+    -fx-padding: 0.25em ;
+}
+
+
+/* ********************************************* */
 
 .label_Connections {
 	-fx-font-size: 20.0pt;
@@ -224,17 +284,17 @@
 .dark-blue {
     -fx-background-color: 
         #090a0c,
-        linear-gradient(#308014 0%, #308014 20%, #308014 100%),
+        linear-gradient(#308014 0.0%, #308014 20.0%, #308014 100.0%),
         linear-gradient(#308014, #308014);
-    -fx-background-radius: 5,4,3,5;
-    -fx-background-insets: 0,1,2,0;
+    -fx-background-radius: 5.0,4.0,3.0,5.0;
+    -fx-background-insets: 0.0,1.0,2.0,0.0;
     -fx-text-fill: white;
-    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
+    -fx-effect: dropshadow( three-pass-box , rgba(0.0,0.0,0.0,0.6) , 5.0, 0.0 , 0.0 , 1.0 );
     -fx-font-family: "Arial";
     -fx-text-fill: linear-gradient(white, #d0d0d0);
-    -fx-font-size: 12px;
-    -fx-padding: 10 20 10 20;
+    -fx-font-size: 12.0px;
+    -fx-padding: 10.0 20.0 10.0 20.0;
 }
 .dark-blue Text {
-    -fx-effect: dropshadow( one-pass-box , rgba(0,0,0,0.9) , 1, 0.0 , 0 , 1 );
+    -fx-effect: dropshadow( one-pass-box , rgba(0.0,0.0,0.0,0.9) , 1.0, 0.0 , 0.0 , 1.0 );
 }

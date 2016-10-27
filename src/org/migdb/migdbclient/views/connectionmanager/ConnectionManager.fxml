@@ -17,6 +17,6 @@
             <Label fx:id="addConnectionLabel" prefHeight="76.0" prefWidth="90.0" styleClass="label_AddConnection" />
          </children></HBox>
       <HBox layoutX="241.0" layoutY="33.0" prefHeight="76.0" prefWidth="90.0" styleClass="label_settingConnection" />
-      <AnchorPane fx:id="connectionAnchorpane" layoutY="109.0" prefHeight="505.0" prefWidth="973.0" style="-fx-background-color: #C0C0C0;" />
+      <AnchorPane fx:id="connectionAnchorpane" layoutY="109.0" prefHeight="505.0" prefWidth="973.0" styleClass="background" />
    </children>
 </AnchorPane>
