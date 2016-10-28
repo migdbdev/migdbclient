@@ -31,10 +31,10 @@ public class CollectionStructure implements Initializable {
     @FXML
     private WebView webview;
     @FXML
-    private WebEngine engine;
+    public WebEngine engine;
     @FXML
     private Button proceed;
-    
+
     @FXML
     private AnchorPane relationshipAnchorPane;
 
@@ -72,16 +72,15 @@ public class CollectionStructure implements Initializable {
     	int layoutXReferenceType = 0;
     	int layoutXToggleButton = 20;
     	for(int i =0 ; i < relationshipCount; i++){
-    		// REFERENCING =
-    		//EMBEDDING =
+
     		JSONObject relationship = (JSONObject) structure.linkDataArray.get(i);
-    		/*relationship.get("from");  // child table
-    		relationship.get("to");   // parent table
-    		relationship.get("toText"); // mappingModel
-*/    		boolean referenceType = (relationship.get("toText").equals("EMBEDDING")) ? true : false ;
+     		boolean referenceType = (relationship.get("toText").equals("EMBEDDING")) ? true : false ;
     		Label referenceTypeLabel = new Label(relationship.get("to")+" to "+relationship.get("from"));
-    		ToggleSwitch toggleButton = new ToggleSwitch(referenceType, relationship.get("from")+"#"+relationship.get("to"), "Embed", "Reference");
-    		System.out.println(relationship.get("from"));
+    		String buttonId = relationship.get("from").toString()+"#"+relationship.get("to").toString();
+    		String originRelationship = relationship.get("toText").toString();
+    		ToggleSwitch toggleButton = new ToggleSwitch(referenceType,buttonId, "Embed", "Reference",engine);
+    		relationship.put("originalvalue", originRelationship);
+    		relationship.put("buttonID",buttonId);
     		referenceTypeLabel.setLayoutY(layoutXReferenceType);
     		referenceTypeLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
     		toggleButton.setLayoutY(layoutXToggleButton);
