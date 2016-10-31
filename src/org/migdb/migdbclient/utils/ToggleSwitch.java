@@ -1,98 +1,101 @@
-package org.migdb.migdbclient.views.collectionstructure;
+/**
+ *
+ */
+package org.migdb.migdbclient.utils;
 
+import java.util.Iterator;
+
+import org.json.simple.JSONObject;
+import org.migdb.migdbclient.main.MainApp;
+import org.migdb.migdbclient.resources.ChangeStructure;
+import org.migdb.migdbclient.views.collectionstructure.CollectionStructure;
+
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
-import org.migdb.migdbclient.main.MainApp;
-import org.migdb.migdbclient.resources.ChangeStructure;
-import org.migdb.migdbclient.utils.ToggleSwitch;
-import org.migdb.migdbclient.views.connectionmanager.ConnectionManagerController;
+/**
+ * @author KANI
+ *
+ */
+public class ToggleSwitch extends Label {
 
-import java.net.URL;
-import java.util.ResourceBundle;
+	private SimpleBooleanProperty switchedOn = new SimpleBooleanProperty(true);
 
+    public ToggleSwitch(boolean isSwitched, String id, String trueText, String falseText,WebEngine engine)
+    {
+        Button switchBtn = new Button();
+        switchBtn.setId(id);
+        switchBtn.setPrefWidth(60);
+        switchBtn.setPrefHeight(20);
+        switchBtn.setOnAction(new EventHandler<ActionEvent>()
+        {
+            @Override
+            public void handle(ActionEvent t)
+            {
+                switchedOn.set(!switchedOn.get());
+            }
+        });
 
-public class CollectionStructure implements Initializable {
+        setGraphic(switchBtn);
 
-    @FXML
-    private WebView webview;
-    @FXML
-    public WebEngine engine;
-    @FXML
-    private Button proceed;
+        switchedOn.addListener(new ChangeListener<Boolean>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> ov,
+                Boolean t, Boolean t1)
+            {
+            	String btnId = switchBtn.getId();
 
-    @FXML
-    private AnchorPane relationshipAnchorPane;
+                if (t1)
+                {
+                	//Embedding side
+                	System.out.println(btnId+" - Embed");
+                	String mapping = "EMBEDDING";
+                	saveUsersMappingModel(btnId, mapping);
+                    setText(trueText);
+                    setStyle("-fx-background-color: #237f4f;-fx-text-fill:white;");
+                    setContentDisplay(ContentDisplay.RIGHT);
+                }
+                else
+                {
+                	//Referencing side
+                	System.out.println(btnId+" - Reference");
+                	String mapping = "REFERENCING";
+                	saveUsersMappingModel(btnId, mapping);
+                    setText(falseText);
+                    setStyle("-fx-background-color: #91bfa7;-fx-text-fill:black;");
+                    setContentDisplay(ContentDisplay.LEFT);
+                }
+                loadStructure(engine);
+            }
+        });
 
-    private JSONObject jsonObject;
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        engine = webview.getEngine();
-        loadStructure();
-        proceed.addEventHandler(ActionEvent.ACTION, event -> procesContinuous());
-        loadToggleButtonDynamically();
-
+        switchedOn.set(isSwitched);
     }
 
-
-    public void procesContinuous() {
-    	try {
-    		MongoWriter mongoWriter = new MongoWriter();
-    		mongoWriter.write();
-    		ConnectionManagerController controller = new ConnectionManagerController();
-    		controller.setSideBarDatabases();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-    }
-
-    public void loadCollectionChangeList(){
-      //  jsonObject = ServiceAccessor.getCollectionStructureJSON();
-      //  System.out.println("success");
-    }
-
-    public void loadToggleButtonDynamically(){
+    /*public SimpleBooleanProperty switchOnProperty() { return switchedOn; }*/
+    public void saveUsersMappingModel(String uiButtonID, String mapping){
     	ChangeStructure structure = ChangeStructure.getInstance();
-    	int relationshipCount = structure.linkDataArray.size();
-    	int layoutXReferenceType = 0;
-    	int layoutXToggleButton = 20;
-    	for(int i =0 ; i < relationshipCount; i++){
-
-    		JSONObject relationship = (JSONObject) structure.linkDataArray.get(i);
-     		boolean referenceType = (relationship.get("toText").equals("EMBEDDING")) ? true : false ;
-    		Label referenceTypeLabel = new Label(relationship.get("to")+" to "+relationship.get("from"));
-    		String buttonId = relationship.get("from").toString()+"#"+relationship.get("to").toString();
-    		String originRelationship = relationship.get("toText").toString();
-    		ToggleSwitch toggleButton = new ToggleSwitch(referenceType,buttonId, "Embed", "Reference",engine);
-    		relationship.put("originalvalue", originRelationship);
-    		relationship.put("buttonID",buttonId);
-    		referenceTypeLabel.setLayoutY(layoutXReferenceType);
-    		referenceTypeLabel.setFont(Font.font("Verdana", FontWeight.BOLD, 10));
-    		toggleButton.setLayoutY(layoutXToggleButton);
-    		layoutXReferenceType+=60;
-    		layoutXToggleButton+=60;
-    		relationshipAnchorPane.getChildren().addAll(referenceTypeLabel,toggleButton);
-
+    	for(int i =0; i < structure.linkDataArray.size(); i++){
+    		JSONObject relationship = (JSONObject)structure.linkDataArray.get(i);
+    		if(relationship.containsKey("buttonID") &&
+    				relationship.get("buttonID").equals(uiButtonID) ){
+    			relationship.replace("toText",mapping);
+    		}
     	}
 
+
     }
 
-    public void loadStructure(){
+    public void loadStructure(WebEngine engine){
 
         String url = MainApp.class.getResource("/org/migdb/migdbclient/resources/webcontent/collectionRelationship.html").toExternalForm();;
         System.out.println(url);
@@ -227,6 +230,5 @@ public class CollectionStructure implements Initializable {
                 }
         );
     }
-
 
 }

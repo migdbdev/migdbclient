@@ -476,9 +476,16 @@ public class ManyToMany {
 	}
 
 	private void removeMappingTable(String name) {
-		JSONArray jsonObject = new JSONArray();
-		jsonObject = ChangeStructure.getInstance().nodeDataArray;
-		System.out.println(name + " !@#$%^&*() "+ jsonObject);
+		JSONArray nodeArray = new JSONArray();
+		nodeArray = ChangeStructure.getInstance().nodeDataArray;
+		System.out.println(name + " !@#$%^&*() "+ nodeArray);
+		for (int i = 0; i < nodeArray.size(); i++) {
+			JSONObject jsonObject = (JSONObject) nodeArray.get(i);
+			if(jsonObject.get("key").toString().equals(name)){
+				nodeArray.remove(i);
+			}
+		}
+		
 	}
 
 	/*

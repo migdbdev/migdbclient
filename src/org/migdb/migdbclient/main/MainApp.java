@@ -114,8 +114,8 @@ public class MainApp extends Application {
 			}
 		};
 
-		showSplash(initStage, jarTask, () -> showDbPathChooserStage());
-		/*showMainStage();*/
+		/*showSplash(initStage, jarTask, () -> showDbPathChooserStage());*/
+		showMainStage();
 		new Thread(jarTask).start();
 		/* showMainStage(); */
 	}
