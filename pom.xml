@@ -59,7 +59,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>C:/Program Files/Java/jdk1.8.0_92/bin/javafxpackager</executable>
+              <executable>${java.home}/../bin/javafxpackager</executable>
               <arguments>
                 <argument>-createjar</argument>
                 <argument>-nocss2bin</argument>
