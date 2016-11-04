@@ -1,4 +1,17 @@
-<h1> NOTIFICATION HANDLING </h1>
+<h1>MIGDB CLIENT APPLICATION</h1>
+<table class="tg">
+  <tr>
+    <th class="tg-yw4l">Version</th>
+    <th class="tg-yw4l">Build Status</th>
+  </tr>
+  <tr>
+    <td class="tg-yw4l">v1.00</td>
+    <td class="tg-yw4l">
+    <img src="https://travis-ci.org/migdbdev/migdbclient.svg?branch=master"/>
+    </td>
+  </tr>
+</table>
+<h2> NOTIFICATION HANDLING </h2>
 <p> There is a java class called MigDBNotifier under the utils package. And there is a two constructors available each for custom notification and defined notification. This notification class referes Tray Tester.jar. The jar was added into the project. The referencing link is <a href"https://github.com/PlusHaze/TrayNotification">https://github.com/PlusHaze/TrayNotification</a> .</p>
 
 <p><span style="color:red"> Note </span> : Add tray tester.jar into your classpath</p>

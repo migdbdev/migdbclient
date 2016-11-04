@@ -7,16 +7,25 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="614.0" prefWidth="973.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.collectionstructure.CollectionStructure">
+<AnchorPane prefHeight="614.0" prefWidth="973.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.collectionstructure.CollectionStructure">
    <children>
       <WebView fx:id="webview" layoutX="179.0" layoutY="3.0" prefHeight="601.0" prefWidth="785.0" AnchorPane.leftAnchor="179.0" />
       <VBox layoutX="14.0" layoutY="14.0" prefHeight="594.0" prefWidth="159.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="804.0" AnchorPane.topAnchor="10.0">
          <children>
-            <Label text="Supplier" />
-            <ComboBox prefWidth="150.0" promptText="Select Mapping" />
-            <Label text="Products" />
-            <ComboBox prefWidth="150.0" promptText="Select Mapping" />
-            <Button fx:id="proceed" mnemonicParsing="false" text="Proceed" />
+            <AnchorPane fx:id="relationshipAnchorPane" prefHeight="547.0" prefWidth="159.0" />
+            <GridPane>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="47.0" minWidth="10.0" prefWidth="42.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="99.0" minWidth="10.0" prefWidth="74.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="80.0" minWidth="10.0" prefWidth="48.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Button fx:id="proceed" mnemonicParsing="false" text="Proceed" GridPane.columnIndex="1" />
+               </children>
+            </GridPane>
          </children>
       </VBox>
    </children>

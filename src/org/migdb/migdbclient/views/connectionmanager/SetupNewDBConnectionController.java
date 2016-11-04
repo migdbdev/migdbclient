@@ -5,19 +5,26 @@ import java.sql.Connection;
 import java.util.ResourceBundle;
 
 import org.migdb.migdbclient.config.ConnectionManager;
+import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.NotificationConfig;
+import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.controllers.dbconnector.MySQLDbConnManager;
+import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
+import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.utils.MigDBNotifier;
+import org.migdb.migdbclient.views.root.RootLayoutController;
 
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -40,7 +47,7 @@ public class SetupNewDBConnectionController implements Initializable {
 	@FXML
 	private TextField mysqlUsernameTextField;
 	@FXML
-	private TextField mysqlPasswordTextField;
+	private PasswordField mysqlPasswordTextField;
 	@FXML
 	private TextField mongoHostTexField;
 	@FXML
@@ -114,6 +121,10 @@ public class SetupNewDBConnectionController implements Initializable {
 			public void handle(MouseEvent mouseevent) {
 				testMySQLConnection();
 			}
+		});
+		
+		testMongoConnectionButton.setOnAction((event) -> {
+			testMongoConnection();
 		});
 	}
 
@@ -191,6 +202,10 @@ public class SetupNewDBConnectionController implements Initializable {
 				String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
 				int showTime = 6;
 				
+				// Load connection manager fxml after successfully insert connection info
+				RootLayoutController rootCtrl = new RootLayoutController();
+				rootCtrl.showConnectionManager();
+				
 				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
 				notification.createDefinedNotification();
 			} else {
@@ -231,7 +246,7 @@ public class SetupNewDBConnectionController implements Initializable {
 				
 			} else {
 				String title = "MySQL Connection Status";
-				String message = "Can't connect to MySQL server with defined parameters!";
+				String message = "Can't connect to MySQL server with defined \n parameters!";
 				String notificationType = NotificationConfig.SHOWERROR.getInfo();
 				int showTime = 6;
 				
@@ -241,6 +256,34 @@ public class SetupNewDBConnectionController implements Initializable {
 			dao.closeConnection(dbConn);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Test if Mongo connection established or not
+	 */
+	public void testMongoConnection() {
+		try {
+			String host = mongoHostTexField.getText();
+			int port = Integer.parseInt(mongoPortTextField.getText());
+			if(!(MongoConnManager.INSTANCE.connect(host, port)).equals("")) {
+				String title = "Mongo Connection Status";
+				String message = "A successful Mongo connection was made with" + "\n"
+						+ " the parameters defined for this connection!";
+				String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
+				int showTime = 6;
+				
+				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+				notification.createDefinedNotification();
+			}
+		} catch (Exception e) {
+			String title = "MySQL Connection Status";
+			String message = "Can't connect to Mongo server with defined \n parameters!";
+			String notificationType = NotificationConfig.SHOWERROR.getInfo();
+			int showTime = 6;
+			
+			MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+			notification.createDefinedNotification();
 		}
 	}
 

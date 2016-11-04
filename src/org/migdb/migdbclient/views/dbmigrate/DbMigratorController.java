@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.migdb.migdbclient.views.connectionmanager;
+package org.migdb.migdbclient.views.dbmigrate;
 
 import java.net.URL;
 import java.util.ArrayList;
