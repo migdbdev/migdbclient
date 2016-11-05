@@ -31,13 +31,14 @@ import javafx.scene.control.ListView;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 
 public class RootLayoutController implements Initializable {
 
 	@FXML
 	private AnchorPane rootContainerAncpane;
 	@FXML
-	private AnchorPane sideBarAnchorpane;
+	private VBox sideBarAnchorpane;
 	@FXML
 	private Label datamanagerLabel;
 	@FXML

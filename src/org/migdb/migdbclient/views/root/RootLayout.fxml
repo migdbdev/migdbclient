@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
@@ -65,9 +66,16 @@
             </AnchorPane>
          </top>
          <left>
-            <AnchorPane fx:id="sideBarAnchorpane" prefWidth="226.0" BorderPane.alignment="CENTER">
+            <AnchorPane prefHeight="613.0" prefWidth="227.0" BorderPane.alignment="CENTER">
          <children>
-            <Label layoutX="45.0" layoutY="298.0" text="No connections available " />
+            <VBox fx:id="sideBarAnchorpane" prefHeight="613.0" prefWidth="227.0">
+               <children>
+                  <Label text="No connections available ">
+                     <VBox.margin>
+                        <Insets left="45.0" top="300.0" />
+                     </VBox.margin></Label>
+               </children>
+            </VBox>
          </children></AnchorPane>
          </left>
          <center>
