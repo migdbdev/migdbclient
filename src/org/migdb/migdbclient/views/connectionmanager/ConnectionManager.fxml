@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="rootLayoutAnchorpane" prefHeight="614.0" prefWidth="973.0" styleClass="background" stylesheets="@../../resources/css/custom.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.connectionmanager.ConnectionManagerController">
+<AnchorPane fx:id="rootLayoutAnchorpane" styleClass="background" stylesheets="@../../resources/css/custom.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.migdb.migdbclient.views.connectionmanager.ConnectionManagerController">
    <children>
       <HBox layoutY="33.0" prefHeight="75.0" prefWidth="176.0">
          <children>
