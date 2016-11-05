@@ -307,6 +307,7 @@
 	-fx-font-size: 20.0pt;
     -fx-font-family: "Segoe UI Semibold";
     -fx-label-padding : 0.0 0.0 0.0 20.0px;
+    -fx-text-fill: #ffffff;
 }
 
 .dark-blue {
