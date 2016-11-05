@@ -12,19 +12,16 @@
   </tr>
 </table>
 <h2> NOTIFICATION HANDLING </h2>
-<p> There is a java class called MigDBNotifier under the utils package. And there is a two constructors available each for custom notification and defined notification. This notification class referes Tray Tester.jar. The jar was added into the project. The referencing link is <a href"https://github.com/PlusHaze/TrayNotification">https://github.com/PlusHaze/TrayNotification</a> .</p>
-
-<p><span style="color:red"> Note </span> : Add tray tester.jar into your classpath</p>
+<p> There is a java class called MigDBNotifier under the utils package. And there is a constructor available to handling notification. This notification class referes javafx notofications controller. The jar was added into the project.</p>
 
 <p> Sample code is in client application under the SetupNewDBConnectionController.java in line #188 </p>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp;String title = "Attention";</br>
    &nbsp;&nbsp;&nbsp;&nbsp;String message = "Successfully created!";</br>
-   &nbsp;&nbsp;&nbsp;&nbsp;AnimationType animationType = AnimationType.FADE;</br>
-   &nbsp;&nbsp;&nbsp;&nbsp;NotificationType notificationType = NotificationType.SUCCESS;</br>
+   &nbsp;&nbsp;&nbsp;&nbsp;String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();</br>
    &nbsp;&nbsp;&nbsp;&nbsp;int showTime = 6;</br>
 			</br>
-   &nbsp;&nbsp;&nbsp;&nbsp;MigDBNotifier notification = new MigDBNotifier(title, message, animationType, notificationType,showTime);</br>
+   &nbsp;&nbsp;&nbsp;&nbsp;MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);</br>
    &nbsp;&nbsp;&nbsp;&nbsp;notification.createDefinedNotification();</p></br>
 
 <h1> JavaFX Dialogue Box </h1>
