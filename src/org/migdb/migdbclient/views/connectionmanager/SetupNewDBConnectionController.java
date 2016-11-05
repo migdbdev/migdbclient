@@ -119,7 +119,27 @@ public class SetupNewDBConnectionController implements Initializable {
 
 		testMySQLConnectionButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			public void handle(MouseEvent mouseevent) {
-				testMySQLConnection();
+				String host = mysqlHostTextField.getText(), database = "", username = mysqlUsernameTextField.getText(),
+						password = mysqlPasswordTextField.getText();
+				int port = Integer.parseInt(mysqlPortTextField.getText());
+				if(testMySQLConnection(host, port, database, username, password)) {
+					String title = "MySQL Connection Status";
+					String message = "A successful MySQL connection was made with" + "\n"
+									+ " the parameters defined for this connection!";
+					String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
+					int showTime = 6;
+					
+					MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+					notification.createDefinedNotification();
+				} else {
+					String title = "MySQL Connection Status";
+					String message = "Can't connect to MySQL server with defined \n parameters!";
+					String notificationType = NotificationConfig.SHOWERROR.getInfo();
+					int showTime = 6;
+					
+					MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
+					notification.createDefinedNotification();
+				}
 			}
 		});
 		
@@ -225,38 +245,21 @@ public class SetupNewDBConnectionController implements Initializable {
 	/**
 	 * Test if MySQL connection established or not
 	 */
-	public void testMySQLConnection() {
+	public boolean testMySQLConnection(String host, int port, 
+			String database, String username, String password) {
+		boolean result = false;
+		MySQLDbConnManager dao = new MySQLDbConnManager();
+		Connection dbConn = null;
 		try {
-			MySQLDbConnManager dao = new MySQLDbConnManager();
-			Connection dbConn = null;
-			String host = mysqlHostTextField.getText(), database = "", username = mysqlUsernameTextField.getText(),
-					password = mysqlPasswordTextField.getText();
-			int port = Integer.parseInt(mysqlPortTextField.getText());
-			dbConn = dao.getConnection(host, port, database, username, password);
-			if (dbConn != null) {
-				
-				String title = "MySQL Connection Status";
-				String message = "A successful MySQL connection was made with" + "\n"
-								+ " the parameters defined for this connection!";
-				String notificationType = NotificationConfig.SHOWSUCCESS.getInfo();
-				int showTime = 6;
-				
-				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
-				notification.createDefinedNotification();
-				
-			} else {
-				String title = "MySQL Connection Status";
-				String message = "Can't connect to MySQL server with defined \n parameters!";
-				String notificationType = NotificationConfig.SHOWERROR.getInfo();
-				int showTime = 6;
-				
-				MigDBNotifier notification = new MigDBNotifier(title, message, notificationType, showTime);
-				notification.createDefinedNotification();
-			}
-			dao.closeConnection(dbConn);
+			dbConn = dao.getConnection(host, port, 
+					database, username, password);
+			result = (dbConn != null) ? true:false;
 		} catch (Exception e) {
-			e.printStackTrace();
+			result = false;
+		} finally {
+			if(dbConn != null) dao.closeConnection(dbConn);
 		}
+		return result;
 	}
 	
 	/**
