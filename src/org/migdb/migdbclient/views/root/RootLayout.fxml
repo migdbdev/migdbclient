@@ -70,7 +70,7 @@
          <left>
             <AnchorPane prefHeight="613.0" prefWidth="226.0" BorderPane.alignment="CENTER">
          <children>
-            <VBox fx:id="sideBarAnchorpane" layoutX="4.0" layoutY="4.0" prefHeight="607.0" prefWidth="215.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="0.0">
+            <VBox fx:id="sideBarAnchorpane" layoutX="4.0" layoutY="4.0" prefHeight="613.0" prefWidth="224.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="0.0">
                <children>
                   <Label text="No connections available ">
                      <VBox.margin>
@@ -78,7 +78,7 @@
                      </VBox.margin></Label>
                </children>
             </VBox>
-            <Separator layoutX="218.0" layoutY="5.0" orientation="VERTICAL" prefHeight="600.0" prefWidth="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="218.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0" />
+            <Separator layoutX="223.0" layoutY="5.0" orientation="VERTICAL" prefHeight="600.0" prefWidth="5.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="223.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="5.0" />
          </children></AnchorPane>
          </left>
          <center>
