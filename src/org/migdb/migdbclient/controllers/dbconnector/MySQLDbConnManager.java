@@ -22,7 +22,7 @@ public class MySQLDbConnManager {
 			Class.forName("com.mysql.jdbc.Driver");
 			dbConn = DriverManager.getConnection(connectionURL, username, password);
 		} catch (ClassNotFoundException | SQLException e) {
-			e.printStackTrace();
+			dbConn = null;
 		}
 		return dbConn;
 	}
