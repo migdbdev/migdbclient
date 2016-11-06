@@ -3,7 +3,6 @@ package org.migdb.migdbclient.views.mongodatamanager;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -15,14 +14,12 @@ import org.json.simple.JSONObject;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.NotificationConfig;
 import org.migdb.migdbclient.main.MainApp;
-import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.tablegen.CustomCellFactory;
 import org.migdb.migdbclient.tablegen.TableBean;
 import org.migdb.migdbclient.utils.MigDBNotifier;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -39,11 +36,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 
 public class CollectionManager implements Initializable {
