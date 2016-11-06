@@ -257,7 +257,26 @@
 /* ********************************************* */
 
 /* ************** Menu style ************** */
-.menu-button, .menu-button .menu-item, .menu-button .context-menu {
+.menu-bar{
+	-fx-background-color: #FFFFFF;
+	-fx-selection-bar: derive(-fx-background,-7%);
+}
+
+.menu {
+	-fx-background-color: #FFFFFF;
+	-fx-border-width: 1 1 0 1; -fx-border-color: #237f4e;
+	-fx-focus-color:#237f4e;
+}
+
+.menu:hover, .menu:filled {
+	-fx-background-color: #237f4e;
+	-fx-text-fill: #ffffff;
+}
+
+.menu-item:hover {
+     -fx-background-color: #237f4e;
+}
+/*.menu-button, .menu-button .menu-item, .menu-button .context-menu {
     -fx-background-color: #FFFFFF;
     -fx-border-color: #4D359C;
     -fx-font-size: 12.0px;
@@ -267,7 +286,7 @@
 }
  .menu-item .label {
     -fx-text-fill: #4D359C;
-}
+}*/
 /*.menu-button > .arrow-button {
     -fx-background-color: white, #28559c ;
     -fx-background-insets: 1, 3 ;
