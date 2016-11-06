@@ -1,13 +1,6 @@
 package org.migdb.migdbclient.controllers.manytomany;
 
-import org.json.simple.JSONObject;
 import org.migdb.migdbclient.controllers.mapping.changemapping.ChangeReferencing;
-import org.migdb.migdbclient.controllers.mapping.manytomany.ManyToMany;
-import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
-import org.migdb.migdbclient.resources.ChangeStructure;
-import org.migdb.migdbclient.utils.ServiceAccessor;
-
-import com.google.gson.JsonObject;
 
 public class MainManyToMany {
 

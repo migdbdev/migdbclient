@@ -3,7 +3,6 @@ package org.migdb.migdbclient.controllers.mapping.changemapping;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.hamcrest.core.IsInstanceOf;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
