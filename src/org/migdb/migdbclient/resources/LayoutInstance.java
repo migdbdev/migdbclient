@@ -1,17 +1,17 @@
 package org.migdb.migdbclient.resources;
 
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 
 public enum LayoutInstance {
 	INSTANCE;
 	
-	private AnchorPane sidebar;
+	private VBox sidebar;
 
-	public AnchorPane getSidebar() {
+	public VBox getSidebar() {
 		return sidebar;
 	}
 
-	public void setSidebar(AnchorPane sidebar) {
+	public void setSidebar(VBox sidebar) {
 		this.sidebar = sidebar;
 	}
 

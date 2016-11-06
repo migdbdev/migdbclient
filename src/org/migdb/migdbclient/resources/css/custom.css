@@ -254,9 +254,40 @@
 .tree-cell:sub-tree-item {
     -fx-padding: 0.25em ;
 }
-
-
 /* ********************************************* */
+
+/* ************** Menu style ************** */
+.menu-bar{
+	-fx-background-color: #FFFFFF;
+	-fx-selection-bar: derive(-fx-background,-7%);
+}
+
+.menu {
+	-fx-background-color: #FFFFFF;
+	-fx-border-width: 1 1 0 1; -fx-border-color: #237f4e;
+	-fx-focus-color:#237f4e;
+}
+
+.menu:hover, .menu:filled {
+	-fx-background-color: #237f4e;
+}
+
+.menu:hover .label {
+	-fx-text-fill: #ffffff;
+}
+
+.menu-item:hover {
+     -fx-background-color: #237f4e;
+}
+
+.menu .menu-item .label {
+	-fx-text-fill: #000000;
+}
+
+.menu .menu-item:hover > .label {
+	-fx-text-fill: #ffffff;
+}
+/* **************************************** */
 
 /* ********** Main Window Page style *********** */
 .mysql_connectivity {
@@ -280,6 +311,7 @@
 	-fx-font-size: 20.0pt;
     -fx-font-family: "Segoe UI Semibold";
     -fx-label-padding : 0.0 0.0 0.0 20.0px;
+    -fx-text-fill: #ffffff;
 }
 
 .dark-blue {
