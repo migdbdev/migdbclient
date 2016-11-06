@@ -16,6 +16,7 @@ import javafx.scene.web.WebView;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.migdb.migdbclient.controllers.UpdateDataSet;
 import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.ChangeStructure;
@@ -52,8 +53,11 @@ public class CollectionStructure implements Initializable {
 
     public void procesContinuous() {
     	try {
+
     		MongoWriter mongoWriter = new MongoWriter();
     		mongoWriter.write();
+    		UpdateDataSet dataSet = new UpdateDataSet();
+    		dataSet.updateDataSet();
     		ConnectionManagerController controller = new ConnectionManagerController();
     		controller.setSideBarDatabases();
 		} catch (Exception e) {

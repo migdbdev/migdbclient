@@ -55,7 +55,7 @@
                </children></AnchorPane>
             <AnchorPane styleClass="NNetwork_connectivity" GridPane.rowIndex="2">
                <children>
-                  <Text layoutX="13.0" layoutY="36.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Neural Network Connectivity">
+                  <Text layoutX="13.0" layoutY="36.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Server Connectivity">
                      <font>
                         <Font name="System Bold" size="20.0" />
                      </font>

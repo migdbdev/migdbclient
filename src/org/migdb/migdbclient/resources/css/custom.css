@@ -257,32 +257,36 @@
 /* ********************************************* */
 
 /* ************** Menu style ************** */
-.menu-button, .menu-button .menu-item, .menu-button .context-menu {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #4D359C;
-    -fx-font-size: 12.0px;
+.menu-bar{
+	-fx-background-color: #FFFFFF;
+	-fx-selection-bar: derive(-fx-background,-7%);
 }
- .menu-button .menu-item .label:hover {
-    -fx-text-fill: #4D359C;
-}
- .menu-item .label {
-    -fx-text-fill: #4D359C;
-}
-/*.menu-button > .arrow-button {
-    -fx-background-color: white, #28559c ;
-    -fx-background-insets: 1, 3 ;
-    -fx-background-radius: 16, 16 ;
-    -fx-padding: 8 ;
 
-}*/
-/*.menu-button > .arrow-button > .arrow {
-    -fx-background-color: white ;
-    -fx-background-insets: 0, 2 ;
-    -fx-background-radius: 12, 12 ;
-    -fx-padding: 8 ; 
-    -fx-shape: "M0 6 l-6 -6 l0 -2 l6 -6 l2 0 l-6 6 l12 0 l0 2 l-12 0 l6 6 z";
+.menu {
+	-fx-background-color: #FFFFFF;
+	-fx-border-width: 1 1 0 1; -fx-border-color: #237f4e;
+	-fx-focus-color:#237f4e;
+}
 
-}*/
+.menu:hover, .menu:filled {
+	-fx-background-color: #237f4e;
+}
+
+.menu:hover .label {
+	-fx-text-fill: #ffffff;
+}
+
+.menu-item:hover {
+     -fx-background-color: #237f4e;
+}
+
+.menu .menu-item .label {
+	-fx-text-fill: #000000;
+}
+
+.menu .menu-item:hover > .label {
+	-fx-text-fill: #ffffff;
+}
 /* **************************************** */
 
 /* ********** Main Window Page style *********** */
