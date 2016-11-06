@@ -530,9 +530,7 @@ public class ModificationEvaluator {
 													String refByTbl = (String) ref.get("referencingTab");
 													// if referencing table is not removed, check for referencing column removal
 													if (!removedTbls.contains(refByTbl)) {
-														
-														/*System.out.println("if");*/
-														
+			
 														String refByCol = (String) ref.get("referencingCol");
 														if (removedCols.keySet().contains(refByTbl)) {
 															for (String c : removedCols.keySet()) {
@@ -565,13 +563,7 @@ public class ModificationEvaluator {
 																refByIndex.add(l);
 															}
 														}
-													} /*else {
-														System.out.println("else");
-														if (!colIndex.contains(k)) {
-															colIndex.add(k);
-															removedColList.add(cols.get(k));
-														}
-													}*/
+													} 
 												} else {
 													if (!colIndex.contains(k)) {
 														colIndex.add(k);
