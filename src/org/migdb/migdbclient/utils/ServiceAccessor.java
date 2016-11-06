@@ -5,6 +5,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.migdb.migdbclient.resources.CollectionStructureJSON;
+import org.migdb.migdbclient.resources.DataSetUpdateRequestMessage;
 import org.migdb.migdbclient.resources.MappingRequestMessage;
 
 import com.sun.jersey.api.client.Client;
@@ -27,7 +28,7 @@ public class ServiceAccessor {
 
 		client.addFilter(new HTTPBasicAuthFilter("fhgi8598ugh985yhob580uojg0t", "dfjgn984u608jb950o9bipj0945yjpbjmgi"));
 		ClientResponse response = webResource.type("application/json")
-				.accept("application/json")	  
+				.accept("application/json")
 				.post(ClientResponse.class, input);
 
 		if (response.getStatus() != 200) {
@@ -46,7 +47,7 @@ public class ServiceAccessor {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-			 return json; 
+			 return json;
 
 	}
 
@@ -108,5 +109,38 @@ public class ServiceAccessor {
 			e.printStackTrace();
 		}
 		return filename;
+	}
+
+	public static JSONObject updatedDataSet(DataSetUpdateRequestMessage message){
+
+		Client client = Client.create();
+
+		WebResource webResource = client
+		   .resource("http://localhost:8080/migdbserver/services/learnnetwork");
+
+		String input = message.getMessageBody().toJSONString();
+
+		client.addFilter(new HTTPBasicAuthFilter("fhgi8598ugh985yhob580uojg0t", "dfjgn984u608jb950o9bipj0945yjpbjmgi"));
+		ClientResponse response = webResource.type("application/json")
+				.accept("application/json")
+				.post(ClientResponse.class, input);
+
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Failed : HTTP error code : "
+			     + response.getStatus());
+		}
+
+		System.out.println("Output from Server .... \n");
+		String output = response.getEntity(String.class);
+		System.out.println(output);
+		JSONParser parser = new JSONParser();
+		JSONObject json = new JSONObject();
+		try {
+			json = (JSONObject) parser.parse(output);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			 return json;
 	}
 }
