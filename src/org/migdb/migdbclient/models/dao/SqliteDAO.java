@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import org.migdb.migdbclient.controllers.dbconnector.SqliteDbConnManager;
 import org.migdb.migdbclient.models.dto.ConnectorDTO;
-import org.migdb.migdbclient.models.dto.ReferenceDTO;
 import org.migdb.migdbclient.models.dto.RelationshiCardinalityDTO;
 
 import javafx.collections.FXCollections;

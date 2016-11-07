@@ -23,10 +23,9 @@ import org.migdb.migdbclient.config.TreeviewSize;
 import org.migdb.migdbclient.controllers.mapping.manytomany.ManyToMany;
 import org.migdb.migdbclient.controllers.mapping.onetomany.OneToManyMapper;
 import org.migdb.migdbclient.controllers.mapping.onetoone.OneToOneMap;
-import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
 import org.migdb.migdbclient.main.MainApp;
-import org.migdb.migdbclient.models.modificationevaluator.TableReference;
 import org.migdb.migdbclient.models.modificationevaluator.ForeignKeyReference;
+import org.migdb.migdbclient.models.modificationevaluator.TableReference;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ChangeStructure;
 

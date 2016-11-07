@@ -1,11 +1,9 @@
 package org.migdb.migdbclient.controllers.mapping.manytomany;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -16,10 +14,6 @@ import org.migdb.migdbclient.resources.ChangeStructure;
 import org.migdb.migdbclient.resources.ManyToManyResource;
 import org.migdb.migdbclient.utils.CollectionStructureJSONHandler;
 import org.migdb.migdbclient.utils.ServiceAccessor;
-
-import com.mongodb.util.JSON;
-
-import scala.reflect.api.Trees.NewApi;
 
 public class ManyToMany {
 

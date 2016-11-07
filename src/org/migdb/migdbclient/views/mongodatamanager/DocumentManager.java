@@ -3,18 +3,13 @@ package org.migdb.migdbclient.views.mongodatamanager;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import javax.swing.tree.TreePath;
-
-import org.apache.commons.collections.KeyValue;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.json.simple.JSONArray;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
