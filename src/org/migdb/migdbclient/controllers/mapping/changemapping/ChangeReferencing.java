@@ -57,6 +57,7 @@ public class ChangeReferencing {
 			}
 
 		}
+		deleteChildTable(collectionStructure, childTableName);
 		 System.out.println(collectionStructure);
 		 writeChangedJson();
 
@@ -93,6 +94,16 @@ public class ChangeReferencing {
 		}
 		return childDataObjects;
 	}
+	private void deleteChildTable(JSONObject tableData,String name){
+		JSONArray collections = new JSONArray();
+		collections = (JSONArray) tableData.get("collections");
+		for (int i = 0; i < collections.size(); i++) {
+			JSONObject collection = (JSONObject) collections.get(i);
+			if (collection.get("collectionName").equals(name)) {
+				collections.remove(i);
+			}
+		}
+	}
 	private void writeChangedJson() {
 		FileWriter file;
 		try {
@@ -105,4 +116,5 @@ public class ChangeReferencing {
 			e.printStackTrace();
 		}
 	}
+	
 }
