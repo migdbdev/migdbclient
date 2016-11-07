@@ -19,6 +19,6 @@
          </contextMenu></ListView>
       <Label layoutX="24.0" layoutY="43.0" text="Schema Name : " />
       <Label fx:id="databaseNameLabel" layoutX="138.0" layoutY="43.0" text="Label" />
-      <Button fx:id="btnAddCollection" layoutX="552.0" layoutY="107.0" mnemonicParsing="false" onAction="#showNewCollection" styleClass="dark-blue" text="New Collection" />
+      <Button fx:id="btnAddCollection" layoutX="552.0" layoutY="107.0" mnemonicParsing="false" onAction="#showNewCollection" styleClass="dark-blue" text="Create Collection" />
    </children>
 </AnchorPane>
