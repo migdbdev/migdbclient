@@ -66,7 +66,7 @@ public class CheckInternetConnectivity extends Thread {
 	
 	public boolean testIneternet(String site) {
 	    Socket sock = new Socket();
-	    InetSocketAddress addr = new InetSocketAddress(site,80);
+	    InetSocketAddress addr = new InetSocketAddress(site,22);
 	    try {
 	        sock.connect(addr,3000);
 	        return true;

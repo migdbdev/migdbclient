@@ -29,7 +29,10 @@
                 </Menu>
                   <Menu mnemonicParsing="false" text="Help">
                     <items>
-                      <MenuItem mnemonicParsing="false" text="Action 1" />
+                      <MenuItem mnemonicParsing="false">
+                           <graphic>
+                              <Hyperlink fx:id="menubarManualHyperlink" text="About MigDB" />
+                           </graphic></MenuItem>
                     </items>
                   </Menu>
               </menus>
