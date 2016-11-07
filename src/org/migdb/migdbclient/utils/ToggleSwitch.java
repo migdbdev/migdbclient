@@ -3,12 +3,9 @@
  */
 package org.migdb.migdbclient.utils;
 
-import java.util.Iterator;
-
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.ChangeStructure;
-import org.migdb.migdbclient.views.collectionstructure.CollectionStructure;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;

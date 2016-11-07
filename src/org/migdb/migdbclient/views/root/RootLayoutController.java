@@ -2,45 +2,32 @@ package org.migdb.migdbclient.views.root;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 import org.migdb.migdbclient.config.FxmlPath;
-import org.migdb.migdbclient.config.ImagePath;
-import org.migdb.migdbclient.controllers.dbconnector.MongoConnManager;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ConnectionParameters;
-import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.resources.LayoutInstance;
+import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCursor;
-
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 public class RootLayoutController implements Initializable {
 

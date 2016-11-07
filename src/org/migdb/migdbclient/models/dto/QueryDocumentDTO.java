@@ -3,8 +3,6 @@
  */
 package org.migdb.migdbclient.models.dto;
 
-import javafx.scene.control.ComboBox;
-
 /**
  * @author HP
  *

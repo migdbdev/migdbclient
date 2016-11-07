@@ -4,7 +4,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.migdb.migdbclient.resources.CollectionStructureJSON;
 import org.migdb.migdbclient.resources.DataSetUpdateRequestMessage;
 import org.migdb.migdbclient.resources.MappingRequestMessage;
 

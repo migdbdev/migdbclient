@@ -16,8 +16,6 @@ import org.json.simple.parser.ParseException;
 import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.resources.ChangeStructure;
 
-import com.google.gson.stream.JsonWriter;
-
 /**
  * @author Kani
  *

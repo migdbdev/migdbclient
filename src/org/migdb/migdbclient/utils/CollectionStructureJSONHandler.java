@@ -2,7 +2,6 @@ package org.migdb.migdbclient.utils;
 
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.resources.ChangeStructure;
-import org.migdb.migdbclient.resources.CollectionStructureJSON;
 
 
 public class CollectionStructureJSONHandler {

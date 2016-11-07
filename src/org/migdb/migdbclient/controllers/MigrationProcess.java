@@ -11,9 +11,7 @@ import org.migdb.migdbclient.resources.CenterLayout;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 
 /**
  * @author Kani
