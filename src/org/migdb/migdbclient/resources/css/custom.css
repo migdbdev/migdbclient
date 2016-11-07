@@ -143,54 +143,6 @@
 }
 /* *************************************************** */
 
-/* ****************** Add query parameters style ***************** */
-.button_addparameters_button {
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Addparametersbutton.png);
-}
-
-.button_addparameters_button:hover {
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Addparametersbuttonhover.png);
-}
-/* ************************************************************** */
-
-/* ****************** Show query button style ***************** */
-.button_showquery_button {
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Showquerybutton.png);
-}
-
-.button_showquery_button:hover {
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Showquerybuttonhover.png);
-}
-/* ************************************************************ */
-
-/* ************** Update button style ************** */
-.button_update {
-	-fx-pref-width:190.0;
-	-fx-pref-height:40.0;
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Updatebutton.png);
-}
-
-.button_update:hover {
-	-fx-pref-width:190.0;
-	-fx-pref-height:40.0;
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Updatebuttonhover.png);
-}
-/* ************************************************* */
-
-/* ************** Convert button style ************** */
-.button_convert {
-	-fx-pref-width:190.0;
-	-fx-pref-height:40.0;
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Convertbutton.png);
-}
-
-.button_convert:hover {
-	-fx-pref-width:190.0;
-	-fx-pref-height:40.0;
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Convertbuttonhover.png);
-}
-/* ************************************************** */
-
 /* ************** Tree view style ************** */
 .tree-cell:selected {
     -fx-font-weight: bold ;
@@ -215,27 +167,27 @@
 }
 /* ********************************************* */
 
-/**
- *  Button Style
- */
+/**************************************************
+ *  				Button Style
+ **************************************************/
  .button {
     -fx-padding: 5 22 5 22;   
     -fx-border-color: #e2e2e2;
     -fx-border-width: 2;
     -fx-background-radius: 0;
-    -fx-background-color: #1d1d1d;
+    -fx-background-color: #237f4e;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 11pt;
-    -fx-text-fill: #d8d8d8;
+    -fx-text-fill: #ffffff;
     -fx-background-insets: 0 0 0 0, 0, 1, 2;
 }
 
 .button:hover {
-    -fx-background-color: #3a3a3a;
+    -fx-background-color: #65a583;
 }
 
 .button:pressed, .button:default:hover:pressed {
-  -fx-background-color: white;
+  -fx-background-color: #91bfa6;
   -fx-text-fill: #1d1d1d;
 }
 
