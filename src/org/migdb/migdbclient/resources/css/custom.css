@@ -79,47 +79,6 @@
 }
 /* ******************************************************** */
 
- 
- /*********** Next button style *************/
- .label_next_button {
- 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Nextbutton.png);
- }
- 
-  .label_next_button:hover {
-  	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Nextbuttonhover.png);
-  }
-  /* ********************************* */
-  
-  /* *************** Back button style *************** */
-  .label_back_button {
- 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Backbutton.png);
- }
- 
- .label_back_button:hover {
- 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Backbuttonhover.png);
- }
-  /* ************************************************* */
-  
-  /* *************** Test connection button style *************** */
-  .button_testconnection_button {
-  	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Testconnectionbutton.png);
-  }
-  
-  .button_testconnection_button:hover {
-  	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Testconnectionhoverbutton.png);
-  }
-  /* ************************************************************ */
-  
-  /* *************** Finish button style *************** */
-  .button_finish_button {
-  	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Finishbutton.png);
-  }
-  
-  .button_finish_button:hover {
-  	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Finishbuttonhover.png);
-  }
-  /* *************************************************** */
-
 /* *************** Connection add button style *************** */
 .label_AddConnection {
 	-fx-background-repeat: no-repeat;
@@ -255,6 +214,54 @@
     -fx-padding: 0.25em ;
 }
 /* ********************************************* */
+
+/**
+ *  Button Style
+ */
+ .button {
+    -fx-padding: 5 22 5 22;   
+    -fx-border-color: #e2e2e2;
+    -fx-border-width: 2;
+    -fx-background-radius: 0;
+    -fx-background-color: #1d1d1d;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 11pt;
+    -fx-text-fill: #d8d8d8;
+    -fx-background-insets: 0 0 0 0, 0, 1, 2;
+}
+
+.button:hover {
+    -fx-background-color: #3a3a3a;
+}
+
+.button:pressed, .button:default:hover:pressed {
+  -fx-background-color: white;
+  -fx-text-fill: #1d1d1d;
+}
+
+.button:focused {
+    -fx-border-color: white, white;
+    -fx-border-width: 1, 1;
+    -fx-border-style: solid, segments(1, 1);
+    -fx-border-radius: 0, 0;
+    -fx-border-insets: 1 1 1 1, 0;
+}
+
+.button:disabled, .button:default:disabled {
+    -fx-opacity: 0.4;
+    -fx-background-color: #1d1d1d;
+    -fx-text-fill: white;
+}
+
+.button:default {
+    -fx-background-color: -fx-focus-color;
+    -fx-text-fill: #ffffff;
+}
+
+.button:default:hover {
+    -fx-background-color: derive(-fx-focus-color,30%);
+}
+ 
 
 /* ************** Menu style ************** */
 .menu-bar{
