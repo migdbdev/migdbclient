@@ -131,7 +131,7 @@ public class RootLayoutController implements Initializable {
             @Override
             public void handle(ActionEvent t) {
                 try {
-					openManualWebpage("http://migdb.org/");
+					openManualWebpage("http://migdb.org/help.html");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -283,7 +283,7 @@ public class RootLayoutController implements Initializable {
 	 * @param url
 	 * @throws URISyntaxException
 	 */
-	public static void openManualWebpage(String url) {
+	public void openManualWebpage(String url) {
 	    try {
 	    	Desktop.getDesktop().browse(new URI(url));
 	    } catch (IOException | URISyntaxException e) {
