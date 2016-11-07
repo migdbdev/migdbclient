@@ -1,6 +1,7 @@
 package org.migdb.migdbclient.controllers.mapping.changemapping;
 
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import org.json.simple.JSONArray;
@@ -11,16 +12,16 @@ import org.migdb.migdbclient.config.FilePath;
 
 public class ChangeReferencing {
 
-	JSONObject dbStructure;
+//	JSONObject dbStructure;
 	JSONObject collectionStructure;
 
 	public ChangeReferencing() {
 		super();
 		JSONParser parser = new JSONParser();
 		try {
-			Object obj = parser.parse(new FileReader(FilePath.DOCUMENT.getPath() + FilePath.DBSTRUCTUREFILE.getPath()));
-			this.dbStructure = (JSONObject) obj;
-			obj = parser.parse(new FileReader(FilePath.DOCUMENT.getPath() + FilePath.COLLECTIONFILE.getPath()));
+//			Object obj = parser.parse(new FileReader(FilePath.DOCUMENT.getPath() + FilePath.DBSTRUCTUREFILE.getPath()));
+//			this.dbStructure = (JSONObject) obj;
+			Object obj = parser.parse(new FileReader(FilePath.DOCUMENT.getPath() + FilePath.COLLECTIONFILE.getPath()));
 			this.collectionStructure = (JSONObject) obj;
 
 		} catch (IOException | ParseException e) {
@@ -57,7 +58,7 @@ public class ChangeReferencing {
 
 		}
 		 System.out.println(collectionStructure);
-
+		 writeChangedJson();
 
 	}
 
@@ -91,5 +92,17 @@ public class ChangeReferencing {
 			childDataObjects.add(getDataObject(dataArray, id));
 		}
 		return childDataObjects;
+	}
+	private void writeChangedJson() {
+		FileWriter file;
+		try {
+			file = new FileWriter(FilePath.DOCUMENT.getPath() + FilePath.COLLECTIONFILE.getPath());
+			file.write(collectionStructure.toJSONString());
+			file.flush();
+			file.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

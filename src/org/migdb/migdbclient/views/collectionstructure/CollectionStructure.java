@@ -3,8 +3,10 @@ package org.migdb.migdbclient.views.collectionstructure;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.controllers.UpdateDataSet;
+import org.migdb.migdbclient.controllers.mapping.changemapping.ChangeReferencing;
 import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
 import org.migdb.migdbclient.main.MainApp;
 import org.migdb.migdbclient.resources.ChangeStructure;
@@ -52,6 +54,16 @@ public class CollectionStructure implements Initializable {
 
     public void procesContinuous() {
     	try {
+
+    		JSONArray changestructure = ChangeStructure.getInstance().linkDataArray;
+    		for (int i = 0; i < changestructure.size(); i++) {
+    			JSONObject relation = (JSONObject) changestructure.get(i);
+    			if(relation.get("originalvalue").toString().equals("REFERENCING")&& relation.get("toText").toString().equals("EMBEDDING")){
+    				ChangeReferencing changeReferencing = new ChangeReferencing();
+    				changeReferencing.change(relation.get("from").toString(), relation.get("to").toString());
+    			}
+    			System.out.println(changestructure.get(i));
+    		}
 
     		MongoWriter mongoWriter = new MongoWriter();
     		mongoWriter.write();
