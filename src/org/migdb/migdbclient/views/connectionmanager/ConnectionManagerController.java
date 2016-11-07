@@ -265,6 +265,7 @@ public class ConnectionManagerController implements Initializable {
 
 			mysqlTree = new TreeView<String>(mysqlItem);
 			mongoTree = new TreeView<String>(mongoItem);
+			mysqlTree.getStyleClass().add("sidebar tree-cell:selected");
 
 			// MYSQL tree item context menu
 			ContextMenu mysqlContext = new ContextMenu();
