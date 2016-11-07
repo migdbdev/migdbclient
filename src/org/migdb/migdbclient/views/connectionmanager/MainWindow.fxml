@@ -64,5 +64,6 @@
                </children></AnchorPane>
          </children>
       </GridPane>
+      <Button fx:id="getStartedButton" layoutX="791.0" layoutY="551.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="169.0" text="Get Started &gt;&gt;" />
 	</children>
 </AnchorPane>

@@ -7,16 +7,27 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import org.migdb.migdbclient.config.FxmlPath;
+import org.migdb.migdbclient.main.MainApp;
+import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.threads.CheckInternetConnectivity;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.layout.AnchorPane;
 
 /**
  * @author KANI
  *
  */
 public class MainWindow implements Initializable {
+	
+	@FXML
+	private Button getStartedButton;
 
 	/**
 	 * Initialize method Called to initialize a controller after its root
@@ -26,6 +37,8 @@ public class MainWindow implements Initializable {
 	 * object was not localized
 	 */
 	public void initialize(URL location, ResourceBundle resources) {
+		
+		getStartedButton.addEventHandler(ActionEvent.ACTION, event -> getStarted() );
 		
 		/*CheckInternetConnectivity internetStatus = new CheckInternetConnectivity();
 
@@ -58,6 +71,23 @@ public class MainWindow implements Initializable {
 			}
 		}).start();*/
 
+	}
+	
+	/**
+	 * Method for action perform in get started button
+	 */
+	public void getStarted() {
+		try {
+			AnchorPane root;
+			root = CenterLayout.INSTANCE.getRootContainer();
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(MainApp.class.getResource(FxmlPath.DBMIGRATOR.getPath()));
+			AnchorPane dbMigrator = loader.load();
+			root.getChildren().clear();
+			root.getChildren().add(dbMigrator);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }
