@@ -1,11 +1,9 @@
 package org.migdb.migdbclient.main;
 
-import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 
 import org.migdb.migdbclient.config.Configurations;
-import org.migdb.migdbclient.config.FilePath;
 import org.migdb.migdbclient.config.FxmlPath;
 import org.migdb.migdbclient.config.ImagePath;
 import org.migdb.migdbclient.models.dao.SqliteDAO;

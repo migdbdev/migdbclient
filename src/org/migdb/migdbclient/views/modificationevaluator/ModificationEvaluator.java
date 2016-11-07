@@ -23,10 +23,9 @@ import org.migdb.migdbclient.config.TreeviewSize;
 import org.migdb.migdbclient.controllers.mapping.manytomany.ManyToMany;
 import org.migdb.migdbclient.controllers.mapping.onetomany.OneToManyMapper;
 import org.migdb.migdbclient.controllers.mapping.onetoone.OneToOneMap;
-import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
 import org.migdb.migdbclient.main.MainApp;
-import org.migdb.migdbclient.models.modificationevaluator.TableReference;
 import org.migdb.migdbclient.models.modificationevaluator.ForeignKeyReference;
+import org.migdb.migdbclient.models.modificationevaluator.TableReference;
 import org.migdb.migdbclient.resources.CenterLayout;
 import org.migdb.migdbclient.resources.ChangeStructure;
 
@@ -531,9 +530,7 @@ public class ModificationEvaluator {
 													String refByTbl = (String) ref.get("referencingTab");
 													// if referencing table is not removed, check for referencing column removal
 													if (!removedTbls.contains(refByTbl)) {
-														
-														/*System.out.println("if");*/
-														
+			
 														String refByCol = (String) ref.get("referencingCol");
 														if (removedCols.keySet().contains(refByTbl)) {
 															for (String c : removedCols.keySet()) {
@@ -566,13 +563,7 @@ public class ModificationEvaluator {
 																refByIndex.add(l);
 															}
 														}
-													} /*else {
-														System.out.println("else");
-														if (!colIndex.contains(k)) {
-															colIndex.add(k);
-															removedColList.add(cols.get(k));
-														}
-													}*/
+													} 
 												} else {
 													if (!colIndex.contains(k)) {
 														colIndex.add(k);

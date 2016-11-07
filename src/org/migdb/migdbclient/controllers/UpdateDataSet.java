@@ -51,7 +51,7 @@ public class UpdateDataSet {
 					String calenderCount = dataTypeCounts.get("DATE_COUNT").toString();
 					String numericCount = dataTypeCounts.get("NUMERIC_COUNT").toString();
 					String mappingModel = tableNameAndMapping[1];
-					DataSetUpdateRequestMessage message = new DataSetUpdateRequestMessage("alfaclient;", columnCount,
+					DataSetUpdateRequestMessage message = new DataSetUpdateRequestMessage("alfaclient", columnCount,
 							numericCount, stringCount, calenderCount, mappingModel);
 					ServiceAccessor.updatedDataSet(message);
 				}

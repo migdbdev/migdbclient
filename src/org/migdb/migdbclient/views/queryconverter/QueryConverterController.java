@@ -10,6 +10,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.migdb.migdbclient.config.DataTypes;
+import org.migdb.migdbclient.models.queryconverter.CreateCollection;
+import org.migdb.migdbclient.models.queryconverter.CreateDocumentCollection;
+import org.migdb.migdbclient.models.queryconverter.DropCollection;
+import org.migdb.migdbclient.models.queryconverter.FindDocument;
+import org.migdb.migdbclient.models.queryconverter.InsertDocument;
+import org.migdb.migdbclient.models.queryconverter.MatchCondition;
+import org.migdb.migdbclient.models.queryconverter.RemoveDocument;
+import org.migdb.migdbclient.models.queryconverter.UpdateCollection;
+import org.migdb.migdbclient.models.queryconverter.UpdateDocument;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
@@ -115,7 +124,7 @@ public class QueryConverterController {
 			} else if (statement instanceof Select) {
 				Select selectStatement = (Select) statement;
 				mongoQuery = convertSelectRecord(selectStatement);
-			}
+			} 
 
 			mongoQueryTxt.setText(mongoQuery);
 
@@ -134,42 +143,53 @@ public class QueryConverterController {
 		List<ColumnDefinition> colDef = createStatement.getColumnDefinitions();
 		List<Index> indexes = createStatement.getIndexes();
 
-		LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+		//LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+		CreateCollection obj1 = new CreateCollection(table.getName());
+		
+		CreateDocumentCollection obj2 = new CreateDocumentCollection(table.getName());
 
 		for (int i = 0; i < colDef.size(); i++) {
 			ColumnDefinition def = colDef.get(i);
 			String dataType = def.getColDataType().getDataType();
 			if (containsCaseInsensitive(dataType, numberTypes)) {
 				if (dataType.equalsIgnoreCase("int")) {
-					pairs.put(def.getColumnName(), "NumberInt(\"<Value" + (i + 1) + ">\")");
+					//pairs.put(def.getColumnName(), "NumberInt(\"<Value" + (i + 1) + ">\")");
+					obj2.addPair(def.getColumnName(), "int");
 				} else if (dataType.equalsIgnoreCase("bigint")) {
-					pairs.put(def.getColumnName(), "NumberLong(\"<Value" + (i + 1) + ">\")");
+					//pairs.put(def.getColumnName(), "NumberLong(\"<Value" + (i + 1) + ">\")");
+					obj2.addPair(def.getColumnName(), "bigint");
 				} else {
-					pairs.put(def.getColumnName(), "<Value" + (i + 1) + ">");
+					//pairs.put(def.getColumnName(), "<Value" + (i + 1) + ">");
+					obj2.addPair(def.getColumnName(), "numeric");
 				}
 			} else if (containsCaseInsensitive(dataType, dateTypes)) {
-				pairs.put(def.getColumnName(), "new Date(\"<Value" + (i + 1) + ">\")");
+				//pairs.put(def.getColumnName(), "new Date(\"<Value" + (i + 1) + ">\")");
+				obj2.addPair(def.getColumnName(), "date");
 			} else {
-				pairs.put(def.getColumnName(), "\"<Value" + (i + 1) + ">\"");
+				//pairs.put(def.getColumnName(), "\"<Value" + (i + 1) + ">\"");
+				obj2.addPair(def.getColumnName(), "string");
 			}
 		}
-
+		
 		for (int i = 0; i < indexes.size(); i++) {
 			Index index = indexes.get(i);
 			String keyType = index.getType();
 			if (keyType.equalsIgnoreCase("foreign key")) {
 				ForeignKeyIndex fk = (ForeignKeyIndex) index;
-				LinkedHashMap<String, Object> fkPairs = new LinkedHashMap<String, Object>();
+				/*LinkedHashMap<String, Object> fkPairs = new LinkedHashMap<String, Object>();
 				fkPairs.put("$ref", fk.getTable().getName());
 				fkPairs.put("$id", "ObjectId(\"<Id_Value>\")");
-				pairs.put(fk.getColumnsNames().get(0), fkPairs);
+				pairs.put(fk.getColumnsNames().get(0), fkPairs);*/
+				obj2.addReferencePair(fk.getTable().getName(), fk.getColumnsNames().get(0));
 			}
-		}
+		}	
+		
+		String mongoQuery = obj1.toString()+"\n\nOR\n\n"+obj2.toString();
 
-		String mongoQuery = "db.createCollection(\"" + table.getName() + "\") \n\n OR \n\n" + "db." + table.getName()
+		/*String mongoQuery = "db.createCollection(\"" + table.getName() + "\") \n\n OR \n\n" + "db." + table.getName()
 				+ ".insert(" + pairs.toString().replace("$", "\t$").replace("=", ":").replace(",", ",\n\t")
 						.replace("{", "{\n\t").replace("}", "\n}").replace("},", "\t},")
-				+ ")";
+				+ ")";*/
 		return mongoQuery;
 	}
 
@@ -179,34 +199,42 @@ public class QueryConverterController {
 	 */
 	private String convertAlterTable(Alter alterStatement) {
 
-		String mongoQuery = "";
-
 		String operation = alterStatement.getOperation();
 		Table table = alterStatement.getTable();
+		
+		UpdateCollection obj = new UpdateCollection(table.getName());
 
 		if (operation.equalsIgnoreCase("add")) {
-			Pair<String, Object> pair;
+			//Pair<String, Object> pair;
 			String dataType = alterStatement.getDataType().toString();
 			if (containsCaseInsensitive(dataType, numberTypes)) {
 				if (dataType.equalsIgnoreCase("int")) {
-					pair = new Pair<String, Object>(alterStatement.getColumnName(), "NumberInt(\"<Value>\")");
+					obj.addColumn(alterStatement.getColumnName(), "int");
+					//pair = new Pair<String, Object>(alterStatement.getColumnName(), "NumberInt(\"<Value>\")");
 				} else if (dataType.equalsIgnoreCase("bigint")) {
-					pair = new Pair<String, Object>(alterStatement.getColumnName(), "NumberLong(\"<Value>\")");
+					obj.addColumn(alterStatement.getColumnName(), "bigint");
+					//pair = new Pair<String, Object>(alterStatement.getColumnName(), "NumberLong(\"<Value>\")");
 				} else {
-					pair = new Pair<String, Object>(alterStatement.getColumnName(), "<Value>");
+					obj.addColumn(alterStatement.getColumnName(), "numeric");
+					//pair = new Pair<String, Object>(alterStatement.getColumnName(), "<Value>");
 				}
 			} else if (containsCaseInsensitive(dataType, dateTypes)) {
-				pair = new Pair<String, Object>(alterStatement.getColumnName(), "new ISODate()");
+				obj.addColumn(alterStatement.getColumnName(), "date");
+				//pair = new Pair<String, Object>(alterStatement.getColumnName(), "new ISODate()");
 			} else {
-				pair = new Pair<String, Object>(alterStatement.getColumnName(), "\"<Value>\"");
+				obj.addColumn(alterStatement.getColumnName(), "string");
+				//pair = new Pair<String, Object>(alterStatement.getColumnName(), "\"<Value>\"");
 			}
-			mongoQuery = "db." + table.getName() + ".update( \n\t{ }, \n\t{ $set: { "
-					+ pair.toString().replace("=", ":") + " } }, \n\t{ multi: true } \n)";
+			/*mongoQuery = "db." + table.getName() + ".update( \n\t{ }, \n\t{ $set: { "
+					+ pair.toString().replace("=", ":") + " } }, \n\t{ multi: true } \n)";*/
 
 		} else if (operation.equalsIgnoreCase("drop")) {
-			mongoQuery = "db." + table.getName() + ".update( \n\t{ }, \n\t{ $unset: { " + alterStatement.getColumnName()
-					+ ": \"\" } }, \n\t{ multi: true } \n)";
+			obj.dropColumn(alterStatement.getColumnName());
+			/*mongoQuery = "db." + table.getName() + ".update( \n\t{ }, \n\t{ $unset: { " + alterStatement.getColumnName()
+					+ ": \"\" } }, \n\t{ multi: true } \n)";*/
 		}
+		
+		String mongoQuery = obj.toString();
 
 		return mongoQuery;
 	}
@@ -224,7 +252,9 @@ public class QueryConverterController {
 		String indexName = index.getName();
 		List<String> columns = index.getColumnsNames();
 
-		LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+		//LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+		org.migdb.migdbclient.models.queryconverter.CreateIndex obj = 
+				new org.migdb.migdbclient.models.queryconverter.CreateIndex(table.getName(), indexName);
 
 		for (int i = 0; i < columns.size(); i++) {
 			String column = columns.get(i);
@@ -236,12 +266,11 @@ public class QueryConverterController {
 					}
 				}
 			}
-			pairs.put(column, order);
+			obj.addIndex(column, order);
+			//pairs.put(column, order);
 		}
 
-		String mongoQuery = "db." + table.getName() + ".createIndex( \n\t"
-				+ pairs.toString().replace("=", ":").replace("{", "{ ").replace("}", " }") + ", \n\t{ name:\""
-				+ indexName + "\" } \n)";
+		String mongoQuery = obj.toString();
 		return mongoQuery;
 	}
 
@@ -252,8 +281,10 @@ public class QueryConverterController {
 	private String convertDropTable(Drop dropStatement) {
 
 		Table table = dropStatement.getName();
+		
+		DropCollection obj = new DropCollection(table.getName());
 
-		String mongoQuery = "db." + table.getName() + ".drop()";
+		String mongoQuery = obj.toString();
 		return mongoQuery;
 	}
 
@@ -268,7 +299,8 @@ public class QueryConverterController {
 		List<Column> columnList = insertStatement.getColumns();
 		String values = insertStatement.getItemsList().toString().replace("(", "").replace(")", "").replace(" ", "");
 
-		LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+		//LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+		InsertDocument obj = new InsertDocument(table.getName());
 
 		StringTokenizer st = new StringTokenizer(values, ",");
 		int count = 0;
@@ -276,15 +308,18 @@ public class QueryConverterController {
 			Object value = st.nextElement();
 
 			if (columnList == null) {
-				pairs.put("<Key" + (count + 1) + ">", value);
+				//pairs.put("<Key" + (count + 1) + ">", value);
+				obj.addPair(count+1,value);
 			} else {
-				pairs.put(columnList.get(count).getColumnName(), value);
+				//pairs.put(columnList.get(count).getColumnName(), value);
+				obj.addPair(columnList.get(count).getColumnName(), value);
 			}
 			count++;
 		}
 
-		String mongoQuery = "db." + table.getName() + ".insert(" + pairs.toString().replace("=", ":")
-				.replace(",", ",\n\t").replace("{", "{\n\t").replace("}", "\n}").replace(" ", "") + ")";
+		/*String mongoQuery = "db." + table.getName() + ".insert(" + pairs.toString().replace("=", ":")
+				.replace(",", ",\n\t").replace("{", "{\n\t").replace("}", "\n}").replace(" ", "") + ")";*/
+		String mongoQuery = obj.toString();
 		return mongoQuery;
 	}
 
@@ -299,7 +334,8 @@ public class QueryConverterController {
 		List<Expression> expressionList = updateStatement.getExpressions();
 		Expression whereExpression = updateStatement.getWhere();
 
-		LinkedHashMap<String, Object> updatePairs = new LinkedHashMap<String, Object>();
+		//LinkedHashMap<String, Object> updatePairs = new LinkedHashMap<String, Object>();
+		UpdateDocument obj = new UpdateDocument(table.getName());
 
 		for (int i = 0; i < columnList.size(); i++) {
 			Column column = columnList.get(i);
@@ -307,7 +343,8 @@ public class QueryConverterController {
 
 			if (expression instanceof Addition) {
 				Addition op = (Addition) expression;
-				Object obj = updatePairs.get("$inc");
+				obj.addUpdatePair(op.getLeftExpression().toString(), op.getLeftExpression(), "inc");
+				/*Object obj = updatePairs.get("$inc");
 				if (obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object, Object>();
 					pair.put(op.getLeftExpression(), op.getRightExpression());
@@ -315,17 +352,11 @@ public class QueryConverterController {
 				} else {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(op.getLeftExpression(), op.getRightExpression());
-				}
+				}*/
 			} else if (expression instanceof Subtraction) {
 				Subtraction op = (Subtraction) expression;
-				boolean isDbl = isDouble(op.getRightExpression().toString());
-				Object rightValue = "";
-				if (isDbl) {
-					rightValue = Double.parseDouble(op.getRightExpression().toString()) * -1;
-				} else {
-					rightValue = Long.parseLong(op.getRightExpression().toString()) * -1;
-				}
-				Object obj = updatePairs.get("$inc");
+				obj.addUpdatePair(op.getLeftExpression().toString(), op.getRightExpression(), "sub");
+				/*Object obj = updatePairs.get("$inc");
 				if (obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object, Object>();
 					pair.put(op.getLeftExpression(), "-" + op.getRightExpression());
@@ -333,10 +364,11 @@ public class QueryConverterController {
 				} else {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(op.getLeftExpression(), "-" + op.getRightExpression());
-				}
+				}*/
 			} else if (expression instanceof Multiplication) {
 				Multiplication op = (Multiplication) expression;
-				Object obj = updatePairs.get("$mul");
+				obj.addUpdatePair(op.getLeftExpression().toString(), op.getRightExpression(), "mul");
+				/*Object obj = updatePairs.get("$mul");
 				if (obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object, Object>();
 					pair.put(op.getLeftExpression(), op.getRightExpression());
@@ -344,21 +376,23 @@ public class QueryConverterController {
 				} else {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(op.getLeftExpression(), op.getRightExpression());
-				}
+				}*/
 			} else if (expression instanceof Division) {
 				Division op = (Division) expression;
-				Object obj = updatePairs.get("$mul");
+				obj.addUpdatePair(op.getLeftExpression().toString(), op.getRightExpression(), "div");
+				/*Object obj = updatePairs.get("$mul");
 				if (obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object, Object>();
 					pair.put(op.getLeftExpression(), "1/" + op.getRightExpression());
-					updatePairs.put("$inc", pair);
+					updatePairs.put("$mul", pair);
 				} else {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(op.getLeftExpression(), "1/" + op.getRightExpression());
-				}
+				}*/
 			} else if (expression instanceof LongValue) {
 				LongValue exp = (LongValue) expression;
-				Object obj = updatePairs.get("$set");
+				obj.addUpdatePair(column.getColumnName(), exp.getValue(), "long");
+				/*Object obj = updatePairs.get("$set");
 				if (obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object, Object>();
 					pair.put(column.getColumnName(), "NumberLong(\"" + exp.getValue() + "\")");
@@ -366,9 +400,10 @@ public class QueryConverterController {
 				} else {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(column.getColumnName(), "NumberLong(\"" + exp.getValue() + "\")");
-				}
-			} else if (expression instanceof DoubleValue) {
+				}*/
+			} /*else if (expression instanceof DoubleValue) {
 				DoubleValue exp = (DoubleValue) expression;
+				obj.addUpdatePair(column.getColumnName(), exp.getValue(), "double");
 				Object obj = updatePairs.get("$set");
 				if (obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object, Object>();
@@ -378,9 +413,10 @@ public class QueryConverterController {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(column.getColumnName(), exp.getValue());
 				}
-			} else if (expression instanceof DateValue || expression instanceof TimestampValue) {
+			} */else if (expression instanceof DateValue || expression instanceof TimestampValue) {
 				DateValue exp = (DateValue) expression;
-				Object obj = updatePairs.get("$set");
+				obj.addUpdatePair(column.getColumnName(), exp.getValue(), "date");
+				/*Object obj = updatePairs.get("$set");
 				if (obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object, Object>();
 					pair.put(column.getColumnName(), "new Date(\"" + exp.getValue() + "\")");
@@ -388,9 +424,10 @@ public class QueryConverterController {
 				} else {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(column.getColumnName(), "new Date(\"" + exp.getValue() + "\")");
-				}
+				}*/
 			} else {
-				Object obj = updatePairs.get("$set");
+				obj.addUpdatePair(column.getColumnName(), expression, "other");
+				/*Object obj = updatePairs.get("$set");
 				if (obj == null) {
 					HashMap<Object, Object> pair = new HashMap<Object, Object>();
 					pair.put(column.getColumnName(), expression);
@@ -398,16 +435,21 @@ public class QueryConverterController {
 				} else {
 					HashMap<Object, Object> pList = (HashMap<Object, Object>) obj;
 					pList.put(column.getColumnName(), expression);
-				}
+				}*/
 			}
 		}
 
-		HashMap<String, Object> conditionPair = convertWhere(whereExpression);
+		//HashMap<String, Object> conditionPair = convertWhere(whereExpression);
+		MatchCondition conditionPair = convertWhere2(whereExpression);
+		obj.setMatchPairs(conditionPair);
 
-		String mongoQuery = "db." + table.getName() + ".update( \n\t"
+		/*String mongoQuery = "db." + table.getName() + ".update( \n\t"
 				+ conditionPair.toString().replace("=", ": ").replace("{", "{ ").replace("}", " }") + ", \n\t"
 				+ updatePairs.toString().replace("=", ": ").replace("{", "{ ").replace("}", " }")
 				+ ", \n\t{ multi: true } \n)";
+		
+	*/
+		String mongoQuery = obj.toString();
 
 		return mongoQuery;
 	}
@@ -420,9 +462,13 @@ public class QueryConverterController {
 
 		Table table = deleteStatement.getTable();
 		Expression whereExpression = deleteStatement.getWhere();
-		String mongoQuery = "";
+		//String mongoQuery = "";
+		
+		RemoveDocument obj = new RemoveDocument(table.getName());
+		MatchCondition conditionPair = convertWhere2(whereExpression);
+		obj.setMatchPairs(conditionPair);	
 
-		if (whereExpression != null) {
+		/*if (whereExpression != null) {
 
 			HashMap<String, Object> conditionPair = convertWhere(whereExpression);
 
@@ -432,7 +478,8 @@ public class QueryConverterController {
 		} else {
 			mongoQuery = "db." + table.getName() + ".remove({})";
 		}
-
+*/
+		String mongoQuery = obj.toString();
 		return mongoQuery;
 	}
 
@@ -454,20 +501,23 @@ public class QueryConverterController {
 			} else {
 				List<SelectItem> selectItems = plainSelect.getSelectItems();
 				Expression whereExpression = plainSelect.getWhere();
-				Distinct distinct = plainSelect.getDistinct();
 				Limit limit = plainSelect.getLimit();
 				List<OrderByElement> orderByList = plainSelect.getOrderByElements();
 
-				HashMap<String, Object> conditionPair = new HashMap<String, Object>();
+				//HashMap<String, Object> conditionPair = new HashMap<String, Object>();
+				FindDocument obj = new FindDocument(plainSelect.getFromItem().toString());
 
-				if (whereExpression != null) {
+				/*if (whereExpression != null) {
 					conditionPair = convertWhere(whereExpression);
-				}
+				}*/
+				MatchCondition conditions = convertWhere2(whereExpression);
+				
+				
 
 				HashMap<String, Object> selectPair = new HashMap<String, Object>();
 				String append = "";
 
-				if ((selectItems.size()) == 1 && (selectItems.get(0) instanceof AllColumns)) {
+				/*if ((selectItems.size()) == 1 && (selectItems.get(0) instanceof AllColumns)) {
 					if (whereExpression == null) {
 						mongoQuery = "db." + plainSelect.getFromItem() + ".find()";
 					} else {
@@ -475,7 +525,7 @@ public class QueryConverterController {
 								+ conditionPair.toString().replace("=", ": ").replace("{", "{ ").replace("}", " }")
 								+ "\n)";
 					}
-				} else {
+				} else {*/
 					for (int i = 0; i < selectItems.size(); i++) {
 						SelectItem item = selectItems.get(i);
 						if (item instanceof SelectExpressionItem) {
@@ -487,39 +537,49 @@ public class QueryConverterController {
 									if (func.getParameters() != null) {
 										List<Expression> exList = func.getParameters().getExpressions();
 										for (int k = 0; k < exList.size(); k++) {
-											conditionPair.put(exList.get(k).toString(), "{ $exists: true }");
+											//conditionPair.put(exList.get(k).toString(), "{ $exists: true }");
+											HashMap<String, Object> pair = new HashMap<String, Object>();
+											pair.put("$exists", "true");
+											conditions.getMatchPair().put(exList.get(k).toString(), pair);
 										}
 									}
-									append += ".count()";
+									//append += ".count()";
+									obj.setCount(true);
 								}
 							} else if (expression instanceof Column) {
 								Column col = (Column) expression;
-								selectPair.put(col.getColumnName(), 1);
+								//selectPair.put(col.getColumnName(), 1);
+								obj.getLimitPair().put(col.getColumnName(), 1);
 							}
 						}
 
 					}
-				}
+				/*}*/
 
 				if (orderByList != null) {
-					HashMap<String, Object> orderPair = new HashMap<String, Object>();
+					//HashMap<String, Object> orderPair = new HashMap<String, Object>();
 					for (int i = 0; i < orderByList.size(); i++) {
 						OrderByElement orderBy = orderByList.get(i);
 						if (orderBy.isAsc()) {
-							orderPair.put(orderBy.getExpression().toString(), 1);
+							//orderPair.put(orderBy.getExpression().toString(), 1);
+							obj.getSortPair().put(orderBy.getExpression().toString(), 1);
 						} else if (orderBy.isAscDescPresent()) {
-							orderPair.put(orderBy.getExpression().toString(), -1);
+							//orderPair.put(orderBy.getExpression().toString(), -1);
+							obj.getSortPair().put(orderBy.getExpression().toString(), -1);
 						}
 					}
-					append += ".sort( " + orderPair.toString().replace("=", ": ").replace("{", "{ ").replace("}", " }")
-							+ " )";
+					/*append += ".sort( " + orderPair.toString().replace("=", ": ").replace("{", "{ ").replace("}", " }")
+							+ " )";*/
 				}
 
 				if (limit != null) {
-					append += ".limit(" + limit.getOffset() + ")";
+					//append += ".limit(" + limit.getOffset() + ")";
+					obj.setLimit((int)limit.getRowCount());
 				}
+				
+				obj.setMatchPairs(conditions);
 
-				if (mongoQuery == "" && (!selectPair.isEmpty())) {
+				/*if (mongoQuery == "" && (!selectPair.isEmpty())) {
 					mongoQuery = "db." + plainSelect.getFromItem() + ".find(\n\t"
 							+ conditionPair.toString().replace("=", ": ").replace("{", "{ ").replace("}", " }")
 							+ ",\n\t" + selectPair.toString().replace("=", ": ").replace("{", "{ ").replace("}", " }")
@@ -527,9 +587,10 @@ public class QueryConverterController {
 				} else if (mongoQuery == "" && (selectPair.isEmpty())) {
 					mongoQuery = "db." + plainSelect.getFromItem() + ".find(\n\t"
 							+ conditionPair.toString().replace("=", ": ").replace("{", "{ ").replace("}", " }") + "\n)";
-				}
+				}*/
 
-				mongoQuery += append;
+				//mongoQuery += append;
+				mongoQuery = obj.toString();
 			}
 		}
 		return mongoQuery;
@@ -733,7 +794,6 @@ public class QueryConverterController {
 			conditionPair.putAll(innerPairLeft);
 			HashMap<String, Object> innerPairRight = convertWhere(rightExp);
 			conditionPair.putAll(innerPairRight);
-
 		}
 
 		else if (whereExpression instanceof OrExpression) {
@@ -826,6 +886,105 @@ public class QueryConverterController {
 		}
 
 		return conditionPair;
+	}
+
+	public MatchCondition convertWhere2(Expression whereExpression) {
+
+		MatchCondition conditions = new MatchCondition();
+
+		if (whereExpression instanceof AndExpression) {
+			
+			AndExpression whereExp = (AndExpression) whereExpression;
+			Expression leftExp = whereExp.getLeftExpression();
+			Expression rightExp = whereExp.getRightExpression();
+			
+			MatchCondition innerPairLeft = convertWhere2(leftExp);
+			//conditions.setMatchPairs(innerPairLeft.getMatchPair());
+			conditions.getMatchPair().putAll(innerPairLeft.getMatchPair());
+			MatchCondition innerPairRight = convertWhere2(rightExp);
+			//conditions.setMatchPairs(innerPairRight.getMatchPair());
+			conditions.getMatchPair().putAll(innerPairRight.getMatchPair());
+
+		}
+
+		else if (whereExpression instanceof OrExpression) {
+
+			OrExpression whereExp = (OrExpression) whereExpression;
+			Expression leftExp = whereExp.getLeftExpression();
+			Expression rightExp = whereExp.getRightExpression();
+
+			//List<Map<String, Object>> orList = new ArrayList<Map<String, Object>>();			
+			
+			//orList.add(innerPairLeft.getMatchPair());
+			if(leftExp instanceof AndExpression) {
+				AndExpression andExp = (AndExpression) leftExp;
+				Expression leftAndExp = andExp.getLeftExpression();
+				Expression rightAndExp = andExp.getRightExpression();
+				MatchCondition left = convertWhere2(leftAndExp);
+				conditions.getMatchPair().putAll(left.getMatchPair());
+				MatchCondition right = convertWhere2(rightAndExp);
+				conditions.addOrCondition(right.getMatchPair());
+			} else {
+				MatchCondition innerPairLeft = convertWhere2(leftExp);
+				conditions.addOrCondition(innerPairLeft.getMatchPair());
+			}	
+			
+			MatchCondition innerPairRight = convertWhere2(rightExp);
+			/*if(leftExp instanceof AndExpression) {
+				conditions.getMatchPair().putAll(innerPairLeft.getMatchPair());
+			} else {
+				conditions.addOrCondition(innerPairLeft.getMatchPair());
+			}*/
+			//orList.add(innerPairRight.getMatchPair());
+			conditions.addOrCondition(innerPairRight.getMatchPair());
+
+		}
+
+		else if (whereExpression instanceof NotEqualsTo) {
+			NotEqualsTo whereExp = (NotEqualsTo) whereExpression;
+			conditions.addCondition(whereExp.getStringExpression(), whereExp.getLeftExpression().toString(), whereExp.getRightExpression());
+		}
+
+		else if (whereExpression instanceof EqualsTo) {
+			EqualsTo whereExp = (EqualsTo) whereExpression;
+			conditions.addCondition(whereExp.getStringExpression(), whereExp.getLeftExpression().toString(), whereExp.getRightExpression());
+		}
+
+		else if (whereExpression instanceof GreaterThan) {
+			GreaterThan whereExp = (GreaterThan) whereExpression;
+			conditions.addCondition(whereExp.getStringExpression(), whereExp.getLeftExpression().toString(), whereExp.getRightExpression());
+		}
+
+		else if (whereExpression instanceof MinorThan) {
+			MinorThan whereExp = (MinorThan) whereExpression;
+			conditions.addCondition(whereExp.getStringExpression(), whereExp.getLeftExpression().toString(), whereExp.getRightExpression());
+		}
+
+		else if (whereExpression instanceof GreaterThanEquals) {
+			GreaterThanEquals whereExp = (GreaterThanEquals) whereExpression;
+			conditions.addCondition(whereExp.getStringExpression(), whereExp.getLeftExpression().toString(), whereExp.getRightExpression());
+		}
+
+		else if (whereExpression instanceof MinorThanEquals) {
+			MinorThanEquals whereExp = (MinorThanEquals) whereExpression;
+			conditions.addCondition(whereExp.getStringExpression(), whereExp.getLeftExpression().toString(), whereExp.getRightExpression());
+		}
+
+		else if (whereExpression instanceof InExpression) {
+			InExpression whereExp = (InExpression) whereExpression;
+			ItemsList items = whereExp.getRightItemsList();
+			String values = items.toString().replace("(", "").replace(")", "").replace(" ", "");
+			conditions.addCondition("IN", whereExp.getLeftExpression().toString(), values);
+
+		}
+
+		else if (whereExpression instanceof LikeExpression) {
+			LikeExpression exp = (LikeExpression) whereExpression;
+			String rightExpression = exp.getRightExpression().toString().replace("'", "");
+			conditions.addCondition(exp.getStringExpression(), exp.getLeftExpression().toString(), rightExpression);
+		}
+
+		return conditions;
 	}
 
 }
