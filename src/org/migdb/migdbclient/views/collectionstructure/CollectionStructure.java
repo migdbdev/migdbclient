@@ -69,8 +69,6 @@ public class CollectionStructure implements Initializable {
     		mongoWriter.write();
     		UpdateDataSet dataSet = new UpdateDataSet();
     		dataSet.updateDataSet();
-    		ConnectionManagerController controller = new ConnectionManagerController();
-    		controller.setSideBarDatabases();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
