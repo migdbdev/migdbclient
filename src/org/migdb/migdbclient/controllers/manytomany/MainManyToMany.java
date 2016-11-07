@@ -1,6 +1,9 @@
 package org.migdb.migdbclient.controllers.manytomany;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.migdb.migdbclient.controllers.mapping.changemapping.ChangeReferencing;
+import org.migdb.migdbclient.resources.ChangeStructure;
 
 public class MainManyToMany {
 
@@ -14,6 +17,7 @@ public class MainManyToMany {
 //		MongoWriter mongoWriter = new MongoWriter();
 //		mongoWriter.write();
 //		System.out.println("mapping module stopped...");
+		
 		System.out.println("change module started...");
 		ChangeReferencing changeReferencing = new ChangeReferencing();
 		changeReferencing.change("employee","projects");
