@@ -30,8 +30,7 @@ public class CustomCellFactory<S,T> implements Callback<TableColumn.CellDataFeat
 
         try {
             // we attempt to cache the property reference here, as otherwise
-            // performance suffers when working in large data models. For
-            // a bit of reference, refer to RT-13937.
+            // performance suffers when working in large data models.
             if (columnClass == null || previousProperty == null ||
                     ! columnClass.equals(rowData.getClass()) ||
                     ! previousProperty.equals(getProperty())) {
