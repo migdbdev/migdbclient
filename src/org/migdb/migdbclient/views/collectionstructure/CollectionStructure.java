@@ -6,6 +6,7 @@ import java.util.ResourceBundle;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.migdb.migdbclient.controllers.UpdateDataSet;
+import org.migdb.migdbclient.controllers.mapping.changemapping.ChangeEmbedding;
 import org.migdb.migdbclient.controllers.mapping.changemapping.ChangeReferencing;
 import org.migdb.migdbclient.controllers.mapping.writer.MongoWriter;
 import org.migdb.migdbclient.main.MainApp;
@@ -61,6 +62,11 @@ public class CollectionStructure implements Initializable {
     			if(relation.get("originalvalue").toString().equals("REFERENCING")&& relation.get("toText").toString().equals("EMBEDDING")){
     				ChangeReferencing changeReferencing = new ChangeReferencing();
     				changeReferencing.change(relation.get("from").toString(), relation.get("to").toString());
+    			}
+    			else if(relation.get("originalvalue").toString().equals("EMBEDDING")&& relation.get("toText").toString().equals("REFERENCING")){
+    				//ChangeEmbedding changeEmbedding = new ChangeEmbedding();
+    				//changeEmbedding.changeEmbeddingToReferencing(relation.get("from")
+    				//.toString(), relation.get("to").toString());
     			}
     			System.out.println(changestructure.get(i));
     		}
