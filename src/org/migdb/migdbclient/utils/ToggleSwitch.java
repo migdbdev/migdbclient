@@ -60,6 +60,7 @@ public class ToggleSwitch extends Label {
                     setText(trueText);
                     setStyle("-fx-background-color: #237f4f;-fx-text-fill:white;");
                     setContentDisplay(ContentDisplay.RIGHT);
+                    loadStructure(engine);
                 }
                 else
                 {
@@ -70,8 +71,9 @@ public class ToggleSwitch extends Label {
                     setText(falseText);
                     setStyle("-fx-background-color: #91bfa7;-fx-text-fill:black;");
                     setContentDisplay(ContentDisplay.LEFT);
+                    loadStructure(engine);
                 }
-                loadStructure(engine);
+
             }
         });
 
@@ -93,13 +95,14 @@ public class ToggleSwitch extends Label {
     }
 
     public void loadStructure(WebEngine engine){
-
+try{
         String url = MainApp.class.getResource("/org/migdb/migdbclient/resources/webcontent/collectionRelationship.html").toExternalForm();;
         System.out.println(url);
         java.net.CookieManager manager = new java.net.CookieManager();
         java.net.CookieHandler.setDefault(manager);
         manager.getCookieStore().removeAll();
         java.net.CookieHandler.setDefault(new com.sun.webkit.network.CookieManager());
+       // engine.executeScript("var divid = document.getElementById('myDiagramDiv');divid.id = 'myDiagramDiv1';");
         engine.load(url);
         engine.getLoadWorker().stateProperty().addListener(
                 new ChangeListener<Worker.State>() {
@@ -110,6 +113,7 @@ public class ToggleSwitch extends Label {
                                     "    if (window.goSamples) goSamples();  // init for these samples -- you don't need to call this\n" +
                                     "    var $ = go.GraphObject.make;  // for conciseness in defining templates\n" +
                                     "\n" +
+                                    " document.getElementById(\"myDiagramDiv\").setAttribute(\"id\", \"myDiagramDiv1\");" +
                                     "    myDiagram =\n" +
                                     "      $(go.Diagram, \"myDiagramDiv\",  // must name or refer to the DIV HTML element\n" +
                                     "        {\n" +
@@ -226,6 +230,10 @@ public class ToggleSwitch extends Label {
                     }
                 }
         );
+    }
+   catch(Exception e){
+    	System.out.println("UI Changed");
+    }
     }
 
 }
