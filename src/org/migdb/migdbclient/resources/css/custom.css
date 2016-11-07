@@ -144,25 +144,25 @@
 /* *************************************************** */
 
 /* ************** Tree view style ************** */
-.tree-cell:selected {
+.sidebar > .tree-cell:selected {
     -fx-font-weight: bold ;
 }
-.tree-view, .tree-cell {
+.sidebar > .tree-view, .sidebar > .tree-cell {
     -fx-background-color: #E8E8E8;
     -fx-text-fill: #000000;
     -fx-border-color: #ffffff;
 }
-.tree-cell:expanded, .tree-cell:sub-tree-item {
+.sidebar > .tree-cell:expanded, .sidebar > .tree-cell:sub-tree-item {
     -fx-background-color: #D0D0D0;
 }
-.tree-cell:selected {
+.sidebar > .tree-cell:selected {
     -fx-font-weight: bold;
     -fx-border-color: #ffffff;
 }
-.tree-cell {
+.sidebar > .tree-cell {
     -fx-padding: 0.75em 0em 0.75em 0em ;
 }
-.tree-cell:sub-tree-item {
+.sidebar > .tree-cell:sub-tree-item {
     -fx-padding: 0.25em ;
 }
 /* ********************************************* */
@@ -272,3 +272,14 @@
     -fx-label-padding : 0.0 0.0 0.0 20.0px;
     -fx-text-fill: #ffffff;
 }
+
+.label_createConnections {
+	-fx-font-size: 20.0pt;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-label-padding : 0.0 0.0 0.0 20.0px;
+    -fx-text-fill: #000000;
+}
+
+ .label_next_button {
+ 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Nextbutton.png);
+ }
