@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 public class FindDocument {
 	
 	private String collectionName;
-	private LinkedHashMap<String, Object> limitPair;
+	private LinkedHashMap<String, Object> projectPair;
 	private MatchCondition matchPairs;
 	private LinkedHashMap<String, Object> sortPair;
 	private int limit;
@@ -13,7 +13,7 @@ public class FindDocument {
 	
 	public FindDocument(String collectionName) {
 		this.collectionName = collectionName;
-		this.limitPair = new LinkedHashMap<String, Object>();
+		this.projectPair = new LinkedHashMap<String, Object>();
 		this.matchPairs = new MatchCondition();
 		this.sortPair = new LinkedHashMap<String, Object>();
 		this.count = false;
@@ -28,11 +28,11 @@ public class FindDocument {
 	}
 
 	public LinkedHashMap<String, Object> getLimitPair() {
-		return limitPair;
+		return projectPair;
 	}
 
 	public void setLimitPair(LinkedHashMap<String, Object> limitPair) {
-		this.limitPair = limitPair;
+		this.projectPair = limitPair;
 	}
 
 	public MatchCondition getMatchPairs() {
@@ -66,12 +66,24 @@ public class FindDocument {
 	public void setCount(boolean count) {
 		this.count = count;
 	}
+	
+	public void addProjection(String fieldName) {
+		this.projectPair.put(fieldName, 1);
+	}
+	
+	public void addSort(String field, String order) {
+		if(order.equals("asc")) {
+			this.sortPair.put(field, 1);
+		} else {
+			this.sortPair.put(field, -1);
+		}
+	}
 
 	@Override
 	public String toString() {
-		String str = "db."+collectionName+".find( \n\t"+matchPairs;
-		if(!limitPair.isEmpty()) {
-			str += ", \n\t"+limitPair.toString().replace("=", ": ").replace("{", "{ ")
+		String str = "db."+collectionName+".find( \n\t"+matchPairs.toString();
+		if(!projectPair.isEmpty()) {
+			str += ", \n\t"+projectPair.toString().replace("=", ": ").replace("{", "{ ")
 					.replace("}", " }");
 		}
 		str += "\n)";

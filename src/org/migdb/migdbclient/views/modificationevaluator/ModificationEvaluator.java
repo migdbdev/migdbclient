@@ -829,7 +829,7 @@ public class ModificationEvaluator {
 
 			} else {
 				Alert alert = new Alert(AlertType.ERROR);
-				alert.setTitle("Error Dialog");
+				alert.setTitle("Error Occured");
 				alert.setHeaderText(null);
 				alert.setContentText(message);
 				alert.showAndWait();
