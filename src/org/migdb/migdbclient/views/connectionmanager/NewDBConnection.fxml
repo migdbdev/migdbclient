@@ -19,7 +19,7 @@
                   <RowConstraints maxHeight="141.0" minHeight="0.0" prefHeight="38.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <Label prefHeight="39.0" prefWidth="626.0" styleClass="label_Connections" text="Setup new connection with">
+                  <Label prefHeight="39.0" prefWidth="626.0" styleClass="label_createConnections" text="Setup new connection with">
                      <GridPane.margin>
                         <Insets />
                      </GridPane.margin>
@@ -27,7 +27,7 @@
                         <Insets left="140.0" />
                      </padding>
                   </Label>
-                  <Label styleClass="label_Connections" text="Connection name" GridPane.rowIndex="1">
+                  <Label styleClass="label_createConnections" text="Connection name" GridPane.rowIndex="1">
                      <GridPane.margin>
                         <Insets left="200.0" />
                      </GridPane.margin>
@@ -71,7 +71,7 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <Label prefHeight="39.0" prefWidth="345.0" styleClass="label_Connections" text="Create MySQL Connection" />
+                  <Label prefHeight="39.0" prefWidth="345.0" styleClass="label_createConnections" text="Create MySQL Connection" />
                </children>
             </GridPane>
             <GridPane layoutX="58.0" layoutY="129.0" prefHeight="152.0" prefWidth="506.0">
@@ -108,7 +108,7 @@
                      </tooltip></PasswordField>
                </children>
             </GridPane>
-            <Button fx:id="testMySQLConnectionButton" layoutX="20.0" layoutY="357.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="190.0" styleClass="button_testconnection_button" />
+            <Button fx:id="testMySQLConnectionButton" layoutX="20.0" layoutY="357.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="190.0" styleClass="button_testconnection_button" text="Test Connection" />
             <Label fx:id="mongoLabel" layoutX="413.0" layoutY="357.0" prefHeight="40.0" prefWidth="190.0" styleClass="label_next_button" />
             <Label fx:id="mysqlBackLabel" layoutX="20.0" layoutY="48.0" prefHeight="35.0" prefWidth="50.0" styleClass="label_back_button" />
          </children>
@@ -123,7 +123,7 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <Label prefHeight="39.0" prefWidth="380.0" styleClass="label_Connections" text="Create MongoDB Connection" />
+                  <Label prefHeight="39.0" prefWidth="380.0" styleClass="label_createConnections" text="Create MongoDB Connection" />
                </children>
             </GridPane>
             <GridPane layoutX="58.0" layoutY="129.0" prefHeight="152.0" prefWidth="506.0">
@@ -154,8 +154,8 @@
                      </tooltip></TextField>
                </children>
             </GridPane>
-            <Button fx:id="testMongoConnectionButton" layoutX="20.0" layoutY="357.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="190.0" styleClass="button_testconnection_button" />
-            <Button fx:id="submitButton" layoutX="413.0" layoutY="357.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="190.0" styleClass="button_finish_button" />
+            <Button fx:id="testMongoConnectionButton" layoutX="20.0" layoutY="357.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="190.0" styleClass="button_testconnection_button" text="Test Connection" />
+            <Button fx:id="submitButton" layoutX="413.0" layoutY="357.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="190.0" text="Finish" />
             <Label fx:id="mongoBackLabel" layoutX="20.0" layoutY="48.0" prefHeight="35.0" prefWidth="50.0" styleClass="label_back_button" />
          </children>
       </AnchorPane>
