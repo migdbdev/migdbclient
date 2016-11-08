@@ -9,6 +9,7 @@ import org.migdb.migdbclient.config.ImagePath;
 import org.migdb.migdbclient.models.dao.SqliteDAO;
 import org.migdb.migdbclient.resources.threads.CheckInternetConnectivity;
 import org.migdb.migdbclient.resources.threads.ConnectivityIsShowInstance;
+import org.migdb.migdbclient.views.root.RootLayoutController;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
@@ -139,6 +140,9 @@ public class MainApp extends Application {
 
 				@Override
 				public void handle(WindowEvent event) {
+					event.consume(); // This stops it's further handling of the event -> Prevent stage close
+					RootLayoutController rootCntrlr = new RootLayoutController();
+					rootCntrlr.closePlatform();
 					runner.stop();
 				}
 			});

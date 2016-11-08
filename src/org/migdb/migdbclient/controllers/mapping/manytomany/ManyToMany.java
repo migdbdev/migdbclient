@@ -23,6 +23,9 @@ public class ManyToMany {
 	JSONArray mappedDataArray;
 	JSONObject mappingMethod;
 
+	/**
+	 * reads intermediate JSON files
+	 */
 	public ManyToMany() {
 		super();
 
@@ -42,6 +45,9 @@ public class ManyToMany {
 
 	}
 
+	/**
+	 * identify the many-to-many relationships in the dbStructure file
+	 */
 	public void identifyM2M() {
 
 		JSONArray sqlTables = (JSONArray) sqlJson.get("tables");
@@ -77,6 +83,12 @@ public class ManyToMany {
 
 	}
 
+	/**
+	 * get the mapping decision from neural network & set parent and child table
+	 * instances
+	 * 
+	 * @param mappingTable
+	 */
 	public void setMapInstance(JSONObject mappingTable) {
 		removeMappingTable(mappingTable.get("name").toString());
 		ManyToManyResource.INSTANCE.setMappingTable(mappingTable);
@@ -122,6 +134,13 @@ public class ManyToMany {
 
 	}
 
+	/**
+	 * get the mapping decision from neural network comparing complexity select
+	 * the parent table and select mapping method add many-to-many relationship
+	 * tables to node array
+	 * 
+	 * @return JSONObject contains mapping decision
+	 */
 	public JSONObject getMappingDecision() {
 
 		JSONArray sqlTables = (JSONArray) sqlJson.get("tables");
@@ -184,6 +203,9 @@ public class ManyToMany {
 		return summary;
 	}
 
+	/**
+	 * use to embed the child table to parent table
+	 */
 	public void embed() {
 		JSONObject table1 = ManyToManyResource.INSTANCE.getTable1();
 
@@ -220,6 +242,9 @@ public class ManyToMany {
 		System.out.println("embed result : " + mapped);
 	}
 
+	/**
+	 * set child table instance
+	 */
 	public void setTable2() {
 		JSONObject table = ManyToManyResource.INSTANCE.getTable2();
 		if (isTableMapped(table)) {
@@ -469,17 +494,22 @@ public class ManyToMany {
 
 	}
 
+	/**
+	 * used to remove many-to-many mapping table from node array
+	 * 
+	 * @param name
+	 *            table name
+	 */
 	private void removeMappingTable(String name) {
 		JSONArray nodeArray = new JSONArray();
 		nodeArray = ChangeStructure.getInstance().nodeDataArray;
-		System.out.println(name + " !@#$%^&*() "+ nodeArray);
 		for (int i = 0; i < nodeArray.size(); i++) {
 			JSONObject jsonObject = (JSONObject) nodeArray.get(i);
-			if(jsonObject.get("key").toString().equals(name)){
+			if (jsonObject.get("key").toString().equals(name)) {
 				nodeArray.remove(i);
 			}
 		}
-		
+
 	}
 
 	/*

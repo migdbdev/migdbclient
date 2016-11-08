@@ -210,17 +210,17 @@ public class DocumentManager implements Initializable {
 				super.commitEdit(keyValue);
 				String path = getPath(this.tree, this.tree.getSelectionModel().getSelectedItem().getParent(),"");
 				// update the real database
-				// System.out.println("key ="+key);
-				// System.out.println("value ="+value);
-				// System.out.println("keyValue ="+keyValue);
-				// System.out.println("id ="+id);
+//				 System.out.println("key ="+key);
+//				 System.out.println("value ="+value);
+//				 System.out.println("keyValue ="+keyValue);
+//				 System.out.println("id ="+id);
 				MongoDatabase db = MongoDBResource.INSTANCE.getDatabase();
 				MongoCollection<Document> collection = db.getCollection(collectionName);
+				System.out.println(path);
 				if (path.equals("/")) {
 
-					collection.updateOne(new Document("_id", id), new Document("$set", new Document(key, value)));
+					System.out.println(collection.updateOne(new Document("_id", id), new Document("$set", new Document(key, value))));
 				} else {
-					System.out.println(path);
 //					collection.updateOne(new Document("_id", id), new Document("$set", new Document(path+"."+key, value)));
 				}
 
@@ -231,7 +231,6 @@ public class DocumentManager implements Initializable {
 
 		private String getPath(TreeView<String> treeView, TreeItem<String> item, String path) {
 //			String path = "";
-			System.out.println("path"+path);
 			if (item.getParent()==null) {
 				path = "/" + path;
 			} else {

@@ -597,58 +597,58 @@ public class QueryGenerator implements Initializable {
 			if (limit == 0 && skip == 0 && sortField.isEmpty()) {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery);
 				outputQuery.appendText(
-						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+						"-------------------------------------------------------------------------------------- MongoDB Command -------------------------------------------------------------------------------------\n\n");
 				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty()\n");
 			} else if (limit != 0 && skip == 0 && sortField.isEmpty()) {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit);
 				outputQuery.appendText(
-						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+						"-------------------------------------------------------------------------------------- MongoDB Command -------------------------------------------------------------------------------------\n\n");
 				outputQuery.appendText(
 						"db." + collection + ".find(" + javaQuery.toString() + ").pretty().limit(" + limit + ")\n");
 			} else if (limit == 0 && skip != 0 && sortField.isEmpty()) {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).skip(skip);
 				outputQuery.appendText(
-						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+						"-------------------------------------------------------------------------------------- MongoDB Command -------------------------------------------------------------------------------------\n\n");
 				outputQuery.appendText(
 						"db." + collection + ".find(" + javaQuery.toString() + ").pretty().skip(" + skip + ")\n");
 			} else if (limit == 0 && skip == 0 && !sortField.isEmpty()) {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).sort(sortObj);
 				outputQuery.appendText(
-						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+						"-------------------------------------------------------------------------------------- MongoDB Command -------------------------------------------------------------------------------------\n\n");
 				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty().sort({'"
 						+ sortField + "':" + sortOrder + "})\n");
 			} else if (limit != 0 && skip != 0 && sortField.isEmpty()) {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit)
 						.skip(skip);
 				outputQuery.appendText(
-						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+						"-------------------------------------------------------------------------------------- MongoDB Command -------------------------------------------------------------------------------------\n\n");
 				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty().limit("
 						+ limit + ").skip(" + skip + ")\n");
 			} else if (limit != 0 && skip == 0 && !sortField.isEmpty()) {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit)
 						.sort(sortObj);
 				outputQuery.appendText(
-						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+						"-------------------------------------------------------------------------------------- MongoDB Command -------------------------------------------------------------------------------------\n\n");
 				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty().limit("
 						+ limit + ").sort({'" + sortField + "':" + sortOrder + "})\n");
 			} else if (limit == 0 && skip != 0 && !sortField.isEmpty()) {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).skip(skip)
 						.sort(sortObj);
 				outputQuery.appendText(
-						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+						"-------------------------------------------------------------------------------------- MongoDB Command -------------------------------------------------------------------------------------\n\n");
 				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty().skip(" + skip
 						+ ").sort({'" + sortField + "':" + sortOrder + "})\n");
 			} else {
 				iterable = (FindIterable<Document>) db.getCollection(collection).find(javaQuery).limit(limit).skip(skip)
 						.sort(sortObj);
 				outputQuery.appendText(
-						"\t\t\t\t\t\t\t\t ------------------------------ Mongo Related query ------------------------------\n\n");
+						"-------------------------------------------------------------------------------------- MongoDB Command -------------------------------------------------------------------------------------\n\n");
 				outputQuery.appendText("db." + collection + ".find(" + javaQuery.toString() + ").pretty().limit("
 						+ limit + ").skip(" + skip + ").sort({'" + sortField + "':" + sortOrder + "})\n");
 			}
 
 			outputQuery.appendText(
-					"\t\t\t\t\t\t\t\t ------------------------------     Executed Result       ------------------------------\n\n");
+					"--------------------------------------------------------------------------------------             Result             -------------------------------------------------------------------------------------\n\n");
 			iterable.forEach(new Block<Document>() {
 				@Override
 				public void apply(final Document document) {
@@ -690,7 +690,7 @@ public class QueryGenerator implements Initializable {
 							+ ".find({$text:{$search:'" + keywordText + "'}}).pretty()");
 				} else {
 					outputQuery.appendText(
-							"Initially Text Search was an experimental feature but starting from version 2.6, the configuration is enabled by default. But if you are using previous version of MongoDB, you have to enable text search with following code: \n\t\t"
+							"Initially Text Search was an experimental feature but starting from version 2.6, the configuration is enabled by default. But if you are using previous version of MongoDB, \n you have to enable text search with following code: \n\t\t"
 									+ "db.a	dminCommand({setParameter:true,textSearchEnabled:true}) \n\n");
 					outputQuery.appendText("Using below query you can create a text index on " + textIndex
 							+ " field : \n\t\t db." + collection + ".ensureIndex({" + textIndex + ":'text'})\n\n");

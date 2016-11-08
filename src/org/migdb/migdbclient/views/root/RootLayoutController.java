@@ -1,6 +1,9 @@
 package org.migdb.migdbclient.views.root;
 
+import java.awt.Desktop;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -14,6 +17,7 @@ import org.migdb.migdbclient.resources.MongoDBResource;
 import org.migdb.migdbclient.views.mongodatamanager.MongoDataManager;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,6 +26,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
@@ -51,6 +56,8 @@ public class RootLayoutController implements Initializable {
 	private ContextMenu mongoDatabaseContextMenu;
 	@FXML
 	private MenuItem menubarCloseMenuItem;
+	@FXML
+	private Hyperlink menubarManualHyperlink;
 
 	/**
 	 * Initialize method Called to initialize a controller after its root
@@ -118,6 +125,18 @@ public class RootLayoutController implements Initializable {
 				showQueryGenerator();
 			}
 		});
+		
+		// Menu bar manual hyperlink click event
+		menubarManualHyperlink.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                try {
+					openManualWebpage("http://migdb.org/help.html");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+            }
+        });
 	}
 
 	/**
@@ -257,6 +276,19 @@ public class RootLayoutController implements Initializable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Method to open web page which has manual
+	 * @param url
+	 * @throws URISyntaxException
+	 */
+	public void openManualWebpage(String url) {
+	    try {
+	    	Desktop.getDesktop().browse(new URI(url));
+	    } catch (IOException | URISyntaxException e) {
+	        e.printStackTrace();
+	    }
 	}
 
 //	public List<String> getDatabaseNames() throws Exception {

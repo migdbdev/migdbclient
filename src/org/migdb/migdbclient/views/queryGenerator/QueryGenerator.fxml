@@ -25,7 +25,7 @@
 												<ComboBox fx:id="queryFieldListComboBox" layoutX="32.0" layoutY="63.0" prefHeight="25.0" prefWidth="249.0" promptText="Document's Fields" />
 												<ComboBox fx:id="queryOperatorsComboBox" layoutX="304.0" layoutY="63.0" prefHeight="25.0" prefWidth="241.0" promptText="Operators" />
 												<TextField fx:id="queryValuesTextField" layoutX="562.0" layoutY="63.0" prefHeight="25.0" prefWidth="218.0" promptText="Value" />
-												<Button fx:id="addQueryParamButton" layoutX="801.0" layoutY="63.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="140.0" styleClass="button_addparameters_button" />
+												<Button fx:id="addQueryParamButton" layoutX="801.0" layoutY="63.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="140.0" text="Add" />
 												<TableView fx:id="queryParametersTableView" layoutX="32.0" layoutY="107.0" prefHeight="200.0" prefWidth="911.0">
 													<columns>
 														<TableColumn fx:id="fieldTableColumn" prefWidth="258.00001525878906" text="Fields" />
@@ -43,7 +43,7 @@
 												<Label layoutX="619.0" layoutY="321.0" text="Sort" />
 												<ComboBox fx:id="querySortColumnComboBox" layoutX="669.0" layoutY="319.0" prefWidth="150.0" promptText="Select Field" />
 												<ComboBox fx:id="querySortOrderComboBox" layoutX="822.0" layoutY="319.0" prefHeight="25.0" prefWidth="121.0" />
-												<Button fx:id="queryBuildButton" layoutX="390.0" layoutY="367.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="190.0" styleClass="button_showquery_button" />
+												<Button fx:id="queryBuildButton" layoutX="390.0" layoutY="367.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="190.0" text="Generate Command" />
 											</children>
 										</AnchorPane>
 									</content>
@@ -62,7 +62,7 @@
                                     <ComboBox fx:id="aggregationFieldsComboBox" layoutX="32.0" layoutY="63.0" prefHeight="25.0" prefWidth="249.0" promptText="Document's Fields" />
                                     <ComboBox fx:id="aggregationOperatorsComboBox" layoutX="304.0" layoutY="63.0" prefHeight="25.0" prefWidth="241.0" promptText="Operators" />
                                     <TextField fx:id="aggregationValueTextField" layoutX="562.0" layoutY="63.0" prefHeight="25.0" prefWidth="218.0" promptText="Value" />
-                                    <Button fx:id="aggregationAddButton" layoutX="801.0" layoutY="63.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="140.0" styleClass="button_addparameters_button" />
+                                    <Button fx:id="aggregationAddButton" layoutX="801.0" layoutY="63.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="140.0" styleClass="button_addparameters_button" text="Add" />
                                     <TableView fx:id="aggregationParametersTableView" layoutX="32.0" layoutY="107.0" prefHeight="200.0" prefWidth="911.0">
                                        <columns>
                                           <TableColumn fx:id="aggregationFieldTableColumn" prefWidth="258.00001525878906" text="Fields" />
@@ -76,7 +76,7 @@
                                     <Label layoutX="667.0" layoutY="321.0" text="Sort" />
                                     <ComboBox fx:id="aggregationSortColumnComboBox" layoutX="693.0" layoutY="319.0" prefHeight="25.0" prefWidth="126.0" promptText="Select Field" />
                                     <ComboBox fx:id="aggregationSortOrderComboBox" layoutX="822.0" layoutY="319.0" prefHeight="25.0" prefWidth="121.0" />
-                                    <Button fx:id="aggregationShowQueryButton" layoutX="390.0" layoutY="367.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="190.0" styleClass="button_showquery_button" />
+                                    <Button fx:id="aggregationShowQueryButton" layoutX="390.0" layoutY="367.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="190.0" styleClass="button_showquery_button" text="Generate Command" />
                                     <ComboBox fx:id="aggregationSumFieldComboBox" layoutX="780.0" layoutY="26.0" prefHeight="25.0" prefWidth="163.0" />
                                     <Separator layoutX="307.0" layoutY="314.0" orientation="VERTICAL" prefHeight="29.0" prefWidth="5.0" />
                                     <Separator layoutX="650.0" layoutY="315.0" orientation="VERTICAL" prefHeight="29.0" prefWidth="5.0" />
@@ -110,7 +110,7 @@
                                     <ComboBox fx:id="textSearchCollectionComboBox" layoutX="462.0" layoutY="38.0" prefWidth="200.0" />
                                     <Label layoutX="701.0" layoutY="42.0" text="Field" />
                                     <ComboBox fx:id="textSearchFieldComboBox" layoutX="735.0" layoutY="38.0" prefHeight="25.0" prefWidth="200.0" />
-                                    <Label layoutX="55.0" layoutY="115.0" text="If you're mongo version is below 2.6, put a tick here" />
+                                    <Label layoutX="55.0" layoutY="115.0" text="Mongo version is below 2.6" />
                                     <CheckBox fx:id="textSearchOldVersionCheckBox" layoutX="388.0" layoutY="115.0" mnemonicParsing="false" />
                                     <Label layoutX="55.0" layoutY="158.0" text="Create text index on" />
                                     <Label fx:id="textSearchTextIndexLabel" layoutX="510.0" layoutY="158.0" text="Label" />
@@ -119,7 +119,7 @@
                                     <Button fx:id="textSearchCreateButton" layoutX="67.0" layoutY="287.0" mnemonicParsing="false" text="Generate Text Index" />
                                     <Button fx:id="textSearchViewButton" layoutX="284.0" layoutY="287.0" mnemonicParsing="false" text="View Text Indexes" />
                                     <Button fx:id="textSearchDropButton" layoutX="510.0" layoutY="287.0" mnemonicParsing="false" text="Delete Text Indexes" />
-                                    <Label layoutX="55.0" layoutY="228.0" text="* Input keywords with comma separated, If you need to find documents using multiple keywords" />
+                                    <Label layoutX="55.0" layoutY="228.0" text="* Comma seperate for multiple keywords" />
                                  </children></AnchorPane>
 									</content>
 								</Tab>
@@ -129,7 +129,7 @@
 				</AnchorPane>
 				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
 					<children>
-						<Label prefHeight="29.0" prefWidth="471.0" text="Outputed query" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0" />
+						<Label prefHeight="29.0" prefWidth="471.0" text="Output" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0" />
 						<TextArea fx:id="outputQuery" layoutY="29.0" prefHeight="152.0" prefWidth="478.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="30.0" />
 					</children>
 				</AnchorPane>

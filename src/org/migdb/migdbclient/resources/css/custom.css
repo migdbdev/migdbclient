@@ -79,47 +79,6 @@
 }
 /* ******************************************************** */
 
- 
- /*********** Next button style *************/
- .label_next_button {
- 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Nextbutton.png);
- }
- 
-  .label_next_button:hover {
-  	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Nextbuttonhover.png);
-  }
-  /* ********************************* */
-  
-  /* *************** Back button style *************** */
-  .label_back_button {
- 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Backbutton.png);
- }
- 
- .label_back_button:hover {
- 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Backbuttonhover.png);
- }
-  /* ************************************************* */
-  
-  /* *************** Test connection button style *************** */
-  .button_testconnection_button {
-  	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Testconnectionbutton.png);
-  }
-  
-  .button_testconnection_button:hover {
-  	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Testconnectionhoverbutton.png);
-  }
-  /* ************************************************************ */
-  
-  /* *************** Finish button style *************** */
-  .button_finish_button {
-  	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Finishbutton.png);
-  }
-  
-  .button_finish_button:hover {
-  	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Finishbuttonhover.png);
-  }
-  /* *************************************************** */
-
 /* *************** Connection add button style *************** */
 .label_AddConnection {
 	-fx-background-repeat: no-repeat;
@@ -184,77 +143,77 @@
 }
 /* *************************************************** */
 
-/* ****************** Add query parameters style ***************** */
-.button_addparameters_button {
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Addparametersbutton.png);
-}
-
-.button_addparameters_button:hover {
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Addparametersbuttonhover.png);
-}
-/* ************************************************************** */
-
-/* ****************** Show query button style ***************** */
-.button_showquery_button {
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Showquerybutton.png);
-}
-
-.button_showquery_button:hover {
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Showquerybuttonhover.png);
-}
-/* ************************************************************ */
-
-/* ************** Update button style ************** */
-.button_update {
-	-fx-pref-width:190.0;
-	-fx-pref-height:40.0;
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Updatebutton.png);
-}
-
-.button_update:hover {
-	-fx-pref-width:190.0;
-	-fx-pref-height:40.0;
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Updatebuttonhover.png);
-}
-/* ************************************************* */
-
-/* ************** Convert button style ************** */
-.button_convert {
-	-fx-pref-width:190.0;
-	-fx-pref-height:40.0;
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Convertbutton.png);
-}
-
-.button_convert:hover {
-	-fx-pref-width:190.0;
-	-fx-pref-height:40.0;
-	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Convertbuttonhover.png);
-}
-/* ************************************************** */
-
 /* ************** Tree view style ************** */
-.tree-cell:selected {
+.sidebar > .tree-cell:selected {
     -fx-font-weight: bold ;
 }
-.tree-view, .tree-cell {
+.sidebar > .tree-view, .sidebar > .tree-cell {
     -fx-background-color: #E8E8E8;
     -fx-text-fill: #000000;
     -fx-border-color: #ffffff;
 }
-.tree-cell:expanded, .tree-cell:sub-tree-item {
+.sidebar > .tree-cell:expanded, .sidebar > .tree-cell:sub-tree-item {
     -fx-background-color: #D0D0D0;
 }
-.tree-cell:selected {
+.sidebar > .tree-cell:selected {
     -fx-font-weight: bold;
     -fx-border-color: #ffffff;
 }
-.tree-cell {
+.sidebar > .tree-cell {
     -fx-padding: 0.75em 0em 0.75em 0em ;
 }
-.tree-cell:sub-tree-item {
+.sidebar > .tree-cell:sub-tree-item {
     -fx-padding: 0.25em ;
 }
 /* ********************************************* */
+
+/**************************************************
+ *  				Button Style
+ **************************************************/
+ .button {
+    -fx-padding: 5 22 5 22;   
+    -fx-border-color: #e2e2e2;
+    -fx-border-width: 2;
+    -fx-background-radius: 0;
+    -fx-background-color: #237f4e;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 11pt;
+    -fx-text-fill: #ffffff;
+    -fx-background-insets: 0 0 0 0, 0, 1, 2;
+}
+
+.button:hover {
+    -fx-background-color: #65a583;
+}
+
+.button:pressed, .button:default:hover:pressed {
+  -fx-background-color: #91bfa6;
+  -fx-text-fill: #1d1d1d;
+}
+
+.button:focused {
+    -fx-border-color: white, white;
+    -fx-border-width: 1, 1;
+    -fx-border-style: solid, segments(1, 1);
+    -fx-border-radius: 0, 0;
+    -fx-border-insets: 1 1 1 1, 0;
+}
+
+.button:disabled, .button:default:disabled {
+    -fx-opacity: 0.4;
+    -fx-background-color: #1d1d1d;
+    -fx-text-fill: white;
+}
+
+.button:default {
+    -fx-background-color: -fx-focus-color;
+    -fx-text-fill: #ffffff;
+}
+
+.button:default:hover {
+    -fx-background-color: derive(-fx-focus-color,30%);
+}
+ 
 
 /* ************** Menu style ************** */
 .menu-bar{
@@ -314,20 +273,13 @@
     -fx-text-fill: #ffffff;
 }
 
-.dark-blue {
-    -fx-background-color: 
-        #090a0c,
-        linear-gradient(#308014 0.0%, #308014 20.0%, #308014 100.0%),
-        linear-gradient(#308014, #308014);
-    -fx-background-radius: 5.0,4.0,3.0,5.0;
-    -fx-background-insets: 0.0,1.0,2.0,0.0;
-    -fx-text-fill: white;
-    -fx-effect: dropshadow( three-pass-box , rgba(0.0,0.0,0.0,0.6) , 5.0, 0.0 , 0.0 , 1.0 );
-    -fx-font-family: "Arial";
-    -fx-text-fill: linear-gradient(white, #d0d0d0);
-    -fx-font-size: 12.0px;
-    -fx-padding: 10.0 20.0 10.0 20.0;
+.label_createConnections {
+	-fx-font-size: 20.0pt;
+    -fx-font-family: "Segoe UI Semibold";
+    -fx-label-padding : 0.0 0.0 0.0 20.0px;
+    -fx-text-fill: #000000;
 }
-.dark-blue Text {
-    -fx-effect: dropshadow( one-pass-box , rgba(0.0,0.0,0.0,0.9) , 1.0, 0.0 , 0.0 , 1.0 );
-}
+
+ .label_next_button {
+ 	-fx-background-image:url(/org/migdb/migdbclient/resources/images/Nextbutton.png);
+ }
