@@ -8,6 +8,7 @@ public class CreateDocumentCollection extends CreateCollection{
 
 	public CreateDocumentCollection(String collectionName) {
 		super(collectionName);
+		this.pairs = new LinkedHashMap<String, Object>();
 	}
 
 	public LinkedHashMap<String, Object> getPairs() {
