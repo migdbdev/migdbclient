@@ -290,7 +290,14 @@ public class ManyToMany {
 
 		return null;
 	}
-
+/**
+ * get matching child data array and embed that array into parent table
+ * @param referencedCollection
+ * @param referencingTable
+ * @param referencingCol
+ * @param referencingColData
+ * @param referencingDataArray
+ */
 	public void generateMappedDataArray(String referencedCollection, String referencingTable, String referencingCol,
 			String referencingColData, JSONArray referencingDataArray) {
 		JSONArray mappedData = (JSONArray) mapped.get("collections");
@@ -312,6 +319,9 @@ public class ManyToMany {
 
 	}
 
+	/**
+	 * use to reference the child table to parent table
+	 */
 	public void reference() {
 		JSONObject table1 = ManyToManyResource.INSTANCE.getTable1();
 
@@ -340,7 +350,7 @@ public class ManyToMany {
 				JSONObject mappingObject = (JSONObject) object2;
 				String referencedValue = mappingObject.get(referencingCol).toString();
 				if (referencedValue.equals(table1Value)) {
-					System.out.println(mappingObject + "@@@" + table1DataObject);
+//					System.out.println(mappingObject + "@@@" + table1DataObject);
 					String referencingId = findReferencedId(mappingObject);
 					referencingIdArray.add(referencingId);
 				}
@@ -351,7 +361,14 @@ public class ManyToMany {
 		}
 
 	}
-
+/**
+ * get matching child object id array and embed that array into parent table
+ * @param referencedCollection
+ * @param referencingTable
+ * @param referencingCol
+ * @param referencingColData
+ * @param referencingDataArray
+ */
 	public void generateReferencedDataArray(String referencedCollection, String referencingTable, String referencingCol,
 			String referencingColData, JSONArray referencingDataArray) {
 		JSONArray mappedData = (JSONArray) mapped.get("collections");
